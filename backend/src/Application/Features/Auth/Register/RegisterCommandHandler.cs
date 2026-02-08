@@ -1,5 +1,7 @@
 using Application.Common.Interfaces;
 using Domain.Entities;
+using FluentValidation;
+using FluentValidation.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +28,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
         
         if (existingUser is not null)
         {
-            throw new InvalidOperationException("Username already exists");
+            throw new ValidationException(new[] { new ValidationFailure("Username", "Username already exists") });
         }
 
         // Check if email already exists (if provided)
@@ -37,7 +39,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
             
             if (existingEmail is not null)
             {
-                throw new InvalidOperationException("Email already exists");
+                throw new ValidationException(new[] { new ValidationFailure("Email", "Email already exists") });
             }
         }
 

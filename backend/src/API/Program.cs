@@ -24,6 +24,9 @@ namespace API
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<API.Middleware.GlobalExceptionHandler>();
+
             builder.Services.AddPersistenceServices(builder.Configuration);
 
             // Add Application services (MediatR, validators, etc.)
@@ -82,6 +85,8 @@ namespace API
             }
 
             app.UseHttpsRedirection();
+
+            app.UseExceptionHandler();
 
             app.UseAuthentication();
             app.UseAuthorization();

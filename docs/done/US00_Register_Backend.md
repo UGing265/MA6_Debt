@@ -54,8 +54,9 @@ public class RegisterResponse
 
 **Validation Rules**:
 - ✅ Username: Required, not null
-- ✅ Password: Required, not null
+- ✅ Password: Required, minimum 6 characters, uppercase letter, lowercase letter, digit
 - ✅ Email: Optional but must be valid email format if provided
+- ✅ Name: Required, minimum 3 characters
 
 Uses **FluentValidation** for declarative validation rules.
 
@@ -138,6 +139,24 @@ public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRe
 
 ---
 
+## Validation Rules
+
+### Password Requirements
+The registration system enforces the following password validation rules:
+
+| Rule | Requirement |
+|------|-------------|
+| Minimum Length | At least 6 characters |
+| Uppercase Letters | Must contain at least one uppercase letter (A-Z) |
+| Lowercase Letters | Must contain at least one lowercase letter (a-z) |
+| Digits | Must contain at least one digit (0-9) |
+
+**Examples**:
+- ✅ Valid: `Password123`, `SecurePass456`, `MyPass789`
+- ❌ Invalid: `password` (no uppercase, no digit), `PASSWORD123` (no lowercase), `Pass` (too short)
+
+---
+
 ## API Contract
 
 ### Endpoint Details
@@ -170,7 +189,11 @@ public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRe
 | Username already exists | 400 Bad Request | "Username already exists" |
 | Email already exists | 400 Bad Request | "Email already exists" |
 | Empty username | 400 Bad Request | Validation error |
-| Empty password | 400 Bad Request | Validation error |
+| Empty password | 400 Bad Request | "Password is required" |
+| Password too short | 400 Bad Request | "Password must be at least 6 characters" |
+| Password missing uppercase | 400 Bad Request | "Password must contain at least one uppercase letter" |
+| Password missing lowercase | 400 Bad Request | "Password must contain at least one lowercase letter" |
+| Password missing digit | 400 Bad Request | "Password must contain at least one digit" |
 | Invalid email format (if provided) | 400 Bad Request | "Email must be a valid email address" |
 
 ---
