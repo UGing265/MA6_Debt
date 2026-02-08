@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Application.Common.Security;
 
@@ -52,16 +53,16 @@ public class TokenGenerator : ITokenGenerator
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username),
-        };
+         var claims = new List<Claim>
+         {
+             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+             new Claim(JwtRegisteredClaimNames.Name, user.Username),
+         };
 
-        if (!string.IsNullOrWhiteSpace(user.Email))
-        {
-            claims.Add(new Claim(ClaimTypes.Email, user.Email));
-        }
+         if (!string.IsNullOrWhiteSpace(user.Email))
+         {
+             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+         }
 
         var token = new JwtSecurityToken(
             issuer: issuer,
