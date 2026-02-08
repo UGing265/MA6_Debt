@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Data;
 using Persistence;
@@ -14,6 +15,7 @@ namespace API
     {
         public static void Main(string[] args)
         {
+            JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
