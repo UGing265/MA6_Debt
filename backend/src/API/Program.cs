@@ -6,6 +6,7 @@ using Persistence;
 using Application;
 using Application.Common.Interfaces;
 using System.Text;
+using Scalar.AspNetCore;
 
 namespace API
 {
@@ -75,6 +76,7 @@ namespace API
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.MapScalarApiReference();
             }
 
             app.UseHttpsRedirection();
