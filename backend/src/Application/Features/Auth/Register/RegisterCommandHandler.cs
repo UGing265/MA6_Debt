@@ -23,10 +23,10 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
     public async Task<RegisterResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         // Check if username already exists
-        var existingUser = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken);
+        var usernameExists = await _dbContext.Users
+            .AnyAsync(u => u.Username == request.Username, cancellationToken);
         
-        if (existingUser is not null)
+        if (usernameExists)
         {
             throw new ValidationException(new[] { new ValidationFailure("Username", "Username already exists") });
         }
@@ -34,10 +34,10 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
         // Check if email already exists (if provided)
         if (!string.IsNullOrEmpty(request.Email))
         {
-            var existingEmail = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
+            var emailExists = await _dbContext.Users
+                .AnyAsync(u => u.Email == request.Email, cancellationToken);
             
-            if (existingEmail is not null)
+            if (emailExists)
             {
                 throw new ValidationException(new[] { new ValidationFailure("Email", "Email already exists") });
             }
