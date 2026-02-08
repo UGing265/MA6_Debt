@@ -1,3 +1,27 @@
-.vs
-obj/*
-bin/*
+# Build outputs
+bin/
+obj/
+dist/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.userprefs
+*.sln.user
+
+# Dependencies
+packages/
+.nuget/
+
+# Environment
+.env
+.env.local
+appsettings.Development.json
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
