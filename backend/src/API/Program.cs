@@ -43,7 +43,7 @@ namespace API
                 throw new InvalidOperationException("JWT settings are not configured in appsettings.json");
             }
 
-            var key = Encoding.ASCII.GetBytes(secret);
+            var key = Encoding.UTF8.GetBytes(secret);
 
             builder.Services
                 .AddAuthentication(options =>
