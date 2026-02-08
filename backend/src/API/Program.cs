@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Persistence.Data;
 using Persistence;
 using Application;
 using Application.Common.Interfaces;
@@ -67,15 +66,6 @@ namespace API
                 });
 
             var app = builder.Build();
-
-            // Initialize database with seed data
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                var passwordHasher = services.GetRequiredService<IPasswordHasher>();
-                DbInitializer.Initialize(context, passwordHasher);
-            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

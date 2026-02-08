@@ -48,17 +48,6 @@
 - ✅ Password hashing verified with BCrypt
 - ✅ JWT token contains correct user claims
 
-## Database Seeding
-- **Status**: ✅ Implemented
-- **Location**: `Infrastructure/Seeders/UserSeeder.cs`
-- **Features**:
-  - Automatic user seed data on application startup
-  - Default test user created with hashed password
-  - Seeds only if database is connected and accessible
-- **Verification**: ⚠️ Failed due to missing database connection during testing
-  - Seeding functionality is complete and ready
-  - Requires active database connection to execute
-
 ## Running the API with Database
 
 ### Option 1: Docker (PostgreSQL)
