@@ -85,8 +85,7 @@ namespace API.Middleware
                 await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
                 return true;
             }
-
-            return false;
+        }
         }
     }
 
