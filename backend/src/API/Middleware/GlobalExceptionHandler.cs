@@ -86,7 +86,7 @@ namespace API.Middleware
                 return true;
             }
         }
-        }
+
     }
 
     public class ValidationErrorResponse
