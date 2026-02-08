@@ -25,3 +25,6 @@ appsettings.Development.json
 # OS
 .DS_Store
 Thumbs.db
+
+#AI agent
+.agent/
