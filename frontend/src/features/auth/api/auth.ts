@@ -1,9 +1,9 @@
 import { LoginInput, RegisterInput, AuthResponse } from "../types/auth";
 
-const API_URL = "http://localhost:5270/api/auth";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
 
 export const login = async (data: LoginInput): Promise<AuthResponse> => {
-  const response = await fetch(`${API_URL}/login`, {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export const login = async (data: LoginInput): Promise<AuthResponse> => {
 };
 
 export const register = async (data: RegisterInput): Promise<void> => {
-  const response = await fetch(`${API_URL}/register`, {
+  const response = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
