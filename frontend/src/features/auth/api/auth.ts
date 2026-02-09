@@ -20,7 +20,6 @@ export const login = async (data: LoginInput): Promise<AuthResponse> => {
     }
     throw errorData;
   }
-  }
 
   return response.json();
 };
