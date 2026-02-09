@@ -78,7 +78,7 @@ export const LoginForm = () => {
                    placeholder="Enter your username" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-white/50 border-gray-300 focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
                  />
               </FormControl>
               <FormMessage />
@@ -97,7 +97,7 @@ export const LoginForm = () => {
                    placeholder="Enter your password" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-white/50 border-gray-300 focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
                  />
               </FormControl>
               <FormMessage />

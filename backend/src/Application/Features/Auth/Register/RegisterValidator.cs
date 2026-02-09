@@ -19,7 +19,7 @@ public class RegisterValidator : AbstractValidator<RegisterRequest>
 
         RuleFor(x => x.Email)
             .EmailAddress().WithMessage("Email must be a valid email address")
-            .When(x => !string.IsNullOrEmpty(x.Email), ApplyConditionTo.CurrentValidator);
+            .When(x => !string.IsNullOrEmpty(x.Email));
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required")
