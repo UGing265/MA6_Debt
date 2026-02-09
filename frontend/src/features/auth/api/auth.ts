@@ -13,7 +13,7 @@ export const login = async (data: LoginInput): Promise<AuthResponse> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Login failed");
+    throw errorData;
   }
 
   return response.json();
@@ -30,6 +30,6 @@ export const register = async (data: RegisterInput): Promise<void> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Registration failed");
+    throw errorData;
   }
 };
