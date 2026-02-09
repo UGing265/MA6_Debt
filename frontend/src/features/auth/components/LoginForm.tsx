@@ -74,12 +74,12 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Username</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Enter your username" 
-                  {...field} 
-                  disabled={isLoading}
-                  className="bg-white/50 border-gray-300 focus:border-[#F5D066] focus:ring-[#F5D066]" 
-                />
+                 <Input 
+                   placeholder="Enter your username" 
+                   {...field} 
+                   disabled={isLoading}
+                   className="bg-white/50 border-gray-300 focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                 />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -92,13 +92,13 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Password</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  placeholder="Enter your password" 
-                  {...field} 
-                  disabled={isLoading}
-                  className="bg-white/50 border-gray-300 focus:border-[#F5D066] focus:ring-[#F5D066]" 
-                />
+                 <Input 
+                   type="password" 
+                   placeholder="Enter your password" 
+                   {...field} 
+                   disabled={isLoading}
+                   className="bg-white/50 border-gray-300 focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                 />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,7 +107,7 @@ export const LoginForm = () => {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-[#F5D066] hover:bg-[#E5C056] text-white font-bold py-2 px-4 rounded shadow-md transition-colors duration-200"
+          className="w-full bg-[#F0D25D] hover:bg-[#E8CB50] text-white font-bold py-2 px-4 rounded shadow-md transition-colors duration-200"
         >
           {isLoading ? (
             <>

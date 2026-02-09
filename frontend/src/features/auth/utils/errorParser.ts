@@ -55,18 +55,26 @@ export const parseErrorResponse = (error: any): ParsedError => {
 
   if (error.message && typeof error.message === 'string') {
     result.general = error.message;
+  } else if (error.title && typeof error.title === 'string') {
+    // Fallback to title if message is missing (e.g. standard ProblemDetails)
+    result.general = error.title;
   }
 
   // Extract field-level errors
   if (error.errors && typeof error.errors === 'object') {
     Object.entries(error.errors).forEach(([fieldName, errorMessages]) => {
       // Handle array of error messages
-      if (Array.isArray(errorMessages) && errorMessages.length > 0) {
-        const displayName = getDisplayFieldName(fieldName);
-        result.fields[displayName] = errorMessages.filter(
-          (msg): msg is string => typeof msg === 'string' && msg.length > 0
-        );
-      }
+        if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+          const displayName = getDisplayFieldName(fieldName);
+          result.fields[displayName] = errorMessages.filter(
+            (msg): msg is string => typeof msg === 'string' && msg.length > 0
+          );
+          
+          // Special case: If field is "Unauthorized" (often from 401), promote to general error if general is generic
+          if (fieldName === "Unauthorized" && errorMessages.length > 0) {
+             result.general = errorMessages[0];
+          }
+        }
       // Handle single error message as string
       else if (typeof errorMessages === 'string' && errorMessages.length > 0) {
         const displayName = getDisplayFieldName(fieldName);
