@@ -36,7 +36,9 @@ export const LoginForm = () => {
     setIsLoading(true);
     try {
       const response = await login(data);
-      localStorage.setItem("token", response.token);
+      // The JWT token should be handled via a secure, HttpOnly cookie set by the server.
+      // Storing it in localStorage is vulnerable to XSS attacks.
+      // localStorage.setItem("token", response.token);
       toast.success("Welcome!");
       router.push("/dashboard");
     } catch (error: any) {
