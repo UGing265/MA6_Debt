@@ -113,12 +113,12 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Username</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Choose a username" 
-                  {...field} 
-                  disabled={isLoading}
-                  className="bg-white/50 border-gray-300 focus:border-[#F5D066] focus:ring-[#F5D066]" 
-                />
+                 <Input 
+                   placeholder="Choose a username" 
+                   {...field} 
+                   disabled={isLoading}
+                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                 />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -131,12 +131,12 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Name</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Enter your full name" 
-                  {...field} 
-                  disabled={isLoading}
-                  className="bg-white/50 border-gray-300 focus:border-[#F5D066] focus:ring-[#F5D066]" 
-                />
+                 <Input 
+                   placeholder="Enter your full name" 
+                   {...field} 
+                   disabled={isLoading}
+                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                 />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -149,13 +149,13 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Email (Optional)</FormLabel>
               <FormControl>
-                <Input 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  {...field} 
-                  disabled={isLoading}
-                  className="bg-white/50 border-gray-300 focus:border-[#F5D066] focus:ring-[#F5D066]" 
-                />
+                 <Input 
+                   type="text" 
+                   placeholder="Enter your email" 
+                   {...field} 
+                   disabled={isLoading}
+                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                 />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -168,13 +168,13 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Password</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  placeholder="Create a password" 
-                  {...field} 
-                  disabled={isLoading}
-                  className="bg-white/50 border-gray-300 focus:border-[#F5D066] focus:ring-[#F5D066]" 
-                />
+                 <Input 
+                   type="password" 
+                   placeholder="Create a password" 
+                   {...field} 
+                   disabled={isLoading}
+                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                 />
               </FormControl>
               <FormMessage />
               {field.value && <PasswordRequirements password={field.value} />}
@@ -184,7 +184,7 @@ export const RegisterForm = () => {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-[#F5D066] hover:bg-[#E5C056] text-white font-bold py-2 px-4 rounded shadow-md transition-colors duration-200"
+          className="w-full bg-[#F0D25D] hover:bg-[#E8CB50] text-white font-bold py-2 px-4 rounded shadow-md transition-colors duration-200"
         >
           {isLoading ? (
             <div className="flex items-center justify-center">

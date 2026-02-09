@@ -10,15 +10,15 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col w-full space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold font-patrick text-gray-900">Create Account</h1>
-        <p className="text-gray-500 font-quicksand">Join us today! Create your account.</p>
+        <h1 className="text-3xl font-bold font-patrick text-[#8B6914]">Create Account</h1>
+        <p className="text-[#9B8C4F] font-quicksand">Join us today! Create your account.</p>
       </div>
       
       <RegisterForm />
       
       <div className="text-center text-sm font-quicksand">
-        <span className="text-gray-500">Already have an account? </span>
-        <Link href="/login" className="text-[#F5D066] hover:underline font-semibold">
+        <span className="text-[#9B8C4F]">Already have an account? </span>
+        <Link href="/login" className="text-[#F0D25D] hover:underline font-semibold">
           Sign in
         </Link>
       </div>

@@ -1,12 +1,5 @@
 @import "tailwindcss";
 
-/* 
-   @plugin "tw-animate-css"; 
-   @import "shadcn/tailwind.css";
-   These lines were causing build errors in Tailwind v4. 
-   Keeping them commented out until we confirm they are needed and how to import them correctly in v4.
-*/
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -42,8 +35,12 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+
+    /* Custom Theme Colors */
     --paper-cream: #FFFBEB;
     --note-yellow: #F0D25D;
+    --ink-black: #1F2937;
+    --pencil-gray: #4B5563;
 }
 
 .dark {
@@ -81,6 +78,7 @@
     --sidebar-ring: oklch(0.439 0 0);
     --paper-cream: #FFFBEB;
     --note-yellow: #F0D25D;
+    --ink-black: #1F2937;
 }
 
 @theme inline {
@@ -120,6 +118,12 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* Custom Color Declarations */
+    --color-paper-cream: var(--paper-cream);
+    --color-note-yellow: var(--note-yellow);
+    --color-ink-black: var(--ink-black);
+    --color-pencil-gray: var(--pencil-gray);
 }
 
 @layer base {
@@ -137,6 +141,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -147,6 +152,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -155,18 +161,22 @@
 
 @layer components {
     .animate-fade-in {
-        animation: fade-in 300ms ease-out;
+        animation: fade-in 300ms ease-out forwards;
     }
 
     .animate-slide-up {
-        animation: slide-up 300ms ease-out;
+        animation: slide-up 300ms ease-out forwards;
     }
 
     .btn-yellow {
-        @apply bg-[#F0D25D] text-ink-black hover:bg-[#E8CB50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F0D25D];
+        @apply bg-note-yellow text-ink-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-note-yellow;
+    }
+
+    .btn-yellow:hover {
+        @apply opacity-90;
     }
 
     .input-field {
-        @apply border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F0D25D];
+        @apply border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-note-yellow;
     }
 }
