@@ -7,7 +7,7 @@
 :root {
 
   --paper-cream: #FFFBEB;
-  --note-yellow: #FEF3C7;
+  --note-yellow: #F5D066;
   --ink-black: #1F2937;
   --pencil-gray: #4B5563;
   --highlight-blue: #DBEAFE;
@@ -176,5 +176,67 @@ h1, h2, h3, h4, h5, h6 {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 300ms ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 300ms ease-out forwards;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@layer components {
+  button, input, select, textarea {
+    @apply transition-colors duration-200;
+  }
+
+  button:focus, input:focus, select:focus, textarea:focus {
+    @apply outline-none ring-2 ring-offset-2;
+    ring-color: var(--note-yellow);
+  }
+
+  button:hover {
+    @apply bg-opacity-90;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    @apply border-note-yellow;
   }
 }

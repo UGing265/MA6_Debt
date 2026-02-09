@@ -8,12 +8,18 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="flex flex-col items-center justify-center w-full">
-      <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
+    <div className="flex flex-col w-full space-y-6">
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold font-patrick text-gray-900">Create Account</h1>
+        <p className="text-gray-500 font-quicksand">Join us today! Create your account.</p>
+      </div>
+      
       <RegisterForm />
-      <div className="mt-4 text-center text-sm">
-        <Link href="/login" className="text-blue-600 hover:underline">
-          Already have an account? Login here
+      
+      <div className="text-center text-sm font-quicksand">
+        <span className="text-gray-500">Already have an account? </span>
+        <Link href="/login" className="text-[#F5D066] hover:underline font-semibold">
+          Sign in
         </Link>
       </div>
     </div>
