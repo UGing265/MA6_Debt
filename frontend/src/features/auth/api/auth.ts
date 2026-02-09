@@ -12,8 +12,14 @@ export const login = async (data: LoginInput): Promise<AuthResponse> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw { message: `Request failed with status ${response.status}` };
+    }
     throw errorData;
+  }
   }
 
   return response.json();
