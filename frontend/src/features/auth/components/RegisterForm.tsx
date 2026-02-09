@@ -150,11 +150,11 @@ export const RegisterForm = () => {
               <FormLabel className="text-gray-700">Email (Optional)</FormLabel>
               <FormControl>
                  <Input 
-                   type="text" 
+                   type="email" 
                    placeholder="Enter your email" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                   className="bg-[`#FEF9E7`] border-[`#E8CB50`] focus:border-[`#F0D25D`] focus:ring-[`#F0D25D`]" 
                  />
               </FormControl>
               <FormMessage />
