@@ -2,54 +2,54 @@ import { CheckCircle, Clock, ShieldCheck } from "lucide-react";
 
 const features = [
   {
-    name: "Minh bạch tài chính",
+    name: "Full money visibility",
     description:
-      "Theo dõi mọi khoản thu chi rõ ràng, giúp bạn hiểu rõ dòng tiền của mình đang đi đâu.",
+      "Track every cash inflow and outflow so you always know where your money goes.",
     icon: ShieldCheck,
   },
   {
-    name: "Ghi chép tức thì",
+    name: "Instant logging",
     description:
-      "Nhập liệu nhanh chóng chỉ trong vài giây, mọi lúc mọi nơi, ngay trên điện thoại của bạn.",
+      "Record transactions in seconds at the exact moment they happen.",
     icon: Clock,
   },
   {
-    name: "Kỷ luật 30 ngày",
+    name: "30-day discipline",
     description:
-      "Xây dựng thói quen quản lý tài chính bền vững với lộ trình 30 ngày được thiết kế khoa học.",
+      "Protect data history after 30 days to keep your monthly spending accountability strong.",
     icon: CheckCircle,
   },
 ];
 
 export const ValuePropsSection = () => {
   return (
-    <div className="bg-slate-950 py-24 sm:py-32">
+    <div id="features" className="bg-[#F2F2F2] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-amber-400">
-            Tại sao chọn chúng tôi?
+          <h2 className="text-base font-semibold leading-7 text-[#C8A93C]">
+            Why MA6 Debt
           </h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Giải pháp quản lý tài chính đơn giản
+          <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            A practical system for physical cash control
           </p>
-          <p className="mt-6 text-lg leading-8 text-slate-400">
-            Chúng tôi tập trung vào những tính năng cốt lõi giúp bạn kiểm soát tài chính cá nhân hiệu quả nhất.
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            Built for speed, clarity, and consistency in daily personal finance management.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-3 lg:gap-y-16">
             {features.map((feature) => (
               <div key={feature.name} className="relative pl-16">
-                <dt className="text-base font-semibold leading-7 text-white">
-                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800">
+                <dt className="text-base font-semibold leading-7 text-gray-900">
+                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg border border-[#E8CB50] bg-[#FEF9E7]">
                     <feature.icon
-                      className="h-6 w-6 text-amber-400"
+                      className="h-6 w-6 text-[#C8A93C]"
                       aria-hidden="true"
                     />
                   </div>
                   {feature.name}
                 </dt>
-                <dd className="mt-2 text-base leading-7 text-slate-400">
+                <dd className="mt-2 text-base leading-7 text-gray-600">
                   {feature.description}
                 </dd>
               </div>
