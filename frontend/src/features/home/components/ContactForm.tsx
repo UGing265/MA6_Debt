@@ -52,7 +52,7 @@ export const ContactForm = () => {
 
         <button
           type="submit"
-          className="font-quicksand w-full border-2 border-[#E8CB50] bg-[#F0D25D] text-white font-bold py-4 rounded-lg hover:bg-[#E8CB50] transition-colors flex items-center justify-center gap-2"
+          className="font-quicksand w-full border-2 border-[#F0D25D] bg-[#F0D25D] text-white font-bold py-4 rounded-lg hover:bg-[#E8CB50] transition-colors flex items-center justify-center gap-2"
         >
           Submit <Send className="w-4 h-4" />
         </button>

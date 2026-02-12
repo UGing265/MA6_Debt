@@ -215,7 +215,7 @@ export const WorkflowSection = () => {
                     </div>
 
                     <Button 
-                      className="font-quicksand bg-[#F0D25D] hover:bg-[#E8CB50] text-white rounded-full border-2 border-[#E8CB50] px-8 py-6 text-lg shadow-md hover:shadow-lg transition-all mt-4"
+                      className="font-quicksand bg-[#F0D25D] hover:bg-[#E8CB50] text-white rounded-full border-2 border-[#F0D25D] px-8 py-6 text-lg shadow-md hover:shadow-lg transition-all mt-4"
                     >
                       Try Now
                     </Button>
