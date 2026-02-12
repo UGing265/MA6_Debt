@@ -20,13 +20,13 @@ const useCases = [
 
 export const UseCaseCardsSection = () => {
   return (
-    <section className="bg-[#FFFBEB] py-24 sm:py-32">
+    <section className="bg-[#FFF7ED] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#8B6914] sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
             Organize your cash by real-life usage
           </h2>
-          <p className="mt-4 text-lg leading-8 text-[#9B8C4F]">
+          <p className="mt-4 text-lg leading-8 text-[#9A3412]">
             Keep every amount in the right wallet with clear purpose and ownership.
           </p>
         </div>
@@ -34,18 +34,18 @@ export const UseCaseCardsSection = () => {
           {useCases.map((useCase) => (
             <div
               key={useCase.title}
-              className="flex flex-col rounded-3xl border border-[#E8CB50] bg-[#FFFEF5] p-8 transition-all hover:shadow-lg hover:border-[#F0D25D]"
+              className="flex flex-col rounded-3xl border border-[#FED7AA] bg-white p-8 transition-all hover:shadow-lg hover:border-[#F97316]"
             >
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFFBEB] ring-1 ring-[#E8CB50]/50">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] ring-1 ring-[#FED7AA]/50">
                 <useCase.icon
-                  className="h-6 w-6 text-[#F0D25D]"
+                  className="h-6 w-6 text-[#F97316]"
                   aria-hidden="true"
                 />
               </div>
-              <h3 className="text-xl font-semibold leading-7 text-[#8B6914]">
+              <h3 className="text-xl font-semibold leading-7 text-[#7C2D12]">
                 {useCase.title}
               </h3>
-              <p className="mt-4 flex-auto text-base leading-7 text-[#9B8C4F]">
+              <p className="mt-4 flex-auto text-base leading-7 text-[#9A3412]">
                 {useCase.description}
               </p>
             </div>
