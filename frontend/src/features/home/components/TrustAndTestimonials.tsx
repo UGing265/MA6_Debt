@@ -55,7 +55,7 @@ export const Testimonials = () => {
     <section className="bg-[#FDFBF9] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="text-3xl font-bold tracking-tight text-[#4A3728] sm:text-4xl">
+          <h2 className="font-patrick text-3xl font-bold tracking-tight text-[#4A3728] sm:text-4xl">
             What people say
           </h2>
         </div>
@@ -78,7 +78,7 @@ export const Testimonials = () => {
                     <div className="text-sm text-gray-500">{testimonial.handle}</div>
                   </div>
                 </div>
-                <p className="mt-4 text-lg leading-6 text-[#4A3728]">
+                <p className="font-quicksand mt-4 text-lg leading-6 text-[#4A3728]">
                   "{testimonial.quote}"
                 </p>
               </div>

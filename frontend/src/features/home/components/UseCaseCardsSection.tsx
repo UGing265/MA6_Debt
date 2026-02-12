@@ -23,10 +23,10 @@ export const UseCaseCardsSection = () => {
     <section className="bg-[#FFF7ED] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
+          <h2 className="font-patrick text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
             Keep cash in the right wallets
           </h2>
-          <p className="mt-4 text-lg leading-8 text-[#9A3412]">
+          <p className="font-quicksand mt-4 text-lg leading-8 text-[#9A3412]">
             Every wallet has a clear purpose.
           </p>
         </div>
@@ -42,10 +42,10 @@ export const UseCaseCardsSection = () => {
                   aria-hidden="true"
                 />
               </div>
-              <h3 className="text-xl font-semibold leading-7 text-[#7C2D12]">
+              <h3 className="font-patrick text-xl font-semibold leading-7 text-[#7C2D12]">
                 {useCase.title}
               </h3>
-              <p className="mt-4 flex-auto text-base leading-7 text-[#9A3412]">
+              <p className="font-quicksand mt-4 flex-auto text-base leading-7 text-[#9A3412]">
                 {useCase.description}
               </p>
             </div>

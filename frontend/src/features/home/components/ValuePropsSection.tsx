@@ -26,13 +26,13 @@ export const ValuePropsSection = () => {
     <div id="features" className="bg-[#FFF7ED] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-[#F97316]">
+          <h2 className="font-patrick text-base font-semibold leading-7 text-[#F97316]">
             Why MA6 Debt
           </h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
+          <p className="font-patrick mt-2 text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
             Keep your cash clear and simple
           </p>
-          <p className="mt-6 text-lg leading-8 text-[#9A3412]">
+          <p className="font-quicksand mt-6 text-lg leading-8 text-[#9A3412]">
             Built for speed. Built for clarity. Built for your daily money.
           </p>
         </div>
@@ -43,7 +43,7 @@ export const ValuePropsSection = () => {
                 key={feature.name}
                 className="flex flex-col rounded-3xl border border-[#FED7AA] bg-white p-8 shadow-sm transition-all hover:shadow-lg hover:border-[#F97316]"
               >
-                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-[#7C2D12]">
+                <dt className="font-patrick flex items-center gap-x-3 text-base font-semibold leading-7 text-[#7C2D12]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FFF7ED] ring-1 ring-[#FED7AA]/50">
                     <feature.icon
                       className="h-6 w-6 text-[#F97316]"
@@ -52,7 +52,7 @@ export const ValuePropsSection = () => {
                   </div>
                   {feature.name}
                 </dt>
-                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-[#9A3412]">
+                <dd className="font-quicksand mt-4 flex flex-auto flex-col text-base leading-7 text-[#9A3412]">
                   <p className="flex-auto">{feature.description}</p>
                 </dd>
               </div>
