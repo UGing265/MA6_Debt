@@ -1,5 +1,4 @@
 import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export const TrustLogos = () => {
   const companies = [

@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { Phone, Mail, Facebook, Twitter, Instagram, Linkedin, Send } from "lucide-react";
 
@@ -89,7 +88,7 @@ export const CTAFooterSection = () => {
 
             <div className="bg-white text-gray-900 rounded-2xl p-8 shadow-2xl max-w-md ml-auto w-full">
               <h4 className="text-2xl font-bold mb-6">Get in Touch</h4>
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                     Name
