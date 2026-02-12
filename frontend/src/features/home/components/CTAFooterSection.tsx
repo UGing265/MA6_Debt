@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 export const CTAFooterSection = () => {
   return (
-    <footer className="border-t border-[#E8CB50] bg-[#F2EEDB] py-12 text-center text-gray-900">
+    <footer className="border-t border-[#E8CB50] bg-[#FFFBEB] py-12 text-center text-gray-900">
       <div className="container mx-auto px-4">
         <h2 className="mb-4 text-3xl font-bold">
           Ready to take control of your cash?

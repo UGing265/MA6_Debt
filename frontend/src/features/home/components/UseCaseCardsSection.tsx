@@ -20,7 +20,7 @@ const useCases = [
 
 export const UseCaseCardsSection = () => {
   return (
-    <section className="bg-[#F2EEDB] py-24 sm:py-32">
+    <section className="bg-[#FFFBEB] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -34,7 +34,7 @@ export const UseCaseCardsSection = () => {
           {useCases.map((useCase) => (
             <div
               key={useCase.title}
-              className="flex flex-col rounded-2xl border border-[#E8CB50] bg-white p-8 transition-all hover:shadow-md"
+              className="flex flex-col rounded-2xl border border-[#E8CB50] bg-[#FFFEF5] p-8 transition-all hover:shadow-md"
             >
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg border border-[#E8CB50] bg-[#FEF9E7]">
                 <useCase.icon

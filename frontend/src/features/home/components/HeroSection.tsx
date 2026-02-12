@@ -3,7 +3,7 @@ import { ArrowRight, TrendingUp } from "lucide-react";
 
 export const HeroSection = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-[#F2EEDB] py-20 md:py-32">
+    <section className="relative w-full overflow-hidden bg-[#FFFBEB] py-20 md:py-32">
       <div className="container relative mx-auto px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#E8CB50] bg-[#FEF9E7] px-4 py-1.5 text-sm font-medium text-gray-700">
