@@ -27,16 +27,16 @@ export const CTAFooterSection = () => {
             </svg>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+          <h2 className="font-patrick text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Ready to <span className="text-[#FF7A00]">take control</span> of your cash?
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="font-quicksand text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Join people who track simple. Start free now.
           </p>
           
           <Link
             href="/register"
-            className="inline-block bg-[#FF7A00] text-white font-semibold px-10 py-4 rounded-full hover:bg-orange-600 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="font-quicksand inline-block border border-[#C85A00] bg-[#FF7A00] text-white font-semibold px-10 py-4 rounded-full hover:bg-orange-600 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             Try Now
           </Link>
@@ -50,7 +50,7 @@ export const CTAFooterSection = () => {
               <div className="inline-block px-3 py-1 border border-white/30 rounded-full text-sm font-medium tracking-wider uppercase mb-4">
                 / get in touch /
               </div>
-              <h3 className="text-4xl md:text-5xl font-bold leading-tight">
+              <h3 className="font-patrick text-4xl md:text-5xl font-bold leading-tight">
                 We're here to help
               </h3>
               
@@ -87,7 +87,7 @@ export const CTAFooterSection = () => {
             </div>
 
             <div className="bg-white text-gray-900 rounded-2xl p-8 shadow-2xl max-w-md ml-auto w-full">
-              <h4 className="text-2xl font-bold mb-6">Get in Touch</h4>
+              <h4 className="font-patrick text-2xl font-bold mb-6">Get in Touch</h4>
               <form className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -127,7 +127,7 @@ export const CTAFooterSection = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#FF7A00] text-white font-bold py-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                  className="font-quicksand w-full border border-[#C85A00] bg-[#FF7A00] text-white font-bold py-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
                 >
                   Submit <Send className="w-4 h-4" />
                 </button>

@@ -7,7 +7,7 @@ const Navbar = () => (
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF7A00] text-white font-bold shadow-sm">
         M
       </div>
-      <span className="font-bold text-[#4A3728]">MA6 Debt</span>
+      <span className="font-patrick font-bold text-[#4A3728]">MA6 Debt</span>
     </div>
 
     <div className="hidden items-center gap-8 md:flex">
@@ -15,7 +15,7 @@ const Navbar = () => (
         <Link
           key={item}
           href={`#${item.toLowerCase()}`}
-          className="text-sm font-medium text-[#4A3728] transition-colors hover:text-[#FF7A00]"
+          className="font-quicksand text-sm font-medium text-[#4A3728] transition-colors hover:text-[#FF7A00]"
         >
           {item}
         </Link>
@@ -25,13 +25,13 @@ const Navbar = () => (
     <div className="flex items-center gap-3">
       <Link
         href="/login"
-        className="hidden rounded-full border border-[#A69080]/50 px-5 py-2 text-sm font-semibold text-[#4A3728] transition-colors hover:bg-[#F5EBE0] sm:inline-flex"
+        className="font-quicksand hidden rounded-full border border-[#A69080]/50 px-5 py-2 text-sm font-semibold text-[#4A3728] transition-colors hover:bg-[#F5EBE0] sm:inline-flex"
       >
         Log In
       </Link>
       <Link
         href="/register"
-        className="rounded-full bg-[#FF7A00] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E66E00]"
+        className="font-quicksand rounded-full border border-[#C85A00] bg-[#FF7A00] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E66E00]"
       >
         Sign Up
       </Link>
@@ -50,19 +50,19 @@ export const HeroSection = () => {
       <div className="container mx-auto max-w-6xl pb-20 md:pb-32">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
           <div className="flex flex-col items-start text-left">
-            <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-[#4A3728] md:text-6xl lg:text-7xl">
+            <h1 className="font-patrick mb-6 text-5xl font-bold leading-tight tracking-tight text-[#4A3728] md:text-6xl lg:text-7xl">
               <span className="text-[#FF7A00]">Track</span> your money, <br />
               made simple
             </h1>
             
-            <p className="mb-8 max-w-lg text-lg leading-relaxed text-[#8B7D6B]">
+            <p className="font-quicksand mb-8 max-w-lg text-lg leading-relaxed text-[#8B7D6B]">
               See where your money goes. No confusing charts. Just the facts.
             </p>
             
             <div className="flex flex-col gap-4 sm:flex-row w-full sm:w-auto">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center rounded-full bg-[#FF7A00] px-8 py-4 text-base font-semibold text-white shadow-sm transition-all hover:bg-[#E66E00] hover:shadow-md"
+                className="font-quicksand inline-flex items-center justify-center rounded-full border border-[#C85A00] bg-[#FF7A00] px-8 py-4 text-base font-semibold text-white shadow-sm transition-all hover:bg-[#E66E00] hover:shadow-md"
               >
                 Try for Free
               </Link>

@@ -174,10 +174,10 @@ export const WorkflowSection = () => {
     <section className="bg-[#F9F3EB] py-24 overflow-hidden relative" id="how-it-works">
       <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
         <div className="text-center mb-24">
-          <h2 className="text-3xl md:text-5xl font-bold text-[#FF7A00] mb-6 tracking-tight">
+          <h2 className="font-patrick text-3xl md:text-5xl font-bold text-[#FF7A00] mb-6 tracking-tight">
             Simple Workflow
           </h2>
-          <p className="text-xl text-[#5C4033] max-w-2xl mx-auto font-medium">
+          <p className="font-quicksand text-xl text-[#5C4033] max-w-2xl mx-auto font-medium">
             Learn in 4 simple steps.
           </p>
         </div>
@@ -201,21 +201,21 @@ export const WorkflowSection = () => {
                       <Icon size={28} />
                     </div>
                     
-                    <h3 className="text-3xl font-bold text-[#FF7A00]">
+                    <h3 className="font-patrick text-3xl font-bold text-[#FF7A00]">
                       {feature.title}
                     </h3>
                     
                     <div className="space-y-4">
-                      <p className="text-xl font-semibold text-[#5C4033]">
+                      <p className="font-quicksand text-xl font-semibold text-[#5C4033]">
                         {feature.description}
                       </p>
-                      <p className="text-base text-[#8D7A6B] leading-relaxed">
+                      <p className="font-quicksand text-base text-[#8D7A6B] leading-relaxed">
                         {feature.details}
                       </p>
                     </div>
 
                     <Button 
-                      className="bg-[#FF7A00] hover:bg-[#E66E00] text-white rounded-full px-8 py-6 text-lg shadow-md hover:shadow-lg transition-all mt-4"
+                      className="font-quicksand bg-[#FF7A00] hover:bg-[#E66E00] text-white rounded-full border border-[#C85A00] px-8 py-6 text-lg shadow-md hover:shadow-lg transition-all mt-4"
                     >
                       Try Now
                     </Button>
