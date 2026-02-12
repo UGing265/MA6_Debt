@@ -3,17 +3,17 @@ import { Wallet, PiggyBank, CreditCard } from "lucide-react";
 const useCases = [
   {
     title: "Main Wallet",
-    description: "Manage your daily cash flow, core expenses, and regular income.",
+    description: "Daily money. Regular rent. Salary.",
     icon: Wallet,
   },
   {
     title: "Sub-wallets",
-    description: "Split cash by purpose: food, transport, savings, and emergency funds.",
+    description: "Split cash by purpose: food, transport, savings, and emergency.",
     icon: PiggyBank,
   },
   {
     title: "Debt Tracking",
-    description: "Track receivables and payables with partner tagging and real-time updates.",
+    description: "Know who you owe and who owes you. Track and settle easily.",
     icon: CreditCard,
   },
 ];
@@ -24,10 +24,10 @@ export const UseCaseCardsSection = () => {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
-            Organize your cash by real-life usage
+            Keep cash in the right wallets
           </h2>
           <p className="mt-4 text-lg leading-8 text-[#9A3412]">
-            Keep every amount in the right wallet with clear purpose and ownership.
+            Every wallet has a clear purpose.
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-8">

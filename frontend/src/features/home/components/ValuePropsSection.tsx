@@ -2,21 +2,21 @@ import { CheckCircle, Clock, ShieldCheck } from "lucide-react";
 
 const features = [
   {
-    name: "Full money visibility",
+    name: "See all your money",
     description:
-      "Track every cash inflow and outflow so you always know where your money goes.",
+      "Know every rupee in and out. Always know where your money goes.",
     icon: ShieldCheck,
   },
   {
-    name: "Instant logging",
+    name: "Quick logging",
     description:
-      "Record transactions in seconds at the exact moment they happen.",
+      "Record transactions in seconds. Log the moment they happen.",
     icon: Clock,
   },
   {
-    name: "30-day discipline",
+    name: "Clear history",
     description:
-      "Protect data history after 30 days to keep your monthly spending accountability strong.",
+      "Keep your records fresh. Track what matters for the month ahead.",
     icon: CheckCircle,
   },
 ];
@@ -30,10 +30,10 @@ export const ValuePropsSection = () => {
             Why MA6 Debt
           </h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-[#7C2D12] sm:text-4xl">
-            A practical system for physical cash control
+            Keep your cash clear and simple
           </p>
           <p className="mt-6 text-lg leading-8 text-[#9A3412]">
-            Built for speed, clarity, and consistency in daily personal finance management.
+            Built for speed. Built for clarity. Built for your daily money.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">

@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, TrendingUp, Menu } from "lucide-react";
+import { Check, Menu } from "lucide-react";
 
 const Navbar = () => (
-  <nav className="mx-auto mb-12 flex max-w-6xl items-center justify-between rounded-full border border-[#FED7AA]/50 bg-white/90 px-6 py-3 shadow-sm backdrop-blur-sm md:mb-20">
+  <nav className="mx-auto mb-16 flex max-w-5xl items-center justify-between rounded-full border border-[#A69080]/20 bg-white/80 px-6 py-3 backdrop-blur-sm md:mb-24">
     <div className="flex items-center gap-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F97316] text-white font-bold shadow-sm">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF7A00] text-white font-bold shadow-sm">
         M
       </div>
-      <span className="font-bold text-[#7C2D12]">MA6 Debt</span>
+      <span className="font-bold text-[#4A3728]">MA6 Debt</span>
     </div>
 
     <div className="hidden items-center gap-8 md:flex">
@@ -15,7 +15,7 @@ const Navbar = () => (
         <Link
           key={item}
           href={`#${item.toLowerCase()}`}
-          className="text-sm font-medium text-[#9A3412] transition-colors hover:text-[#C2410C]"
+          className="text-sm font-medium text-[#4A3728] transition-colors hover:text-[#FF7A00]"
         >
           {item}
         </Link>
@@ -25,17 +25,17 @@ const Navbar = () => (
     <div className="flex items-center gap-3">
       <Link
         href="/login"
-        className="hidden rounded-full border border-[#F97316] px-5 py-2 text-sm font-semibold text-[#C2410C] transition-colors hover:bg-[#FFF7ED] sm:inline-flex"
+        className="hidden rounded-full border border-[#A69080]/50 px-5 py-2 text-sm font-semibold text-[#4A3728] transition-colors hover:bg-[#F5EBE0] sm:inline-flex"
       >
         Log In
       </Link>
       <Link
         href="/register"
-        className="rounded-full bg-[#F97316] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#EA580C]"
+        className="rounded-full bg-[#FF7A00] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E66E00]"
       >
         Sign Up
       </Link>
-      <button className="md:hidden text-[#C2410C]">
+      <button className="md:hidden text-[#4A3728]">
         <Menu className="h-6 w-6" />
       </button>
     </div>
@@ -44,58 +44,74 @@ const Navbar = () => (
 
 export const HeroSection = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-[#FFF7ED] px-4 py-6 md:px-6 lg:px-8">
+    <section className="relative w-full overflow-hidden bg-[#F5EBE0] px-4 py-6 md:px-6 lg:px-8">
       <Navbar />
 
       <div className="container mx-auto max-w-6xl pb-20 md:pb-32">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
           <div className="flex flex-col items-start text-left">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#FED7AA] bg-white px-4 py-1.5 text-sm font-medium text-[#9A3412] shadow-sm">
-              <TrendingUp className="h-4 w-4 text-[#F97316]" />
-              <span>Smart personal finance</span>
-            </div>
-            
-            <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-[#7C2D12] md:text-5xl lg:text-6xl">
-              Manage your money <br />
-              <span className="text-[#F97316]">with clarity</span>
+            <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-[#4A3728] md:text-6xl lg:text-7xl">
+              <span className="text-[#FF7A00]">Track</span> your money, <br />
+              made simple
             </h1>
             
-            <p className="mb-8 max-w-lg text-lg leading-relaxed text-[#9A3412]">
-              Organize physical cash with hierarchical wallets, track debt in real time, and build a stronger monthly money habit.
+            <p className="mb-8 max-w-lg text-lg leading-relaxed text-[#8B7D6B]">
+              See where your money goes. No confusing charts. Just the facts.
             </p>
             
             <div className="flex flex-col gap-4 sm:flex-row w-full sm:w-auto">
               <Link
-                href="/login"
-                className="group inline-flex items-center justify-center rounded-full bg-[#F97316] px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#EA580C] hover:shadow-md"
+                href="/register"
+                className="inline-flex items-center justify-center rounded-full bg-[#FF7A00] px-8 py-4 text-base font-semibold text-white shadow-sm transition-all hover:bg-[#E66E00] hover:shadow-md"
               >
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="#features"
-                className="inline-flex items-center justify-center rounded-full border border-[#F97316] bg-white px-8 py-3.5 text-sm font-semibold text-[#C2410C] transition-all hover:bg-[#FFF7ED]"
-              >
-                Learn More
+                Try for Free
               </Link>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
-            <div className="relative aspect-square overflow-hidden rounded-3xl border-2 border-[#FED7AA] bg-white shadow-xl">
-              <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                 <div className="h-64 w-64 rounded-full bg-[#F97316] blur-3xl" />
+          <div className="relative mx-auto w-full max-w-md lg:max-w-none flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-xl ring-1 ring-[#A69080]/10">
+              <div className="mb-6 flex items-center justify-between border-b border-[#F5EBE0] pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-[#F5EBE0] flex items-center justify-center">
+                    <div className="h-5 w-5 rounded-full bg-[#FF7A00]" />
+                  </div>
+                  <div>
+                    <div className="h-2.5 w-24 rounded-full bg-[#4A3728]/10 mb-1.5" />
+                    <div className="h-2 w-16 rounded-full bg-[#4A3728]/5" />
+                  </div>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-[#F5EBE0]" />
               </div>
-              <div className="relative flex h-full flex-col items-center justify-center p-8 text-center">
-                 <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#FFF7ED] shadow-sm ring-1 ring-[#FED7AA]/50">
-                    <TrendingUp className="h-10 w-10 text-[#F97316]" />
-                 </div>
-                 <h3 className="text-xl font-bold text-[#7C2D12]">Visual Clarity</h3>
-                 <p className="mt-2 text-[#9A3412]">See your financial health at a glance.</p>
+
+              <div className="space-y-4">
+                {[
+                  { text: "Track Daily Expenses", amount: "-$45.00" },
+                  { text: "Monthly Rent", amount: "-$1,200.00" },
+                  { text: "Freelance Income", amount: "+$3,500.00", positive: true },
+                  { text: "Savings Goal", amount: "$500.00", highlight: true },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-xl border border-[#F5EBE0] p-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-full ${item.highlight ? 'bg-[#FF7A00]' : 'bg-[#F5EBE0]'}`}>
+                        <Check className={`h-3.5 w-3.5 ${item.highlight ? 'text-white' : 'text-[#4A3728]'}`} />
+                      </div>
+                      <span className="text-sm font-medium text-[#4A3728]">{item.text}</span>
+                    </div>
+                    <span className={`text-sm font-semibold ${item.positive ? 'text-green-600' : 'text-[#4A3728]'}`}>
+                      {item.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="absolute -right-4 top-1/2 h-16 w-16 -translate-y-1/2 rounded-2xl bg-[#FF7A00] shadow-lg flex items-center justify-center transform rotate-12">
+                 <span className="text-white font-bold text-xl">$</span>
               </div>
             </div>
             
-            <div className="absolute -bottom-6 -right-6 -z-10 h-full w-full rounded-3xl bg-[#F97316]/10" />
+            <div className="absolute -bottom-10 -left-10 -z-10 h-64 w-64 rounded-full bg-[#FF7A00]/10 blur-3xl" />
+            <div className="absolute -top-10 -right-10 -z-10 h-64 w-64 rounded-full bg-[#4A3728]/5 blur-3xl" />
           </div>
         </div>
       </div>
