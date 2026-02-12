@@ -33,33 +33,7 @@ namespace API
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi(options =>
-            {
-                options.AddDocumentTransformer((document, context, cancellationToken) =>
-                {
-                    document.Components ??= new Microsoft.OpenApi.Models.OpenApiComponents();
-                    document.Components.Schemas["ProblemDetails"] = new Microsoft.OpenApi.Models.OpenApiSchema
-                    {
-                        Type = "object",
-                        Properties = new Dictionary<string, Microsoft.OpenApi.Models.OpenApiSchema>
-                        {
-                            ["type"] = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string" },
-                            ["title"] = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string" },
-                            ["status"] = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "integer" },
-                            ["errors"] = new Microsoft.OpenApi.Models.OpenApiSchema
-                            {
-                                Type = "object",
-                                AdditionalProperties = new Microsoft.OpenApi.Models.OpenApiSchema
-                                {
-                                    Type = "array",
-                                    Items = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string" }
-                                }
-                            }
-                        }
-                    };
-                    return Task.CompletedTask;
-                });
-            });
+            builder.Services.AddOpenApi();
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<API.Middleware.GlobalExceptionHandler>();
