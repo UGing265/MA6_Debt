@@ -6,5 +6,6 @@ namespace Application.Features.Wallets
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public Guid? ParentWalletId { get; set; }
+        public decimal Balance { get; set; }
     }
 }

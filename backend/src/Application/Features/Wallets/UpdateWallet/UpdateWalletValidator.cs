@@ -6,6 +6,9 @@ namespace Application.Features.Wallets.UpdateWallet
     {
         public UpdateWalletValidator()
         {
+            RuleFor(x => x.UserId)
+                .NotEmpty().WithMessage("UserId is required");
+
             RuleFor(x => x.Id)
                 .NotEmpty().WithMessage("Id is required");
 

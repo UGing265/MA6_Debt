@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Wallets.UpdateWallet
 {
@@ -15,7 +16,9 @@ namespace Application.Features.Wallets.UpdateWallet
 
         public async Task<WalletDto> Handle(UpdateWalletCommand request, CancellationToken cancellationToken)
         {
-            var wallet = await _context.Wallets.FindAsync(new object[] { request.Id }, cancellationToken);
+            var wallet = await _context.Wallets
+                .FirstOrDefaultAsync(w => w.Id == request.Id && w.UserId == request.UserId, cancellationToken);
+
             if (wallet is null)
             {
                 throw new NotFoundException("Wallet", request.Id);
@@ -31,19 +34,9 @@ namespace Application.Features.Wallets.UpdateWallet
                 Id = wallet.Id,
                 Name = wallet.Name,
                 Description = wallet.Description,
-                ParentWalletId = wallet.ParentWalletId
+                ParentWalletId = wallet.ParentWalletId,
+                Balance = 0m
             };
-        }
-    }
-}
-
-namespace Application.Common.Exceptions
-{
-    public class NotFoundException : Exception
-    {
-        public NotFoundException(string name, object key)
-            : base($"{name} ({key}) was not found.")
-        {
         }
     }
 }

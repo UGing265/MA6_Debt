@@ -1,6 +1,7 @@
 using Domain.Entities;
 using MediatR;
 using Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Wallets.CreateWallet
 {
@@ -15,12 +16,24 @@ namespace Application.Features.Wallets.CreateWallet
 
         public async Task<WalletDto> Handle(CreateWalletCommand request, CancellationToken cancellationToken)
         {
+            if (request.ParentWalletId.HasValue)
+            {
+                var parentExists = await _context.Wallets.AnyAsync(
+                    w => w.Id == request.ParentWalletId.Value && w.UserId == request.UserId,
+                    cancellationToken);
+
+                if (!parentExists)
+                {
+                    throw new InvalidOperationException("Parent wallet not found for current user");
+                }
+            }
+
             var wallet = new Wallet
             {
                 Name = request.Name,
                 Description = request.Description,
                 ParentWalletId = request.ParentWalletId,
-                UserId = Guid.Empty // TODO: Get from auth context
+                UserId = request.UserId
             };
 
             _context.Wallets.Add(wallet);
@@ -31,7 +44,8 @@ namespace Application.Features.Wallets.CreateWallet
                 Id = wallet.Id,
                 Name = wallet.Name,
                 Description = wallet.Description,
-                ParentWalletId = wallet.ParentWalletId
+                ParentWalletId = wallet.ParentWalletId,
+                Balance = 0m
             };
         }
     }
