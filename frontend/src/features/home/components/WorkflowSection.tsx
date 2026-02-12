@@ -28,27 +28,30 @@ export const WorkflowSection = () => {
     <div className="bg-[#FFFBEB] py-24 sm:py-32" id="how-it-works">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-[#C8A93C]">
+          <h2 className="text-base font-semibold leading-7 text-[#F0D25D]">
             Simple Workflow
           </h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <p className="mt-2 text-3xl font-bold tracking-tight text-[#8B6914] sm:text-4xl">
             How it works from day one
           </p>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
+          <p className="mt-6 text-lg leading-8 text-[#9B8C4F]">
             Follow four clear steps to keep your physical cash management consistent.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-4">
             {steps.map((step, index) => (
-              <div key={step.name} className="flex flex-col items-center text-center">
-                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[#E8CB50] bg-[#FEF9E7] text-[#C8A93C]">
+              <div 
+                key={step.name} 
+                className="flex flex-col items-center text-center rounded-3xl border border-[#E8CB50] bg-[#FFFEF5] p-8 shadow-sm transition-all hover:shadow-lg hover:border-[#F0D25D]"
+              >
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#FFFBEB] ring-1 ring-[#E8CB50]/50 text-[#F0D25D]">
                   <step.icon className="h-8 w-8" aria-hidden="true" />
                 </div>
-                <dt className="text-xl font-semibold leading-7 text-gray-900">
+                <dt className="text-xl font-semibold leading-7 text-[#8B6914]">
                   {index + 1}. {step.name}
                 </dt>
-                <dd className="mt-1 text-base leading-7 text-gray-600">
+                <dd className="mt-1 text-base leading-7 text-[#9B8C4F]">
                   {step.description}
                 </dd>
               </div>

@@ -8,7 +8,7 @@ test.describe('Homepage Smoke Tests', () => {
     await expect(page.locator('main')).toBeVisible();
     
     const heroHeading = page.locator('h1').first();
-    await expect(heroHeading).toContainText('Quản Lý Nợ Thông Minh');
+    await expect(heroHeading).toContainText('Manage your money');
   });
 
   test('CTA button navigates to login page', async ({ page }) => {
