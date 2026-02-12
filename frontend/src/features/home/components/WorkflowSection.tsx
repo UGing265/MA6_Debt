@@ -93,7 +93,7 @@ const DebtManagerUI = () => (
       </div>
       <div className="text-base font-bold text-green-600">+$50.00</div>
     </div>
-    <div className="flex items-center gap-4 p-3 bg-white rounded-xl border border-[#F0D25D]/20 shadow-sm transition-transform hover:scale-[1.02]">
+    <div className="flex items-center gap-4 p-3 bg-[#FFFBEB] rounded-xl border border-[#F0D25D]/20 shadow-sm transition-transform hover:scale-[1.02]">
       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shadow-sm">
         AS
       </div>

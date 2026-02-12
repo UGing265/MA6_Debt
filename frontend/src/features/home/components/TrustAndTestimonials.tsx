@@ -1,28 +1,5 @@
 import { Star } from "lucide-react";
 
-export const TrustLogos = () => {
-  const companies = [
-    "Acme Corp", "Globex", "Soylent", "Initech", "Umbrella", "Massive Dynamic"
-  ];
-
-  return (
-    <section className="bg-[#FDFBF9] py-12 border-b border-gray-100">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-        <h2 className="text-lg font-semibold leading-8 text-[#4A3728]">
-          Trusted by Companies
-        </h2>
-        <div className="mx-auto mt-8 grid max-w-lg grid-cols-2 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-3 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-6">
-          {companies.map((company) => (
-            <div key={company} className="flex justify-center items-center grayscale opacity-60 font-bold text-xl text-[#4A3728]">
-              {company}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const testimonials = [
   {
     name: "Sarah",

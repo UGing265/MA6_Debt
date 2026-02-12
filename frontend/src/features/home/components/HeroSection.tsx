@@ -91,7 +91,7 @@ export const HeroSection = () => {
                   { text: "Freelance Income", amount: "+$3,500.00", positive: true },
                   { text: "Savings Goal", amount: "$500.00", highlight: true },
                 ].map((item, i) => (
-                  <div key={i} className={`flex items-center justify-between rounded-xl border p-3 ${item.highlight ? 'border-[#F0D25D] bg-[#FFFBEB]' : 'border-[#F0D25D]/20 bg-white'}`}>
+                  <div key={i} className={`flex items-center justify-between rounded-xl border p-3 ${item.highlight ? 'border-[#F0D25D] bg-[#FFFBEB]' : 'border-[#F0D25D]/20 bg-[#FEF9E7]'}`}>
                     <div className="flex items-center gap-3">
                       <div className={`flex h-6 w-6 items-center justify-center rounded-full ${item.highlight ? 'bg-[#F0D25D]' : 'bg-[#FFFBEB]'}`}>
                         <Check className={`h-3.5 w-3.5 ${item.highlight ? 'text-white' : 'text-[#8B6914]'}`} />
