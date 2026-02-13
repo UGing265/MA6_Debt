@@ -7,7 +7,7 @@ import { CTAFooterSection } from "@/features/home/components/CTAFooterSection";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col bg-[#FFFBEB]">
+    <main className="flex min-h-screen flex-col bg-[#F5EFE6]">
       <HeroSection />
       <ValuePropsSection />
       <UseCaseCardsSection />

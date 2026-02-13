@@ -29,10 +29,10 @@ const testimonials = [
 
 export const Testimonials = () => {
   return (
-    <section className="bg-[#F5EBE0] py-24 sm:py-32">
+    <section className="bg-[#F5EFE6] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="font-patrick text-3xl font-bold tracking-tight text-[#432818] sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-[#4A2C2A] sm:text-4xl">
             What people say
           </h2>
         </div>
@@ -40,26 +40,24 @@ export const Testimonials = () => {
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.handle}
-              className="flex flex-col justify-between rounded-xl bg-[#F5EBE0] p-6 border-2 border-[#FF7A00] relative transition-transform hover:-translate-y-1"
-              style={{
-                boxShadow: `8px 8px 0px 0px ${testimonial.shadowColor}`,
-              }}
+              className="flex flex-col justify-between rounded-xl bg-white p-6 border border-[#4A2C2A]/20 relative transition-transform hover:-translate-y-1"
+              style={{ boxShadow: `6px 6px 0 0 ${testimonial.shadowColor}` }}
             >
               <div>
                 <div className="flex items-center gap-x-4">
-                  <div className="h-10 w-10 rounded-full bg-[#F5EBE0] flex items-center justify-center text-[#432818] font-bold border border-[#FF7A00]">
+                  <div className="h-10 w-10 rounded-full bg-[#F5EFE6] flex items-center justify-center text-[#4A2C2A] font-bold">
                     {testimonial.name[0]}
                   </div>
                   <div>
-                    <div className="font-bold text-[#432818]">{testimonial.name}</div>
+                    <div className="font-bold text-[#4A2C2A]">{testimonial.name}</div>
                     <div className="text-sm text-[#8D6E63]">{testimonial.handle}</div>
                   </div>
                 </div>
-                <p className="font-quicksand mt-4 text-lg leading-6 text-[#8D6E63]">
+                <p className="mt-4 text-lg leading-6 text-[#8D6E63]">
                   "{testimonial.quote}"
                 </p>
               </div>
-              <div className="mt-6 flex items-center justify-between border-t border-[#E56E00] pt-4">
+              <div className="mt-6 flex items-center justify-between border-t border-[#4A2C2A]/10 pt-4">
                 <div className="flex gap-x-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-[#FF7A00] text-[#FF7A00]" />

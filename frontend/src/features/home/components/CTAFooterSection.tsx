@@ -5,7 +5,7 @@ import { ContactForm } from "./ContactForm";
 export const CTAFooterSection = () => {
   return (
     <div className="flex flex-col w-full">
-      <section className="bg-[#F5EBE0] py-20 px-4 sm:px-6 lg:px-8">
+      <section className="bg-[#FDFCFB] py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8 flex justify-center">
             <svg
@@ -14,57 +14,57 @@ export const CTAFooterSection = () => {
               viewBox="0 0 200 160"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="text-[#432818]"
+              className="text-[#4A2C2A]"
             >
-              <rect x="40" y="20" width="120" height="100" rx="4" stroke="currentColor" strokeWidth="2" fill="#F5EBE0" />
-              <path d="M50 40 H150" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
-              <path d="M50 60 H130" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
-              <path d="M50 80 H140" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
+              <rect x="40" y="20" width="120" height="100" rx="4" stroke="currentColor" strokeWidth="1.5" fill="white" />
+              <path d="M50 40 H150" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 4" />
+              <path d="M50 60 H130" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 4" />
+              <path d="M50 80 H140" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 4" />
               <circle cx="140" cy="100" r="30" fill="#FF7A00" opacity="0.1" />
               <circle cx="140" cy="100" r="10" stroke="#FF7A00" strokeWidth="2" />
               <path d="M135 100 L145 100 M140 95 L140 105" stroke="#FF7A00" strokeWidth="2" />
-              <circle cx="30" cy="130" r="15" stroke="currentColor" strokeWidth="2" fill="#F5EBE0" />
-              <path d="M30 145 V160 M15 160 H45" stroke="currentColor" strokeWidth="2" />
+              <circle cx="30" cy="130" r="15" stroke="currentColor" strokeWidth="1.5" fill="white" />
+              <path d="M30 145 V160 M15 160 H45" stroke="currentColor" strokeWidth="1.5" />
             </svg>
           </div>
 
-          <h2 className="font-patrick text-4xl md:text-5xl font-bold text-[#432818] mb-4 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#4A2C2A] mb-4 tracking-tight">
             Ready to <span className="text-[#FF7A00]">take control</span> of your cash?
           </h2>
-          <p className="font-quicksand text-xl text-[#8D6E63] mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-[#8D6E63] mb-8 max-w-2xl mx-auto">
             Join people who track simple. Start free now.
           </p>
           
           <Link
             href="/register"
-            className="font-quicksand inline-block border-2 border-[#FF7A00] bg-[#FF7A00] text-white font-semibold px-10 py-4 rounded-full hover:bg-[#E56E00] transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="inline-block bg-[#FF7A00] text-white font-semibold px-10 py-4 rounded-full hover:bg-[#E56E00] transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border border-[#4A2C2A]/30"
           >
             Try Now
           </Link>
         </div>
       </section>
 
-      <footer className="bg-[#F5EBE0] text-[#432818] pt-20 pb-8 px-4 sm:px-6 lg:px-8 border-t-2 border-[#FF7A00]">
+      <footer className="bg-[#F5EFE6] text-[#4A2C2A] pt-20 pb-8 px-4 sm:px-6 lg:px-8 border-t border-[#4A2C2A]/10">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-16">
             <div className="space-y-8">
-              <div className="inline-block px-3 py-1 border border-[#FF7A00]/30 rounded-full text-sm font-medium tracking-wider uppercase mb-4 text-[#8D6E63]">
+              <div className="inline-block px-3 py-1 border border-[#4A2C2A]/10 rounded-full text-sm font-medium tracking-wider uppercase mb-4 text-[#8D6E63]">
                 / get in touch /
               </div>
-              <h3 className="font-patrick text-4xl md:text-5xl font-bold leading-tight text-[#432818]">
+              <h3 className="text-4xl md:text-5xl font-bold leading-tight text-[#4A2C2A]">
                 We're here to help
               </h3>
               
               <div className="space-y-6 mt-8">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#FF7A00]/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm border border-[#4A2C2A]/10">
                     <Phone className="w-6 h-6 text-[#FF7A00]" />
                   </div>
                   <span className="text-xl font-medium text-[#8D6E63]">+1 234 567 890</span>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#FF7A00]/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm border border-[#4A2C2A]/10">
                     <Mail className="w-6 h-6 text-[#FF7A00]" />
                   </div>
                   <span className="text-xl font-medium text-[#8D6E63]">hello@ma6debt.com</span>
@@ -72,16 +72,16 @@ export const CTAFooterSection = () => {
               </div>
 
               <div className="flex gap-4 mt-8">
-                <a href="#" className="w-10 h-10 bg-[#F5EBE0] border border-[#FF7A00]/20 text-[#432818] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
+                <a href="#" className="w-10 h-10 bg-white border border-[#4A2C2A]/10 text-[#4A2C2A] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
                   <Facebook className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-[#F5EBE0] border border-[#FF7A00]/20 text-[#432818] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
+                <a href="#" className="w-10 h-10 bg-white border border-[#4A2C2A]/10 text-[#4A2C2A] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
                   <Twitter className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-[#F5EBE0] border border-[#FF7A00]/20 text-[#432818] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
+                <a href="#" className="w-10 h-10 bg-white border border-[#4A2C2A]/10 text-[#4A2C2A] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
                   <Instagram className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-[#F5EBE0] border border-[#FF7A00]/20 text-[#432818] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
+                <a href="#" className="w-10 h-10 bg-white border border-[#4A2C2A]/10 text-[#4A2C2A] rounded flex items-center justify-center hover:bg-[#FF7A00] hover:text-white transition-colors">
                   <Linkedin className="w-5 h-5" />
                 </a>
               </div>
@@ -90,13 +90,13 @@ export const CTAFooterSection = () => {
             <ContactForm />
           </div>
 
-          <div className="border-t border-[#FF7A00]/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm opacity-90 text-[#8D6E63]">
+          <div className="border-t border-[#4A2C2A]/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm opacity-90 text-[#8D6E63]">
             <p>© {new Date().getFullYear()} MA6 Debt. All rights reserved.</p>
             <div className="flex gap-8">
-              <Link href="/privacy" className="hover:text-[#432818] transition-colors">
+              <Link href="/privacy" className="hover:text-[#4A2C2A] transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="hover:text-[#432818] transition-colors">
+              <Link href="/terms" className="hover:text-[#4A2C2A] transition-colors">
                 Terms of Service
               </Link>
             </div>

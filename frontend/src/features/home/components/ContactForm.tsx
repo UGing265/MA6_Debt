@@ -11,48 +11,48 @@ export const ContactForm = () => {
   };
 
   return (
-    <div className="bg-[#FFFEF5] text-[#8B6914] rounded-2xl p-8 shadow-2xl max-w-md ml-auto w-full border-2 border-[#F0D25D]">
-      <h4 className="font-patrick text-2xl font-bold mb-6">Get in Touch</h4>
+    <div className="bg-white text-[#4A2C2A] rounded-2xl p-8 shadow-lg max-w-md ml-auto w-full border border-[#4A2C2A]/10">
+      <h4 className="text-2xl font-bold mb-6">Get in Touch</h4>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-[#8B6914] mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-[#8D6E63] mb-1">
             Name
           </label>
           <input
             type="text"
             id="name"
-            className="w-full px-4 py-3 rounded-lg border border-[#E8CB50] focus:border-[#F0D25D] focus:ring-2 focus:ring-[#F0D25D]/20 outline-none transition-all bg-[#FEF9E7] text-[#8B6914]"
+            className="w-full px-4 py-3 rounded-lg border border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-2 focus:ring-[#FF7A00]/20 outline-none transition-all bg-[#FDFCFB] text-[#4A2C2A]"
             placeholder="Your name"
           />
         </div>
         
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[#8B6914] mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-[#8D6E63] mb-1">
             Email
           </label>
           <input
             type="email"
             id="email"
-            className="w-full px-4 py-3 rounded-lg border border-[#E8CB50] focus:border-[#F0D25D] focus:ring-2 focus:ring-[#F0D25D]/20 outline-none transition-all bg-[#FEF9E7] text-[#8B6914]"
+            className="w-full px-4 py-3 rounded-lg border border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-2 focus:ring-[#FF7A00]/20 outline-none transition-all bg-[#FDFCFB] text-[#4A2C2A]"
             placeholder="your@email.com"
           />
         </div>
         
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-[#8B6914] mb-1">
+          <label htmlFor="message" className="block text-sm font-medium text-[#8D6E63] mb-1">
             Message
           </label>
           <textarea
             id="message"
             rows={4}
-            className="w-full px-4 py-3 rounded-lg border border-[#E8CB50] focus:border-[#F0D25D] focus:ring-2 focus:ring-[#F0D25D]/20 outline-none transition-all bg-[#FEF9E7] text-[#8B6914] resize-none"
+            className="w-full px-4 py-3 rounded-lg border border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-2 focus:ring-[#FF7A00]/20 outline-none transition-all bg-[#FDFCFB] text-[#4A2C2A] resize-none"
             placeholder="How can we help?"
           />
         </div>
 
         <button
           type="submit"
-          className="font-quicksand w-full border-2 border-[#F0D25D] bg-[#F0D25D] text-white font-bold py-4 rounded-lg hover:bg-[#E8CB50] transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-[#FF7A00] text-white font-bold py-4 rounded-lg hover:bg-[#E56E00] transition-colors flex items-center justify-center gap-2 shadow-sm border border-[#4A2C2A]/30"
         >
           Submit <Send className="w-4 h-4" />
         </button>
