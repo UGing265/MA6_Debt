@@ -1,3 +1,4 @@
+using Application.Common.Behaviors;
 using Application.Common.Interfaces;
 using Application.Common.Security;
 using Application.Features.Auth.Login;
@@ -15,7 +16,10 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+        services.AddMediatR(cfg => {
+            cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
         services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 
         return services;

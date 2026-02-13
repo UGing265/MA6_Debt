@@ -15,9 +15,21 @@ namespace API
         public static void Main(string[] args)
         {
             JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            //DotNetEnv.Env.Load(); if not using docker
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.AddCors(options =>
+            {
+                var allowedOrigins = builder.Configuration["Cors:Origins"];
+                options.AddPolicy("AllowReactApp",
+                    builder => builder
+                        .WithOrigins(allowedOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new[] { "http://localhost:3000" })
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -99,6 +111,8 @@ namespace API
                 app.MapOpenApi();
                 app.MapScalarApiReference();
             }
+
+            app.UseCors("AllowReactApp");
 
             app.UseHttpsRedirection();
 
