@@ -23,16 +23,16 @@ const features = [
 
 export const ValuePropsSection = () => {
   return (
-    <div id="features" className="bg-[#FFFBEB] py-24 sm:py-32">
+    <div id="features" className="bg-[#F5EBE0] py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="font-patrick text-base font-semibold leading-7 text-[#8B6914]">
+          <h2 className="font-patrick text-base font-semibold leading-7 text-[#432818]">
             Why MA6 Debt
           </h2>
-          <p className="font-patrick mt-2 text-3xl font-bold tracking-tight text-[#8B6914] sm:text-4xl">
+          <p className="font-patrick mt-2 text-3xl font-bold tracking-tight text-[#432818] sm:text-4xl">
             Keep your cash clear and simple
           </p>
-          <p className="font-quicksand mt-6 text-lg leading-8 text-[#9B8C4F]">
+          <p className="font-quicksand mt-6 text-lg leading-8 text-[#8D6E63]">
             Built for speed. Built for clarity. Built for your daily money.
           </p>
         </div>
@@ -41,18 +41,18 @@ export const ValuePropsSection = () => {
             {features.map((feature) => (
               <div
                 key={feature.name}
-                className="flex flex-col rounded-3xl border-2 border-[#F0D25D] bg-[#FFFEF5] p-8 shadow-sm transition-all hover:shadow-lg hover:border-[#E8CB50]"
+                className="flex flex-col rounded-3xl border-2 border-[#FF7A00] bg-[#F5EBE0] p-8 shadow-sm transition-all hover:shadow-lg hover:border-[#E56E00]"
               >
-                <dt className="font-patrick flex items-center gap-x-3 text-base font-semibold leading-7 text-[#8B6914]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FFFBEB] ring-1 ring-[#F0D25D]/50">
+                <dt className="font-patrick flex items-center gap-x-3 text-base font-semibold leading-7 text-[#432818]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5EBE0] ring-1 ring-[#FF7A00]/50">
                     <feature.icon
-                      className="h-6 w-6 text-[#F0D25D]"
+                      className="h-6 w-6 text-[#FF7A00]"
                       aria-hidden="true"
                     />
                   </div>
                   {feature.name}
                 </dt>
-                <dd className="font-quicksand mt-4 flex flex-auto flex-col text-base leading-7 text-[#9B8C4F]">
+                <dd className="font-quicksand mt-4 flex flex-auto flex-col text-base leading-7 text-[#8D6E63]">
                   <p className="flex-auto">{feature.description}</p>
                 </dd>
               </div>

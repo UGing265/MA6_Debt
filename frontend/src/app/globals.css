@@ -37,20 +37,20 @@
     --sidebar-ring: oklch(0.708 0 0);
 
     /* Custom Theme Colors */
-    --paper-cream: #FFFBEB;
-    --note-yellow: #F0D25D;
+    --paper-cream: #F5EBE0;
+    --note-yellow: #FF7A00;
     --ink-black: #1F2937;
     --pencil-gray: #4B5563;
 
     /* 
      * Brand Colors - Yellow First Token Map
      * -------------------------------------
-     * Primary Yellow: #F0D25D (Matches note-yellow)
+     * Primary Yellow: #FF7A00 (Matches note-yellow)
      * Usage: Primary buttons, highlights, active states.
      * Contrast Rule: ALWAYS use --brand-yellow-foreground (dark) for text on yellow.
      *                NEVER use white text on yellow (fails WCAG).
      */
-    --brand-yellow: #F0D25D;
+    --brand-yellow: #FF7A00;
     --brand-yellow-foreground: #1F2937;
 
     /* 
@@ -122,9 +122,9 @@
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
-    --paper-cream: #FFFBEB;
-    --note-yellow: #F0D25D;
+     --sidebar-ring: oklch(0.439 0 0);
+    --paper-cream: #F5EBE0;
+    --note-yellow: #FF7A00;
     --ink-black: #1F2937;
 }
 
