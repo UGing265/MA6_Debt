@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Users, BarChart3, Wallet } from "lucide-react";
+import { ArrowRight, Wallet, ArrowRightLeft, RefreshCw, Lock } from "lucide-react";
+import { SetupUI, TransactionUI, ProcessingUI, ReviewUI } from "./workflow-mocks";
 
 const ExpenseTrackerUI = () => (
   <div className="w-full h-full p-6 flex flex-col gap-4 bg-white">
@@ -140,32 +140,32 @@ const ReportsUI = () => (
 
 const features = [
   {
-    title: "Track your spending",
-    description: "See where your money goes",
-    details: "Log each expense in seconds. Put them into groups. Keep your wallet clean.",
+    title: "Set Up Wallets",
+    description: "Create parent and sub-wallets, add debt partners",
+    details: "Easily configure your wallet hierarchy and invite partners to start tracking shared expenses.",
     icon: Wallet,
-    ui: ExpenseTrackerUI,
+    ui: SetupUI,
   },
   {
-    title: "Plan your budget",
-    description: "Set limits and stick to them",
-    details: "Make monthly budgets for each group. Get alerts when you're close to your limit.",
-    icon: Calendar,
-    ui: BudgetPlannerUI,
+    title: "Record Transactions",
+    description: "Quick deduct with debt tagging and notes",
+    details: "Fast transaction entry with smart tagging features to keep your records accurate and detailed.",
+    icon: ArrowRightLeft,
+    ui: TransactionUI,
   },
   {
-    title: "Manage debt",
-    description: "Track who you owe and who owes you",
-    details: "Keep a clear list of all debts. Send reminders. Settle up easily.",
-    icon: Users,
-    ui: DebtManagerUI,
+    title: "Auto-Processing",
+    description: "Automatic calculation and balance updates",
+    details: "Real-time balance adjustments and debt calculations happen instantly in the background.",
+    icon: RefreshCw,
+    ui: ProcessingUI,
   },
   {
-    title: "View reports",
-    description: "Simple charts show your progress",
-    details: "See your money in clear charts. Know your habits at a glance.",
-    icon: BarChart3,
-    ui: ReportsUI,
+    title: "Review & Lock",
+    description: "Lock data after 30 days, review history",
+    details: "Monthly data locking ensures historical accuracy and provides a stable audit trail.",
+    icon: Lock,
+    ui: ReviewUI,
   },
 ];
 
@@ -182,63 +182,53 @@ export const WorkflowSection = () => {
           </p>
         </div>
 
-        <div className="flex flex-col gap-32 relative">
-          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px border-l border-dashed border-[#FF7A00]/20 -translate-x-1/2 z-0" />
-
-          {features.map((feature, index) => {
-            const isEven = index % 2 === 0;
-            const Icon = feature.icon;
-
-            return (
-              <div key={index} className="relative group z-10">
-                <div
-                  className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-24 ${
-                    !isEven ? "lg:flex-row-reverse" : ""
-                  }`}
-                >
-                  <div className={`flex-1 text-center ${isEven ? 'lg:text-right' : 'lg:text-left'} space-y-6 max-w-md`}>
-                    <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-white text-[#FF7A00] mb-2 lg:mb-0 shadow-sm border border-[#FF7A00]/10 ${isEven ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
-                      <Icon size={28} />
-                    </div>
-                    
-                    <h3 className="text-3xl font-bold text-[#4A2C2A]">
-                      {feature.title}
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      <p className="text-xl font-semibold text-[#8D6E63]">
-                        {feature.description}
-                      </p>
-                      <p className="text-base text-[#8D6E63]/80 leading-relaxed">
-                        {feature.details}
-                      </p>
-                    </div>
-
-                    <Button 
-                      className="bg-[#FF7A00] hover:bg-[#E56E00] text-white rounded-full px-8 py-6 text-lg shadow-sm hover:shadow-md transition-all mt-4 border border-[#4A2C2A]/20"
-                    >
-                      Try Now
-                    </Button>
-                  </div>
-
-                  <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-[#FF7A00] rounded-full border-4 border-white shadow-sm z-20" />
-
-                  <div className="flex-1 w-full max-w-md lg:max-w-lg perspective-1000">
-                    <div className={`relative bg-white rounded-2xl border border-[#4A2C2A]/10 shadow-lg p-2 aspect-[4/3] overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl hover:-rotate-1 ${!isEven ? 'hover:rotate-1' : ''}`}>
-                      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#FF7A00] to-[#E56E00]" />
-                      
-                      <div className="w-full h-full bg-white rounded-xl overflow-hidden relative">
-                        <feature.ui />
+        <div className="relative">
+          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-[#FF7A00]/30 to-transparent" />
+          
+          <div className="flex flex-col gap-24 lg:gap-32">
+            {features.map((feature, index) => {
+              const isEven = index % 2 === 0;
+              const Icon = feature.icon;
+              
+              return (
+                <div key={index} className="relative group">
+                  <div className={`flex flex-col lg:flex-row items-center gap-8 lg:gap-0 ${!isEven ? "lg:flex-row-reverse" : ""}`}>
+                    <div className={`flex-1 w-full lg:w-1/2 px-4 lg:px-12 ${isEven ? 'lg:text-right' : 'lg:text-left'}`}>
+                      <div className="flex flex-col gap-2">
+                        <span className="text-sm font-bold text-[#FF7A00] tracking-wider uppercase">Step 0{index + 1}</span>
+                        <h3 className="text-3xl font-bold text-[#4A2C2A]">{feature.title}</h3>
+                        <p className="text-lg font-medium text-[#8D6E63]">{feature.description}</p>
+                        <p className="text-base text-[#8D6E63]/80 leading-relaxed">{feature.details}</p>
                       </div>
+                    </div>
+                    
+                    <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                      <div className="w-16 h-16 rounded-full bg-[#FDFCFB] border-4 border-white shadow-lg flex items-center justify-center text-[#FF7A00] group-hover:scale-110 transition-transform duration-300">
+                        <Icon size={28} strokeWidth={2} />
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 w-full lg:w-1/2 px-4 lg:px-12">
+                      <div className={`relative bg-white rounded-2xl border border-[#4A2C2A]/10 shadow-lg p-2 aspect-[4/3] overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl ${!isEven ? 'hover:rotate-1' : 'hover:-rotate-1'}`}>
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#FF7A00] to-[#E56E00]" />
+                        
+                        <div className="w-full h-full bg-white rounded-xl overflow-hidden relative">
+                          <feature.ui />
+                        </div>
 
-                      <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#FF7A00]/5 rounded-full blur-3xl pointer-events-none" />
-                      <div className="absolute -top-8 -left-8 w-32 h-32 bg-[#4A2C2A]/5 rounded-full blur-3xl pointer-events-none" />
+                        <div className="lg:hidden absolute top-4 right-4 bg-[#FF7A00] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm z-10">
+                          Step 0{index + 1}
+                        </div>
+
+                        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#FF7A00]/5 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -top-8 -left-8 w-32 h-32 bg-[#4A2C2A]/5 rounded-full blur-3xl pointer-events-none" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
