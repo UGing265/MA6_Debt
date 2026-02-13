@@ -29,3 +29,7 @@ Thumbs.db
 #AI agent
 .agent/
 .sisyphus/
+
+
+#other
+img/

@@ -450,6 +450,43 @@ Components use the `sx`/`className` pattern:
 
 ---
 
+---
+
+## Homepage Redesign Implementation (Feb 2026)
+
+### Summary
+Completed visual sync of homepage to match reference screenshot style while maintaining brand consistency with login page.
+
+### Changes Made
+1. **HeroSection.tsx**: Added rounded top nav strip with center links + right CTA pair, two-column hero layout
+2. **ValuePropsSection.tsx**: Updated to card-based design with login palette
+3. **UseCaseCardsSection.tsx**: Updated card styling and colors
+4. **WorkflowSection.tsx**: Updated to card-based workflow steps
+5. **CTAFooterSection.tsx**: Updated CTA block with login palette
+6. **homepage.spec.ts**: Updated test to match new English copy
+
+### Color Palette Applied
+- Page Background: `#FFFBEB` (login-aligned)
+- Card Background: `#FFFEF5` (login-aligned)
+- Primary Button: `#F0D25D` with hover `#E8CB50`
+- Border: `#E8CB50`
+- Heading: `#8B6914`
+- Body: `#9B8C4F`
+
+### Key Features
+- All copy converted to English
+- Consistent pill/rounded button styling
+- Generous section spacing (py-24 to py-32)
+- Card-based content with hover effects
+- Mobile-responsive (no overflow on 390px)
+- CTA navigation to `/login` preserved
+
+### Testing
+- Playwright smoke tests updated and passing
+- Visual regression: desktop + mobile screenshots captured
+
+---
+
 ## ✅ Checklist for Future Developers
 
 When extending this frontend:

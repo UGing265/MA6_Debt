@@ -115,3 +115,34 @@
 
 - [ ] **5. Documentation**
     - Create `docs/done/Frontend_Design.md`.
+
+---
+
+## Homepage Redesign Plan (Feb 2026)
+
+### Objective
+Sync homepage visual language to match reference screenshot style (Noted-like) while maintaining login palette consistency.
+
+### Visual Targets
+- Rounded top nav strip with center links + right dual CTAs (filled + outlined pills)
+- Two-column hero: left text + right visual block
+- Warm cream backgrounds (#FFFBEB, #FFFEF5)
+- Generous whitespace between sections
+- Card-based content blocks with subtle borders
+- Pill buttons with yellow/orange (#F0D25D / #E8CB50)
+
+### Color Palette (Login-Aligned)
+| Role | Hex | Usage |
+|------|-----|-------|
+| Page Background | #FFFBEB | All sections |
+| Card Background | #FFFEF5 | Content cards |
+| Primary Button | #F0D25D | CTAs |
+| Border | #E8CB50 | Card borders |
+| Heading | #8B6914 | H1-H6 text |
+| Body | #9B8C4F | Paragraph text |
+
+### Implementation Scope
+- Update 5 section components in `frontend/src/features/home/components/`
+- Convert all homepage copy to English
+- Ensure CTA navigation to `/login` works
+- Update Playwright smoke tests if needed

@@ -23,29 +23,26 @@ import { Input } from "@/components/ui/input";
 
 const PasswordRequirements = ({ password }: { password: string }) => {
   const requirements = [
-    { label: "At least 6 characters", met: password.length >= 6 },
-    { label: "At least one uppercase letter", met: /[A-Z]/.test(password) },
-    { label: "At least one lowercase letter", met: /[a-z]/.test(password) },
-    { label: "At least one number", met: /[0-9]/.test(password) },
+    { label: "6+ chars", met: password.length >= 6 },
+    { label: "Uppercase", met: /[A-Z]/.test(password) },
+    { label: "Lowercase", met: /[a-z]/.test(password) },
+    { label: "Number", met: /[0-9]/.test(password) },
   ];
 
   return (
-    <div className="space-y-2 mt-2 text-sm animate-fade-in">
-      <p className="font-medium text-gray-700">Password Requirements:</p>
-      <ul className="space-y-1">
-        {requirements.map((req, index) => (
-          <li key={index} className="flex items-center gap-2">
-            {req.met ? (
-              <Check className="w-4 h-4 text-green-500" />
-            ) : (
-              <X className="w-4 h-4 text-red-500" />
-            )}
-            <span className={req.met ? "text-green-600" : "text-gray-500"}>
-              {req.label}
-            </span>
-          </li>
-        ))}
-      </ul>
+    <div className="mt-2 text-sm animate-fade-in grid grid-cols-2 gap-2">
+      {requirements.map((req, index) => (
+        <div key={index} className="flex items-center gap-1.5">
+          {req.met ? (
+            <Check className="w-4 h-4 text-green-600 shrink-0" />
+          ) : (
+            <X className="w-4 h-4 text-red-500 shrink-0" />
+          )}
+          <span className={req.met ? "text-green-600 font-bold" : "text-red-500 font-medium"}>
+            {req.label}
+          </span>
+        </div>
+      ))}
     </div>
   );
 };
@@ -105,19 +102,19 @@ export const RegisterForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 animate-fade-in">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 animate-fade-in w-full">
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Username</FormLabel>
-              <FormControl>
+             <FormItem>
+               <FormLabel className="text-gray-700">Username</FormLabel>
+               <FormControl>
                  <Input 
                    placeholder="Choose a username" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -128,14 +125,14 @@ export const RegisterForm = () => {
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Name</FormLabel>
-              <FormControl>
+             <FormItem>
+               <FormLabel className="text-gray-700">Name</FormLabel>
+               <FormControl>
                  <Input 
                    placeholder="Enter your full name" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -146,15 +143,15 @@ export const RegisterForm = () => {
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Email (Optional)</FormLabel>
-              <FormControl>
+             <FormItem>
+               <FormLabel className="text-gray-700">Email (Optional)</FormLabel>
+               <FormControl>
                  <Input 
                    type="email" 
                    placeholder="Enter your email" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[`#FEF9E7`] border-[`#E8CB50`] focus:border-[`#F0D25D`] focus:ring-[`#F0D25D`]" 
+                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -165,15 +162,15 @@ export const RegisterForm = () => {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Password</FormLabel>
-              <FormControl>
+             <FormItem>
+               <FormLabel className="text-gray-700">Password</FormLabel>
+               <FormControl>
                  <Input 
                    type="password" 
                    placeholder="Create a password" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FEF9E7] border-[#E8CB50] focus:border-[#F0D25D] focus:ring-[#F0D25D]" 
+                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -181,16 +178,17 @@ export const RegisterForm = () => {
             </FormItem>
           )}
         />
+        
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-[#F0D25D] hover:bg-[#E8CB50] text-white font-bold py-2 px-4 rounded shadow-md transition-colors duration-200"
+          className="w-full bg-[#FF7A00] hover:bg-[#E56E00] text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors duration-200 border border-[#4A2C2A]/20"
         >
           {isLoading ? (
-            <div className="flex items-center justify-center">
+            <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Creating Account...
-            </div>
+            </>
           ) : (
             "Sign Up"
           )}
