@@ -11,8 +11,6 @@ namespace Domain.Entities
 
         public decimal InitialBalance { get; set; }
 
-        public string Type { get; set; } = string.Empty; // Receivable or Payable
-
         public bool IsDeleted { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

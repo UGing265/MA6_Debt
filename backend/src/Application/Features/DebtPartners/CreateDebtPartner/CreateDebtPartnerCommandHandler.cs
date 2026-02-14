@@ -20,7 +20,6 @@ namespace Application.Features.DebtPartners.CreateDebtPartner
                 UserId = request.UserId,
                 Name = request.Name,
                 InitialBalance = request.InitialBalance,
-                Type = request.Type,
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow
             };
@@ -32,8 +31,7 @@ namespace Application.Features.DebtPartners.CreateDebtPartner
             {
                 Id = debtPartner.Id,
                 Name = debtPartner.Name,
-                InitialBalance = debtPartner.InitialBalance,
-                Type = debtPartner.Type
+                InitialBalance = debtPartner.InitialBalance
             };
         }
     }

@@ -8,9 +8,18 @@
 
 ## Components Implemented
 
+### Architecture Change: Signed Balance Model (SRS v1.1)
+**BREAKING CHANGE**: Removed `Type` field. Debt direction now determined by `InitialBalance` sign:
+- Positive (`> 0`): Partner owes user (receivable)
+- Negative (`< 0`): User owes partner (payable)
+- Zero: Neutral
+
+**Migration**: `20260214092505_DebtPartnersSignedInitialBalanceDropType` converts existing data and drops Type column.
+
 ### 1. DebtPartner DTO
 - **File**: `backend/src/Application/Features/DebtPartners/DebtPartnerDto.cs`
 - Response model used by Debt Partner APIs.
+- **Note**: No longer includes `Type` property.
 
 ### 2. Create Debt Partner
 - **Files**:
@@ -53,9 +62,24 @@
 
 ---
 
+## API Contract Changes
+
+### Request/Response Changes
+- **Removed**: `Type` field from all requests and responses
+- **Request body** now only requires: `name`, `initialBalance`
+- **Response body** returns: `id`, `name`, `initialBalance`
+- **Breaking change**: Clients expecting `type` in response will need updates
+
+### Validation Changes
+- `Type` validation removed
+- `InitialBalance` accepts any decimal value (positive, negative, or zero)
+- `Name` remains required
+
+---
+
 ## Verification (Available Endpoints)
-- `POST /api/debtpartners`
-- `GET /api/debtpartners`
-- `GET /api/debtpartners/{id}`
-- `PUT /api/debtpartners/{id}`
+- `POST /api/debtpartners` - Accepts signed InitialBalance
+- `GET /api/debtpartners` - Returns partners without Type field
+- `GET /api/debtpartners/{id}` - Returns partner without Type field
+- `PUT /api/debtpartners/{id}` - Accepts signed InitialBalance
 - `DELETE /api/debtpartners/{id}` (soft delete)

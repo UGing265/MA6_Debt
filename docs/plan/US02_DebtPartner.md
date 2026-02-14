@@ -5,9 +5,14 @@ This user story focuses on managing Debt Partners, which are entities (people or
 
 ### Requirements:
 - CRUD operations for Debt Partners.
-- Fields: `Name`, `InitialBalance`, `Type` (Receivable/Payable).
+- Fields: `Name`, `InitialBalance` (signed decimal).
 - Soft delete support.
 - `InitialBalance` is the starting point for debt calculation.
+
+### Signed Balance Semantics (SRS v1.1):
+- `InitialBalance > 0`: Partner owes user (receivable)
+- `InitialBalance < 0`: User owes partner (payable)
+- `InitialBalance = 0`: Neutral
 
 ## 2. Implementation Steps
 
@@ -22,7 +27,7 @@ This user story focuses on managing Debt Partners, which are entities (people or
     *   `GetDebtPartnersQuery`: Returns a list of debt partners for the current user.
     *   `GetDebtPartnerByIdQuery`: Returns details of a specific debt partner.
 4.  **Validators**:
-    *   `CreateDebtPartnerCommandValidator`: Ensures `Name` is not empty and `Type` is valid.
+    *   `CreateDebtPartnerCommandValidator`: Ensures `Name` is not empty.
     *   `UpdateDebtPartnerCommandValidator`: Similar to create validator.
 
 ### API Layer (`backend/src/API`)

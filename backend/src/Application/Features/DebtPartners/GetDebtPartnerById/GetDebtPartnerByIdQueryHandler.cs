@@ -23,8 +23,7 @@ namespace Application.Features.DebtPartners.GetDebtPartnerById
                 {
                     Id = dp.Id,
                     Name = dp.Name,
-                    InitialBalance = dp.InitialBalance,
-                    Type = dp.Type
+                    InitialBalance = dp.InitialBalance
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 

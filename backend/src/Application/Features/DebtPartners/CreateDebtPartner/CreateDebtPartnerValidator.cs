@@ -11,11 +11,6 @@ namespace Application.Features.DebtPartners.CreateDebtPartner
 
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name is required");
-
-            RuleFor(x => x.Type)
-                .NotEmpty().WithMessage("Type is required")
-                .Must(t => t == "Receivable" || t == "Payable")
-                .WithMessage("Type must be either 'Receivable' or 'Payable'");
         }
     }
 }
