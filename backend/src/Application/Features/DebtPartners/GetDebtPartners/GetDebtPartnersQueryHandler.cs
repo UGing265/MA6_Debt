@@ -22,7 +22,7 @@ namespace Application.Features.DebtPartners.GetDebtPartners
                 {
                     Id = dp.Id,
                     Name = dp.Name,
-                    InitialBalance = dp.InitialBalance
+                    Balance = dp.Balance
                 })
                 .OrderBy(dp => dp.Name)
                 .ToListAsync(cancellationToken);

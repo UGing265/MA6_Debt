@@ -25,7 +25,7 @@ namespace Application.Features.DebtPartners.UpdateDebtPartner
             }
 
             debtPartner.Name = request.Name;
-            debtPartner.InitialBalance = request.InitialBalance;
+            debtPartner.Balance = request.Balance;
 
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -33,7 +33,7 @@ namespace Application.Features.DebtPartners.UpdateDebtPartner
             {
                 Id = debtPartner.Id,
                 Name = debtPartner.Name,
-                InitialBalance = debtPartner.InitialBalance
+                Balance = debtPartner.Balance
             };
         }
     }

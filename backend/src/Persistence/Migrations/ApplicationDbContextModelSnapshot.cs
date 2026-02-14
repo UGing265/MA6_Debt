@@ -26,157 +26,202 @@ namespace Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("InitialBalance")
-                        .HasColumnType("numeric");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_debt_partners");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_debt_partners_user_id");
 
-                    b.ToTable("DebtPartners");
+                    b.ToTable("debt_partners", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("note");
 
                     b.Property<Guid?>("PartnerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("partner_id");
 
                     b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("transaction_date");
 
                     b.Property<Guid>("WalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_transactions");
 
-                    b.HasIndex("PartnerId");
+                    b.HasIndex("PartnerId")
+                        .HasDatabaseName("ix_transactions_partner_id");
 
-                    b.HasIndex("WalletId");
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_transactions_wallet_id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("transactions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Transfer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid>("FromWalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_wallet_id");
 
                     b.Property<Guid>("ToWalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("to_wallet_id");
 
                     b.Property<DateTime>("TransferDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("transfer_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_transfers");
 
-                    b.HasIndex("FromWalletId");
+                    b.HasIndex("FromWalletId")
+                        .HasDatabaseName("ix_transfers_from_wallet_id");
 
-                    b.HasIndex("ToWalletId");
+                    b.HasIndex("ToWalletId")
+                        .HasDatabaseName("ix_transfers_to_wallet_id");
 
-                    b.ToTable("Transfers");
+                    b.ToTable("transfers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("DefaultPartnerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("default_partner_id");
 
                     b.Property<Guid?>("DefaultWalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("default_wallet_id");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("password_hash");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("username");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_users");
 
-                    b.ToTable("Users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Wallet", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<Guid?>("ParentWalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_wallet_id");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_wallets");
 
-                    b.HasIndex("ParentWalletId");
+                    b.HasIndex("ParentWalletId")
+                        .HasDatabaseName("ix_wallets_parent_wallet_id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_wallets_user_id");
 
-                    b.ToTable("Wallets");
+                    b.ToTable("wallets", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.DebtPartner", b =>
@@ -185,7 +230,8 @@ namespace Persistence.Migrations
                         .WithMany("DebtPartners")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_debt_partners_users_user_id");
 
                     b.Navigation("User");
                 });
@@ -195,13 +241,15 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.DebtPartner", "Partner")
                         .WithMany("Transactions")
                         .HasForeignKey("PartnerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_transactions_debt_partners_partner_id");
 
                     b.HasOne("Domain.Entities.Wallet", "Wallet")
                         .WithMany("Transactions")
                         .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_transactions_wallets_wallet_id");
 
                     b.Navigation("Partner");
 
@@ -214,13 +262,15 @@ namespace Persistence.Migrations
                         .WithMany("SentTransfers")
                         .HasForeignKey("FromWalletId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_transfers_wallets_from_wallet_id");
 
                     b.HasOne("Domain.Entities.Wallet", "ToWallet")
                         .WithMany("ReceivedTransfers")
                         .HasForeignKey("ToWalletId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_transfers_wallets_to_wallet_id");
 
                     b.Navigation("FromWallet");
 
@@ -232,13 +282,15 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Wallet", "ParentWallet")
                         .WithMany("ChildWallets")
                         .HasForeignKey("ParentWalletId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_wallets_wallets_parent_wallet_id");
 
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Wallets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_wallets_users_user_id");
 
                     b.Navigation("ParentWallet");
 
