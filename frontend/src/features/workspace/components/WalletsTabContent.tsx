@@ -4,6 +4,14 @@ import { Suspense, useState } from "react";
 import { Plus, Loader2, AlertCircle, Wallet as WalletIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { WalletList } from "@/features/wallet/components/WalletList";
 import { WalletForm } from "@/features/wallet/components/WalletForm";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
@@ -20,11 +28,11 @@ import type { Wallet } from "@/features/wallet/types/wallet";
  * - Loading states and error handling
  */
 export function WalletsTabContent() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null);
 
   const handleCreateSuccess = () => {
-    setShowCreateForm(false);
+    setIsCreateDialogOpen(false);
   };
 
   const handleEditSuccess = () => {
@@ -33,11 +41,7 @@ export function WalletsTabContent() {
 
   const handleEdit = (wallet: Wallet) => {
     setEditingWallet(wallet);
-    setShowCreateForm(false);
-  };
-
-  const handleCancelCreate = () => {
-    setShowCreateForm(false);
+    setIsCreateDialogOpen(false);
   };
 
   const handleCancelEdit = () => {
@@ -51,20 +55,20 @@ export function WalletsTabContent() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl text-gray-900">Wallets</CardTitle>
+              <CardTitle className="text-2xl text-gray-900 font-patrick lowercase">wallets</CardTitle>
               <CardDescription className="mt-1">
-                Manage your cash partitions and track balances
+                manage your cash partitions and track balances
               </CardDescription>
             </div>
             <Button
               onClick={() => {
-                setShowCreateForm(true);
+                setIsCreateDialogOpen(true);
                 setEditingWallet(null);
               }}
               className="bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1F2937] font-bold border border-[#1F2937]/20"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Create Wallet
+              create wallet
             </Button>
           </div>
         </CardHeader>
@@ -82,60 +86,69 @@ export function WalletsTabContent() {
           >
             <WalletListContent
               onEdit={handleEdit}
-              onCreateClick={() => setShowCreateForm(true)}
+              onCreateClick={() => setIsCreateDialogOpen(true)}
             />
           </Suspense>
         </CardContent>
       </Card>
 
-      {/* Create Form */}
-      {showCreateForm && (
-        <Card className="border-[#1F2937]/10 bg-[#FFFBEB]">
-          <CardHeader>
-            <CardTitle className="text-xl text-[#1F2937]">Create New Wallet</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="w-8 h-8 text-[#FCD34D] animate-spin" />
-                </div>
-              }
-            >
-              <WalletFormWrapper
-                mode="create"
-                onSuccess={handleCreateSuccess}
-                onCancel={handleCancelCreate}
-              />
-            </Suspense>
-          </CardContent>
-        </Card>
-      )}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogClose onClose={() => setIsCreateDialogOpen(false)} />
+          <DialogHeader>
+            <DialogTitle className="font-patrick lowercase">create new wallet</DialogTitle>
+            <DialogDescription>
+              create a wallet and optionally assign it under a parent wallet.
+            </DialogDescription>
+          </DialogHeader>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="w-8 h-8 text-[#FCD34D] animate-spin" />
+              </div>
+            }
+          >
+            <WalletFormWrapper
+              mode="create"
+              onSuccess={handleCreateSuccess}
+              onCancel={() => setIsCreateDialogOpen(false)}
+            />
+          </Suspense>
+        </DialogContent>
+      </Dialog>
 
-      {/* Edit Form */}
-      {editingWallet && (
-        <Card className="border-[#1F2937]/10 bg-[#FFFBEB]">
-          <CardHeader>
-            <CardTitle className="text-xl text-[#1F2937]">Edit Wallet</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="w-8 h-8 text-[#FCD34D] animate-spin" />
-                </div>
-              }
-            >
-              <WalletFormWrapper
-                mode="edit"
-                wallet={editingWallet}
-                onSuccess={handleEditSuccess}
-                onCancel={handleCancelEdit}
-              />
-            </Suspense>
-          </CardContent>
-        </Card>
-      )}
+      <Dialog
+        open={Boolean(editingWallet)}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelEdit();
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogClose onClose={handleCancelEdit} />
+          <DialogHeader>
+            <DialogTitle className="font-patrick lowercase">edit wallet</DialogTitle>
+            <DialogDescription>
+              update wallet name or description.
+            </DialogDescription>
+          </DialogHeader>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="w-8 h-8 text-[#FCD34D] animate-spin" />
+              </div>
+            }
+          >
+            <WalletFormWrapper
+              mode="edit"
+              wallet={editingWallet ?? undefined}
+              onSuccess={handleEditSuccess}
+              onCancel={handleCancelEdit}
+            />
+          </Suspense>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -17,34 +17,28 @@ function WorkspaceContent() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="sticky top-0 z-50 bg-[#FFFBEB] border-b border-[#1F2937]/10 mb-6">
-        <div className="flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FCD34D] text-[#1F2937] font-bold shadow-sm border border-[#1F2937]/20">
-              M
-            </div>
-            <span className="font-bold text-xl text-[#1F2937]" style={{ fontFamily: 'var(--font-patrick)' }}>
-              MA6 Debt
-            </span>
+    <div className="max-w-6xl mx-auto font-quicksand">
+      <nav className="mx-auto mb-8 flex max-w-6xl items-center justify-between rounded-full border border-[#1F2937]/10 bg-[#FFFDF5]/90 px-6 py-3 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FCD34D] text-[#1F2937] font-bold shadow-sm border border-[#1F2937]/20">
+            M
           </div>
-          <div className="text-sm text-gray-600">
-            Workspace
-          </div>
+          <span className="font-bold font-patrick text-[#1F2937] text-xl">MA6 Debt</span>
         </div>
-      </div>
+        <div className="text-sm font-medium text-[#4B5563] lowercase">workspace</div>
+      </nav>
 
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'var(--font-patrick)' }}>
-          Workspace
+        <h1 className="text-4xl font-bold text-[#1F2937] mb-2 font-patrick lowercase">
+          workspace
         </h1>
-        <p className="text-gray-600">Manage your wallets and debt partners</p>
+        <p className="text-[#4B5563]">manage your wallets and debt partners</p>
       </div>
 
       <Tabs value={tab} onValueChange={handleTabChange}>
-        <TabsList>
-          <TabsTrigger value="wallets">Wallets</TabsTrigger>
-          <TabsTrigger value="partners">Debt Partners</TabsTrigger>
+        <TabsList className="font-quicksand">
+          <TabsTrigger value="wallets" className="lowercase">wallets</TabsTrigger>
+          <TabsTrigger value="partners" className="lowercase">debt partners</TabsTrigger>
         </TabsList>
 
         <TabsContent value="wallets">

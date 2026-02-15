@@ -58,9 +58,9 @@ export function DebtPartnersTabContent() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl text-gray-900">Debt Partners</CardTitle>
+              <CardTitle className="text-2xl text-gray-900 font-patrick lowercase">debt partners</CardTitle>
               <CardDescription className="mt-1">
-                Manage your creditors and debt relationships
+                manage your creditors and debt relationships
               </CardDescription>
             </div>
             <Button

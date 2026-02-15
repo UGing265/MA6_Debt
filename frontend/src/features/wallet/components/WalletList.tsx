@@ -1,8 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Trash2, Edit2, Loader2 } from "lucide-react";
+import { Trash2, Edit2, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useDeleteWallet } from "../hooks/useWallets";
 import type { Wallet } from "../types/wallet";
 
@@ -102,15 +110,13 @@ export function buildWalletTree(wallets: Wallet[]): WalletTreeNode[] {
 export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   const deleteMutation = useDeleteWallet();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [walletToDelete, setWalletToDelete] = useState<Wallet | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this wallet?")) {
-      return;
-    }
-
-    setDeletingId(id);
+  const handleDelete = async (wallet: Wallet) => {
+    setDeletingId(wallet.id);
     try {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync(wallet.id);
+      setWalletToDelete(null);
     } finally {
       setDeletingId(null);
     }
@@ -140,7 +146,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
     return (
       <div key={node.wallet.id}>
         <div
-          className={`p-4 border border-[#1F2937]/10 rounded-lg shadow-sm bg-[#FFFBEB] hover:shadow-md transition-shadow ${isChild ? 'mt-2' : 'mt-4'}`}
+          className={`p-4 border border-[#1F2937]/10 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow ${isChild ? 'mt-2' : 'mt-4'}`}
           style={{ marginLeft: `${indent}px` }}
         >
           <div className="flex justify-between items-start">
@@ -180,7 +186,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
               <Button
                 variant="destructive"
                 size="icon-sm"
-                onClick={() => handleDelete(node.wallet.id)}
+                onClick={() => setWalletToDelete(node.wallet)}
                 disabled={deletingId === node.wallet.id}
               >
                 {deletingId === node.wallet.id ? (
@@ -200,6 +206,54 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   return (
     <div className="space-y-0">
       {tree.map((node) => renderTreeNode(node))}
+
+      <Dialog
+        open={Boolean(walletToDelete)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setWalletToDelete(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogClose onClose={() => setWalletToDelete(null)} />
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <DialogTitle className="font-patrick lowercase text-center">delete wallet</DialogTitle>
+            <DialogDescription className="text-center">
+              this action cannot be undone. wallet <span className="font-semibold text-[#1F2937]">{walletToDelete?.name}</span> will be removed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex gap-3 justify-end pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setWalletToDelete(null)}
+              disabled={Boolean(deletingId)}
+            >
+              cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => walletToDelete && handleDelete(walletToDelete)}
+              disabled={!walletToDelete || Boolean(deletingId)}
+            >
+              {deletingId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  deleting...
+                </>
+              ) : (
+                "delete"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

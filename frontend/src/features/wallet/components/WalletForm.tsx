@@ -128,7 +128,7 @@ export const WalletForm = ({
                   placeholder="e.g., Cash Wallet, Bank Account"
                   {...field}
                   disabled={isLoading}
-                  className="bg-[#FFFBEB] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
+                  className="bg-white border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
                 />
               </FormControl>
               <FormMessage />
@@ -147,7 +147,7 @@ export const WalletForm = ({
                   placeholder="Brief description of this wallet"
                   {...field}
                   disabled={isLoading}
-                  className="bg-[#FFFBEB] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
+                  className="bg-white border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
                 />
               </FormControl>
               <FormMessage />
@@ -166,7 +166,7 @@ export const WalletForm = ({
                   <select
                     {...field}
                     disabled={isLoading}
-                    className="w-full rounded-md border border-[#1F2937]/10 bg-[#FFFBEB] px-3 py-2 text-sm focus:border-[#FCD34D] focus:outline-none focus:ring-1 focus:ring-[#FCD34D]"
+                    className="w-full rounded-md border border-[#1F2937]/10 bg-white px-3 py-2 text-sm focus:border-[#FCD34D] focus:outline-none focus:ring-1 focus:ring-[#FCD34D]"
                   >
                     <option value="">-- No Parent --</option>
                     {selectableParents.map((w) => (
