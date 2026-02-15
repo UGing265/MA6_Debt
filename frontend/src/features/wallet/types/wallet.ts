@@ -34,6 +34,7 @@ export interface CreateWalletRequest {
 export interface UpdateWalletRequest {
   name: string;
   description?: string;
+  parentWalletId?: string | null;
 }
 
 /**

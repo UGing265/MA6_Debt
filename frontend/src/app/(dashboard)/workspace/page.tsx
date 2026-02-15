@@ -18,16 +18,6 @@ function WorkspaceContent() {
 
   return (
     <div className="max-w-6xl mx-auto font-quicksand">
-      <nav className="mx-auto mb-8 flex max-w-6xl items-center justify-between rounded-full border border-[#1F2937]/10 bg-[#FFFDF5]/90 px-6 py-3 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FCD34D] text-[#1F2937] font-bold shadow-sm border border-[#1F2937]/20">
-            M
-          </div>
-          <span className="font-bold font-patrick text-[#1F2937] text-xl">MA6 Debt</span>
-        </div>
-        <div className="text-sm font-medium text-[#4B5563] lowercase">workspace</div>
-      </nav>
-
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#1F2937] mb-2 font-patrick lowercase">
           workspace

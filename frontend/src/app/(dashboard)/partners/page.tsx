@@ -1,12 +1,14 @@
-import React from 'react';
+"use client";
+
+import React, { Suspense } from "react";
+import { DebtPartnersTabContent } from "@/features/workspace/components/DebtPartnersTabContent";
 
 export default function PartnersPage() {
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-bold">Partners</h1>
-      <div className="bg-white p-6 rounded-lg shadow">
-        <p className="text-gray-600">Partners list will be displayed here</p>
-      </div>
+    <div data-testid="partners-page-root">
+      <Suspense fallback={<div className="p-6 text-center">Loading partners...</div>}>
+        <DebtPartnersTabContent />
+      </Suspense>
     </div>
   );
 }

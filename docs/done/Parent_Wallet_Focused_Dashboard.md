@@ -172,6 +172,8 @@ Successfully implemented a complete parent-wallet-focused dashboard for MA6 Debt
 #### Components
 - **File**: `frontend/src/features/wallet/components/WalletList.tsx` - Display wallet list
 - **File**: `frontend/src/features/wallet/components/WalletForm.tsx` - Create/edit wallet modal
+- **File**: `frontend/src/features/wallet/components/AttachWalletModal.tsx` - Attach sub-wallet modal
+- **File**: `frontend/src/features/wallet/components/DetachWalletModal.tsx` - Detach sub-wallet confirmation modal
 
 #### API Layer
 - **File**: `frontend/src/features/wallet/api/wallets.ts` - Wallet CRUD operations
@@ -229,10 +231,16 @@ Successfully implemented a complete parent-wallet-focused dashboard for MA6 Debt
 - **File**: `frontend/src/app/(auth)/register/page.tsx` - Register page
 
 #### Dashboard Routes
-- **File**: `frontend/src/app/(dashboard)/layout.tsx` - Dashboard layout with sidebar
+- **File**: `frontend/src/app/(dashboard)/layout.tsx` - Dashboard layout with unified navbar (absolute links fixed)
 - **File**: `frontend/src/app/(dashboard)/page.tsx` - Dashboard home
 - **File**: `frontend/src/app/(dashboard)/wallet/page.tsx` - Wallet management page
-- **File**: `frontend/src/app/(dashboard)/workspace/page.tsx` - Unified workspace page
+- **File**: `frontend/src/app/(dashboard)/workspace/page.tsx` - Unified workspace page (duplicate navbar removed)
+
+### New Parent-Wallet-First Routes (Phase 2)
+- **File**: `frontend/src/app/(dashboard)/wallets/dashboard/page.tsx` - Wallet overview dashboard with summary cards
+- **File**: `frontend/src/app/(dashboard)/wallets/page.tsx` - Parent wallets list page
+- **File**: `frontend/src/app/(dashboard)/wallets/[id]/page.tsx` - Parent wallet detail with child management
+- **File**: `frontend/src/app/(dashboard)/partners/page.tsx` - Standalone partners page (relocated from workspace)
 
 ### 7. UI Components (shadcn/ui)
 - **File**: `frontend/src/components/ui/button.tsx` - Button component
@@ -290,6 +298,27 @@ Successfully implemented a complete parent-wallet-focused dashboard for MA6 Debt
 - Single unified page at `/dashboard/workspace`
 - Tabbed interface: "Wallets" and "Debt Partners"
 - Shared modal forms reduce duplication
+- **Refactored**: Removed duplicate local navbar, now uses unified dashboard navbar
+
+### 7. Parent-Wallet-First Navigation (Phase 2)
+- **Dashboard Overview**: `/wallets/dashboard` - Summary cards (total cash, parent count, child count)
+- **Parent List**: `/wallets` - Shows only root wallets (parentWalletId === null)
+- **Parent Detail**: `/wallets/[id]` - Two-section layout: overview stats + child wallet management
+- **Standalone Partners**: `/partners` - Relocated from workspace tabs to separate route
+
+### 8. Attach/Detach Sub-wallet Functionality
+- **API Contract**: Uses existing `PUT /api/wallets/{id}` with `parentWalletId` field
+  - Attach: Set `parentWalletId` to parent wallet ID
+  - Detach: Set `parentWalletId` to `null`
+- **UI Components**: 
+  - `AttachWalletModal` - Select from eligible detached wallets
+  - `DetachWalletModal` - Confirmation dialog before detaching
+- **Validation**: Backend validates against circular references and cross-user assignment
+
+### 9. Navigation Improvements
+- Fixed navbar links to use absolute paths (prevents `/wallets/wallets/dashboard` bug)
+- Single unified navbar in dashboard layout (removed duplicate from workspace)
+- Added data-testid attributes for automated testing
 
 ---
 
@@ -484,6 +513,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 
 ## Verification Checklist
 
+### Phase 1 (Foundation)
 - [x] All API endpoints implemented
 - [x] Database migrations applied
 - [x] Frontend components render without errors
@@ -491,7 +521,19 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 - [x] User data properly scoped
 - [x] Error handling implemented
 - [x] TypeScript strict mode enabled
-- [x] Documentation completed
+
+### Phase 2 (Parent-Wallet-First Dashboard)
+- [x] Wallet dashboard page (`/wallets/dashboard`) with summary cards
+- [x] Parent wallets list page (`/wallets`) showing only root wallets
+- [x] Parent wallet detail page (`/wallets/[id]`) with two-section layout
+- [x] Attach sub-wallet functionality with modal
+- [x] Detach sub-wallet functionality with confirmation modal
+- [x] UpdateWalletRequest type includes `parentWalletId` field
+- [x] Partners page relocated to standalone route (`/partners`)
+- [x] Navbar links fixed to use absolute paths
+- [x] Duplicate navbar removed from workspace page
+- [x] data-testid attributes added for automated testing
+- [x] Documentation updated
 
 ---
 

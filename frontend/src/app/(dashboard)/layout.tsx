@@ -14,16 +14,28 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between">
             <div className="text-xl font-bold text-amber-900">MA6 Dashboard</div>
             <div className="flex gap-6">
-              <Link href="wallets/dashboard" className="text-amber-700 hover:text-amber-900 font-medium">
+              <Link
+                href="/wallets/dashboard"
+                className="text-amber-700 hover:text-amber-900 font-medium"
+                data-testid="nav-wallet-dashboard"
+              >
                 Dashboard
               </Link>
-              <Link href="wallets" className="text-amber-700 hover:text-amber-900 font-medium">
+              <Link
+                href="/wallets"
+                className="text-amber-700 hover:text-amber-900 font-medium"
+                data-testid="nav-wallets"
+              >
                 Wallets
               </Link>
-              <Link href="partners" className="text-amber-700 hover:text-amber-900 font-medium">
+              <Link
+                href="/partners"
+                className="text-amber-700 hover:text-amber-900 font-medium"
+                data-testid="nav-partners"
+              >
                 Partners
               </Link>
-              <Link href="workspace" className="text-amber-700 hover:text-amber-900 font-medium">
+              <Link href="/workspace" className="text-amber-700 hover:text-amber-900 font-medium">
                 Workspace
               </Link>
             </div>
