@@ -1,5 +1,6 @@
 using API.Middleware;
 using Application.Features.Transactions;
+using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
 using Application.Features.Transactions.QuickDeduct;
@@ -40,6 +41,22 @@ namespace API.Controllers
             command.UserId = GetCurrentUserId();
             var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = result.Transaction.Id }, result);
+        }
+
+        /// <summary>
+        /// Create a cash adjustment transaction (add/subtract wallet balance).
+        /// Personal-only flow: no partner, no debt, reason required.
+        /// </summary>
+        [HttpPost("adjustment")]
+        [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TransactionDto>> CashAdjustment([FromBody] CreateCashAdjustmentCommand command)
+        {
+            command.UserId = GetCurrentUserId();
+            var result = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         /// <summary>
