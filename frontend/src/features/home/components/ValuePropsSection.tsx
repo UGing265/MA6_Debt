@@ -26,7 +26,7 @@ export const ValuePropsSection = () => {
     <div id="features" className="bg-[#FFFDF5] py-24 sm:py-32 font-quicksand">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-[#D97706]">
+          <h2 className="text-base font-semibold leading-7 text-[#D97706] font-patrick text-lg">
             Why MA6 Debt
           </h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-[#1F2937] font-patrick sm:text-4xl">
@@ -43,7 +43,7 @@ export const ValuePropsSection = () => {
                 key={feature.name}
                 className="flex flex-col rounded-3xl border border-[#1F2937]/10 bg-white p-8 shadow-sm transition-all hover:shadow-md hover:border-[#FCD34D]/60"
               >
-                  <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-[#1F2937]">
+                  <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-[#1F2937] font-patrick text-xl">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FEF3C7] text-[#D97706]">
                     <feature.icon
                       className="h-6 w-6"
