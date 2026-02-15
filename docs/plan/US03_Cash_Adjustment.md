@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dedicated transaction flow for manual wallet cash adjustments (add/subtract), separate from QuickDeduct. Personal-only with mandatory reason for audit trail.
+Dedicated transaction flow for manual wallet cash adjustments (add/subtract), separate from QuickDeduct. Personal-only with mandatory note for audit trail.
 
 **Status**: Planning Phase  
 **Scope**: Backend (Application + API layers)  
@@ -29,20 +29,20 @@ New endpoint: `POST /api/transactions/adjustment`
 
 **Characteristics**:
 - Personal-only (no partner, no debt)
-- Reason required (audit trail)
+- Note required (audit trail)
 - Direction-based: credit (add) / debit (subtract)
 - Uses existing transaction ledger
 
 ### 2. Data Flow
 
 ```
-Request: { walletId, direction, amount, reason }
+Request: { walletId, direction, amount, note }
   ↓
-Validation: wallet ownership, amount > 0, reason length
+Validation: wallet ownership, amount > 0, note length
   ↓
 Handler: signedAmount = direction == credit ? +amount : -amount
   ↓
-Transaction: { amount: signedAmount, note: reason, partnerId: null }
+Transaction: { amount: signedAmount, note, partnerId: null }
   ↓
 Response: TransactionDto
 ```
@@ -59,7 +59,7 @@ POST /api/transactions/adjustment
   "walletId": "550e8400-e29b-41d4-a716-446655440000",
   "direction": 0,  // 0 = Credit (add), 1 = Debit (subtract)
   "amount": 500000,
-  "reason": "Rút tiền ATM chuyển sang tiền mặt",
+  "note": "Rút tiền ATM chuyển sang tiền mặt",
   "transactionDate": "2026-02-15T10:30:00Z"
 }
 ```
@@ -86,8 +86,8 @@ POST /api/transactions/adjustment
 
 - Missing `walletId`
 - `amount <= 0`
-- Missing/short `reason` (< 3 chars)
-- `reason` too long (> 255 chars)
+- Missing/short `note` (< 3 chars)
+- `note` too long (> 255 chars)
 - Wallet not found/not owned
 
 ---
@@ -100,7 +100,7 @@ POST /api/transactions/adjustment
    - Command DTO with direction enum
 
 2. `backend/src/Application/Features/Transactions/CashAdjustment/CreateCashAdjustmentValidator.cs`
-   - Validation rules (wallet ownership, reason required)
+   - Validation rules (wallet ownership, note required)
 
 3. `backend/src/Application/Features/Transactions/CashAdjustment/CreateCashAdjustmentCommandHandler.cs`
    - Handler logic (signed amount calculation)
@@ -124,9 +124,9 @@ POST /api/transactions/adjustment
 | UserId required | Not empty | "UserId is required" |
 | WalletId required | Not empty | "WalletId is required" |
 | Amount positive | > 0 | "Amount must be greater than 0" |
-| Reason required | Not empty | "Reason is required for audit trail" |
-| Reason min length | >= 3 | "Reason must be at least 3 characters" |
-| Reason max length | <= 255 | "Reason cannot exceed 255 characters" |
+| Note required | Not empty | "Note is required for audit trail" |
+| Note min length | >= 3 | "Note must be at least 3 characters" |
+| Note max length | <= 255 | "Note cannot exceed 255 characters" |
 | Wallet ownership | DB check | "Wallet does not belong to current user" |
 
 ---
@@ -145,7 +145,7 @@ POST /api/transactions/adjustment
 - Prevents double-negative confusion
 - Matches accounting terminology
 
-### Why Reason Required?
+### Why Note Required?
 
 - Audit trail for manual adjustments
 - Distinguishes from automated transactions
@@ -189,7 +189,7 @@ POST /api/transactions/adjustment
 ### After Implementation
 - [ ] Credit adjustment increases wallet balance
 - [ ] Debit adjustment decreases wallet balance
-- [ ] Missing reason returns 400
+- [ ] Missing note returns 400
 - [ ] Non-owned wallet returns 404
 - [ ] Transaction appears in GET /api/transactions
 

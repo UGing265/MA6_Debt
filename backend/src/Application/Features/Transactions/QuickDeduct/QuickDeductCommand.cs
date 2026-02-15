@@ -1,4 +1,5 @@
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace Application.Features.Transactions.QuickDeduct
 {
@@ -11,6 +12,7 @@ namespace Application.Features.Transactions.QuickDeduct
         /// <summary>
         /// User ID (set from JWT claim).
         /// </summary>
+        [JsonIgnore]
         public Guid UserId { get; set; }
         
         /// <summary>

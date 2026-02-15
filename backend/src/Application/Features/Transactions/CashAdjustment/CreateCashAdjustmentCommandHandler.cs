@@ -52,7 +52,7 @@ namespace Application.Features.Transactions.CashAdjustment
                 WalletId = request.WalletId,
                 PartnerId = null, // Personal-only: no partner
                 Amount = signedAmount,
-                Note = request.Reason, // Use reason as note for audit
+                Note = request.Note,
                 TransactionDate = request.TransactionDate ?? DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 // Cash adjustment fields (no US-03 specific fields)

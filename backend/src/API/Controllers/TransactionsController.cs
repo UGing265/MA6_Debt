@@ -1,4 +1,5 @@
 using API.Middleware;
+using API.Contracts.Transactions;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.GetTransactionById;
@@ -36,25 +37,45 @@ namespace API.Controllers
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<QuickDeductResponse>> QuickDeduct([FromBody] QuickDeductCommand command)
+        public async Task<ActionResult<QuickDeductResponse>> QuickDeduct([FromBody] QuickDeductRequest request)
         {
-            command.UserId = GetCurrentUserId();
+            var command = new QuickDeductCommand
+            {
+                UserId = GetCurrentUserId(),
+                WalletId = request.WalletId,
+                PartnerId = request.PartnerId,
+                PayerMode = request.PayerMode,
+                Total = request.Total,
+                DebtAmount = request.DebtAmount,
+                Note = request.Note,
+                TransactionDate = request.TransactionDate
+            };
+
             var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = result.Transaction.Id }, result);
         }
 
         /// <summary>
         /// Create a cash adjustment transaction (add/subtract wallet balance).
-        /// Personal-only flow: no partner, no debt, reason required.
+        /// Personal-only flow: no partner, no debt, note required.
         /// </summary>
         [HttpPost("adjustment")]
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<TransactionDto>> CashAdjustment([FromBody] CreateCashAdjustmentCommand command)
+        public async Task<ActionResult<TransactionDto>> CashAdjustment([FromBody] CashAdjustmentRequest request)
         {
-            command.UserId = GetCurrentUserId();
+            var command = new CreateCashAdjustmentCommand
+            {
+                UserId = GetCurrentUserId(),
+                WalletId = request.WalletId,
+                Direction = request.Direction,
+                Amount = request.Amount,
+                Note = request.Note,
+                TransactionDate = request.TransactionDate
+            };
+
             var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }

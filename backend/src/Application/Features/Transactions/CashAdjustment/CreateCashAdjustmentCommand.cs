@@ -1,16 +1,18 @@
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace Application.Features.Transactions.CashAdjustment
 {
     /// <summary>
     /// Command to create a cash adjustment transaction (add/subtract wallet balance).
-    /// Personal-only flow: no partner, no debt tagging, reason required.
+    /// Personal-only flow: no partner, no debt tagging, note required.
     /// </summary>
     public class CreateCashAdjustmentCommand : IRequest<TransactionDto>
     {
         /// <summary>
         /// User ID (set from JWT claim).
         /// </summary>
+        [JsonIgnore]
         public Guid UserId { get; set; }
         
         /// <summary>
@@ -29,9 +31,9 @@ namespace Application.Features.Transactions.CashAdjustment
         public decimal Amount { get; set; }
         
         /// <summary>
-        /// Required reason/description for audit trail.
+        /// Required note/description for audit trail.
         /// </summary>
-        public string Reason { get; set; } = string.Empty;
+        public string Note { get; set; } = string.Empty;
         
         /// <summary>
         /// Optional transaction date (defaults to UtcNow).

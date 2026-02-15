@@ -2,13 +2,13 @@
 
 **Status**: Implementation completed  
 **Scope**: Backend (Application + API layers)  
-**Features**: Personal-only cash adjustment with mandatory reason  
+**Features**: Personal-only cash adjustment with mandatory note  
 
 ---
 
 ## Summary
 
-Successfully implemented a dedicated transaction flow for manual wallet cash adjustments (add/subtract), separate from QuickDeduct. Personal-only with mandatory reason for audit trail.
+Successfully implemented a dedicated transaction flow for manual wallet cash adjustments (add/subtract), separate from QuickDeduct. Personal-only with mandatory note for audit trail.
 
 ---
 
@@ -22,7 +22,7 @@ Successfully implemented a dedicated transaction flow for manual wallet cash adj
   - `walletId` (required)
   - `direction` (Credit/Debit enum)
   - `amount` (positive)
-  - `reason` (required)
+  - `note` (required)
   - `transactionDate` (optional)
 - `AdjustmentDirection` enum: Credit (0), Debit (1)
 
@@ -34,7 +34,7 @@ Validation rules:
 - UserId required
 - WalletId required
 - Amount > 0
-- Reason required (3-255 chars)
+- Note required (3-255 chars)
 - Wallet ownership check (async DB validation)
 
 ### 3. Handler
@@ -84,7 +84,7 @@ Content-Type: application/json
   "walletId": "550e8400-e29b-41d4-a716-446655440000",
   "direction": 0,
   "amount": 500000,
-  "reason": "Rút tiền ATM chuyển sang tiền mặt"
+  "note": "Rút tiền ATM chuyển sang tiền mặt"
 }
 ```
 
@@ -114,13 +114,13 @@ POST /api/transactions/adjustment
   "walletId": "...",
   "direction": 1,
   "amount": 200000,
-  "reason": "Đưa tiền cho bạn"
+  "note": "Đưa tiền cho bạn"
 }
 ```
 
 **Response**: `amount: -200000`
 
-### Validation Error (Missing Reason)
+### Validation Error (Missing Note)
 
 **Request**:
 ```bash
@@ -139,7 +139,7 @@ POST /api/transactions/adjustment
   "title": "Validation Error",
   "status": 400,
   "errors": {
-    "Reason": ["Reason is required for audit trail"]
+    "Note": ["Note is required for audit trail"]
   }
 }
 ```
@@ -193,7 +193,7 @@ After:  Wallet balance = 300000
 
 ✅ **Reuses existing infrastructure** - No schema changes  
 ✅ **Personal-only** - `partnerId` always null  
-✅ **Audit trail** - Reason mandatory and persisted  
+✅ **Audit trail** - Note mandatory and persisted  
 ✅ **Ownership check** - Wallet must belong to current user  
 ✅ **Consistent API** - Returns standard TransactionDto  
 
@@ -220,7 +220,7 @@ ls backend/src/Application/Features/Transactions/CashAdjustment/
 grep -A3 "CashAdjustment" backend/src/API/Controllers/TransactionsController.cs
 
 # Check validation rules
-grep "Reason" backend/src/Application/Features/Transactions/CashAdjustment/CreateCashAdjustmentValidator.cs
+grep "Note" backend/src/Application/Features/Transactions/CashAdjustment/CreateCashAdjustmentValidator.cs
 ```
 
 ---
@@ -239,7 +239,7 @@ grep "Reason" backend/src/Application/Features/Transactions/CashAdjustment/Creat
 
 - Direction enum: 0 = Credit (add), 1 = Debit (subtract)
 - Amount always positive in request, signed in DB
-- Reason stored in `note` field
+- Note stored in `note` field
 - No US-03 specific fields (payerMode, debtAmount, etc.)
 - Compatible with existing transaction list and balance queries
 

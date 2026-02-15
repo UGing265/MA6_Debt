@@ -6,7 +6,7 @@ namespace Application.Features.Transactions.CashAdjustment
 {
     /// <summary>
     /// Validator for CreateCashAdjustmentCommand.
-    /// Enforces: personal-only, reason required, no partner/debt fields.
+    /// Enforces: personal-only, note required, no partner/debt fields.
     /// </summary>
     public class CreateCashAdjustmentValidator : AbstractValidator<CreateCashAdjustmentCommand>
     {
@@ -25,10 +25,10 @@ namespace Application.Features.Transactions.CashAdjustment
             RuleFor(x => x.Amount)
                 .GreaterThan(0).WithMessage("Amount must be greater than 0");
 
-            RuleFor(x => x.Reason)
-                .NotEmpty().WithMessage("Reason is required for audit trail")
-                .MinimumLength(3).WithMessage("Reason must be at least 3 characters")
-                .MaximumLength(255).WithMessage("Reason cannot exceed 255 characters");
+            RuleFor(x => x.Note)
+                .NotEmpty().WithMessage("Note is required for audit trail")
+                .MinimumLength(3).WithMessage("Note must be at least 3 characters")
+                .MaximumLength(255).WithMessage("Note cannot exceed 255 characters");
 
             RuleFor(x => x)
                 .MustAsync(WalletBelongsToUser)
