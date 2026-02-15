@@ -61,6 +61,31 @@ namespace Application.Features.Transactions.QuickDeduct
                 partnerBalanceBefore = partner.Balance;
             }
 
+            // US-03 Constraint Hardening: Defensive invariants (anti-bypass)
+            // Invariant 1: PartnerTra requires a partner
+            if (request.PayerMode == PayerMode.PartnerTra && !partnerId.HasValue)
+            {
+                throw new InvalidOperationException("PartnerTra mode requires a partner. This should have been caught by validation.");
+            }
+
+            // Invariant 2: DebtAmount must be non-negative
+            if (request.DebtAmount.HasValue && request.DebtAmount.Value < 0)
+            {
+                throw new InvalidOperationException("DebtAmount cannot be negative. This should have been caught by validation.");
+            }
+
+            // Invariant 3: DebtAmount cannot exceed Total
+            if (request.DebtAmount.HasValue && request.DebtAmount.Value > request.Total)
+            {
+                throw new InvalidOperationException("DebtAmount cannot exceed Total. This should have been caught by validation.");
+            }
+
+            // Invariant 4: PartnerTra requires valid DebtAmount for split tracking
+            if (request.PayerMode == PayerMode.PartnerTra && (!request.DebtAmount.HasValue || request.DebtAmount.Value < 0))
+            {
+                throw new InvalidOperationException("PartnerTra mode requires a valid DebtAmount to track the bill split.");
+            }
+
             // Calculate amounts based on payer mode (US-03.3 formulas)
             decimal walletDelta;
             decimal partnerDelta;
