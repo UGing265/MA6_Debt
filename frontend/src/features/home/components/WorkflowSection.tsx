@@ -171,19 +171,19 @@ const features = [
 
 export const WorkflowSection = () => {
   return (
-    <section className="bg-[#FDFCFB] py-24 overflow-hidden relative" id="how-it-works">
+    <section className="bg-[#FFFDF5] py-24 overflow-hidden relative font-quicksand" id="how-it-works">
       <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
         <div className="text-center mb-24">
-          <h2 className="text-3xl md:text-5xl font-bold text-[#4A2C2A] mb-6 tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-bold text-[#1F2937] mb-6 tracking-tight font-patrick">
             Simple Workflow
           </h2>
-          <p className="text-xl text-[#8D6E63] max-w-2xl mx-auto font-medium">
+          <p className="text-xl text-[#4B5563] max-w-2xl mx-auto font-medium">
             Learn in 4 simple steps.
           </p>
         </div>
 
         <div className="relative">
-          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-[#FF7A00]/30 to-transparent" />
+          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-[#FCD34D]/50 to-transparent" />
           
           <div className="flex flex-col gap-24 lg:gap-32">
             {features.map((feature, index) => {
@@ -195,33 +195,33 @@ export const WorkflowSection = () => {
                   <div className={`flex flex-col lg:flex-row items-center gap-8 lg:gap-0 ${!isEven ? "lg:flex-row-reverse" : ""}`}>
                     <div className={`flex-1 w-full lg:w-1/2 px-4 lg:px-12 ${isEven ? 'lg:text-right' : 'lg:text-left'}`}>
                       <div className="flex flex-col gap-2">
-                        <span className="text-sm font-bold text-[#FF7A00] tracking-wider uppercase">Step 0{index + 1}</span>
-                        <h3 className="text-3xl font-bold text-[#4A2C2A]">{feature.title}</h3>
-                        <p className="text-lg font-medium text-[#8D6E63]">{feature.description}</p>
-                        <p className="text-base text-[#8D6E63]/80 leading-relaxed">{feature.details}</p>
+                        <span className="text-sm font-bold text-[#D97706] tracking-wider uppercase">Step 0{index + 1}</span>
+                        <h3 className="text-3xl font-bold text-[#1F2937] font-patrick">{feature.title}</h3>
+                        <p className="text-lg font-medium text-[#4B5563]">{feature.description}</p>
+                        <p className="text-base text-[#4B5563]/80 leading-relaxed">{feature.details}</p>
                       </div>
                     </div>
                     
                     <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                      <div className="w-16 h-16 rounded-full bg-[#FDFCFB] border-4 border-white shadow-lg flex items-center justify-center text-[#FF7A00] group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-16 h-16 rounded-full bg-[#FFFDF5] border-4 border-white shadow-lg flex items-center justify-center text-[#D97706] group-hover:scale-110 transition-transform duration-300">
                         <Icon size={28} strokeWidth={2} />
                       </div>
                     </div>
                     
                     <div className="flex-1 w-full lg:w-1/2 px-4 lg:px-12">
-                      <div className={`relative bg-white rounded-2xl border border-[#4A2C2A]/10 shadow-lg p-2 aspect-[4/3] overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl ${!isEven ? 'hover:rotate-1' : 'hover:-rotate-1'}`}>
-                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#FF7A00] to-[#E56E00]" />
+                      <div className={`relative bg-white rounded-2xl border border-[#1F2937]/10 shadow-lg p-2 aspect-[4/3] overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl ${!isEven ? 'hover:rotate-1' : 'hover:-rotate-1'}`}>
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#FCD34D] to-[#F59E0B]" />
                         
                         <div className="w-full h-full bg-white rounded-xl overflow-hidden relative">
                           <feature.ui />
                         </div>
 
-                        <div className="lg:hidden absolute top-4 right-4 bg-[#FF7A00] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm z-10">
+                        <div className="lg:hidden absolute top-4 right-4 bg-[#FCD34D] text-[#1F2937] text-xs font-bold px-2 py-1 rounded-full shadow-sm z-10">
                           Step 0{index + 1}
                         </div>
 
-                        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#FF7A00]/5 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -top-8 -left-8 w-32 h-32 bg-[#4A2C2A]/5 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#FCD34D]/20 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -top-8 -left-8 w-32 h-32 bg-[#1F2937]/5 rounded-full blur-3xl pointer-events-none" />
                       </div>
                     </div>
                   </div>

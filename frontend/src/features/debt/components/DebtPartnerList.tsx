@@ -43,14 +43,14 @@ export function DebtPartnerList({
     if (balance > 0) {
       return {
         label: "Receivable",
-        description: "Partner nợ tôi",
+        description: "Partner owes me",
         color: "bg-green-100 text-green-800 border-green-300",
         icon: TrendingUp,
       };
     } else if (balance < 0) {
       return {
         label: "Payable",
-        description: "Tôi nợ partner",
+        description: "I owe partner",
         color: "bg-red-100 text-red-800 border-red-300",
         icon: TrendingDown,
       };

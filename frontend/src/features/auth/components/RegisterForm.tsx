@@ -114,7 +114,7 @@ export const RegisterForm = () => {
                    placeholder="Choose a username" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] text-[#1F2937] placeholder:text-[#4B5563]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -132,7 +132,7 @@ export const RegisterForm = () => {
                    placeholder="Enter your full name" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] text-[#1F2937] placeholder:text-[#4B5563]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -151,7 +151,7 @@ export const RegisterForm = () => {
                    placeholder="Enter your email" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] text-[#1F2937] placeholder:text-[#4B5563]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -170,7 +170,7 @@ export const RegisterForm = () => {
                    placeholder="Create a password" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00] text-[#4A2C2A] placeholder:text-[#8D6E63]/70" 
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] text-[#1F2937] placeholder:text-[#4B5563]/70" 
                  />
               </FormControl>
               <FormMessage />
@@ -182,7 +182,7 @@ export const RegisterForm = () => {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-[#FF7A00] hover:bg-[#E56E00] text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors duration-200 border border-[#4A2C2A]/20"
+          className="w-full bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1F2937] font-bold py-2 px-4 rounded-full shadow-md transition-colors duration-200 border border-[#1F2937]/20"
         >
           {isLoading ? (
             <>

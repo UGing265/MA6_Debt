@@ -23,16 +23,16 @@ const features = [
 
 export const ValuePropsSection = () => {
   return (
-    <div id="features" className="bg-[#FDFCFB] py-24 sm:py-32">
+    <div id="features" className="bg-[#FFFDF5] py-24 sm:py-32 font-quicksand">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-[#FF7A00]">
+          <h2 className="text-base font-semibold leading-7 text-[#D97706]">
             Why MA6 Debt
           </h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-[#4A2C2A] sm:text-4xl">
+          <p className="mt-2 text-3xl font-bold tracking-tight text-[#1F2937] font-patrick sm:text-4xl">
             Keep your cash clear and simple
           </p>
-          <p className="mt-6 text-lg leading-8 text-[#8D6E63]">
+          <p className="mt-6 text-lg leading-8 text-[#4B5563]">
             Built for speed. Built for clarity. Built for your daily money.
           </p>
         </div>
@@ -41,10 +41,10 @@ export const ValuePropsSection = () => {
             {features.map((feature) => (
               <div
                 key={feature.name}
-                className="flex flex-col rounded-3xl border border-[#4A2C2A]/10 bg-white p-8 shadow-sm transition-all hover:shadow-md hover:border-[#FF7A00]/30"
+                className="flex flex-col rounded-3xl border border-[#1F2937]/10 bg-white p-8 shadow-sm transition-all hover:shadow-md hover:border-[#FCD34D]/60"
               >
-                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-[#4A2C2A]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5EFE6] text-[#FF7A00]">
+                  <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-[#1F2937]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FEF3C7] text-[#D97706]">
                     <feature.icon
                       className="h-6 w-6"
                       aria-hidden="true"
@@ -52,7 +52,7 @@ export const ValuePropsSection = () => {
                   </div>
                   {feature.name}
                 </dt>
-                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-[#8D6E63]">
+                  <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-[#4B5563]">
                   <p className="flex-auto">{feature.description}</p>
                 </dd>
               </div>

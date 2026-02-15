@@ -79,7 +79,7 @@ export const LoginForm = () => {
                    placeholder="Enter your username" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]" 
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]" 
                  />
               </FormControl>
               <FormMessage />
@@ -98,7 +98,7 @@ export const LoginForm = () => {
                    placeholder="Enter your password" 
                    {...field} 
                    disabled={isLoading}
-                   className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]" 
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]" 
                  />
               </FormControl>
               <FormMessage />
@@ -108,7 +108,7 @@ export const LoginForm = () => {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-[#FF7A00] hover:bg-[#E56E00] text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors duration-200 border border-[#4A2C2A]/20"
+          className="w-full bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1F2937] font-bold py-2 px-4 rounded-full shadow-md transition-colors duration-200 border border-[#1F2937]/20"
         >
           {isLoading ? (
             <>

@@ -24,8 +24,8 @@ interface HybridBalanceInputProps {
  * Sync Rule: Latest user action wins
  * 
  * Balance Semantics:
- * - Positive (>0): Receivable - "Partner nợ tôi" (they owe me)
- * - Negative (<0): Payable - "Tôi nợ partner" (I owe them)
+ * - Positive (>0): Receivable (partner owes you)
+ * - Negative (<0): Payable (you owe partner)
  * - Zero: Neutral
  */
 export function HybridBalanceInput({
@@ -141,7 +141,7 @@ export function HybridBalanceInput({
                   : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
               )}
             >
-              Partner nợ tôi
+              Partner owes me
             </button>
             <button
               type="button"
@@ -154,7 +154,7 @@ export function HybridBalanceInput({
                   : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
               )}
             >
-              Tôi nợ partner
+              I owe partner
             </button>
           </div>
         </div>
@@ -213,7 +213,7 @@ export function HybridBalanceInput({
             {value.toFixed(2)}
           </span>{" "}
           {value > 0 && "(Receivable - Partner owes you)"}
-          {value < 0 && "(Payable - You owe partner)"}
+          {value < 0 && "(Payable - You owe this partner)"}
           {value === 0 && "(Neutral)"}
         </p>
       </div>
