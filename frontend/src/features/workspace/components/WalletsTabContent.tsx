@@ -147,7 +147,30 @@ const WalletListContent = ({
   onEdit: (wallet: Wallet) => void;
   onCreateClick: () => void;
 }) => {
-  const { data: wallets } = useWallets();
+  const { data: wallets, isLoading, error } = useWallets();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-[#FCD34D] mx-auto mb-4 animate-spin" />
+          <p className="text-gray-600 font-medium">Loading wallets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 font-medium">Failed to load wallets</p>
+          <p className="text-sm text-red-500 mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!wallets || wallets.length === 0) {
     return (
@@ -170,7 +193,7 @@ const WalletListContent = ({
     );
   }
 
-  return <WalletList onEdit={onEdit} />;
+  return <WalletList wallets={wallets} onEdit={onEdit} />;
 };
 
 const WalletFormWrapper = ({

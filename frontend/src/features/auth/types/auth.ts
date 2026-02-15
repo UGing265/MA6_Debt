@@ -22,12 +22,7 @@ export const RegisterSchema = z.object({
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 
-export interface AuthResponse {
+export interface LoginResponse {
   token: string;
-  user: {
-    id: string;
-    username: string;
-    name: string;
-    email?: string;
-  };
+  expiration: string;
 }

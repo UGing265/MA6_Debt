@@ -4,8 +4,18 @@ import {
   UpdateDebtPartnerRequest,
 } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { getAuthToken } from "@/lib/authToken";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
+
+const getAuthHeaders = () => {
+  const token = getAuthToken();
+
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 /**
  * Create a new debt partner
@@ -16,9 +26,7 @@ export const createDebtPartner = async (
 ): Promise<DebtPartner> => {
   const response = await fetch(`${API_URL}/api/debtpartners`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
     credentials: "include",
   });
@@ -45,9 +53,7 @@ export const createDebtPartner = async (
 export const getDebtPartners = async (): Promise<DebtPartner[]> => {
   const response = await fetch(`${API_URL}/api/debtpartners`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     credentials: "include",
   });
 
@@ -72,9 +78,7 @@ export const getDebtPartners = async (): Promise<DebtPartner[]> => {
 export const getDebtPartnerById = async (id: string): Promise<DebtPartner> => {
   const response = await fetch(`${API_URL}/api/debtpartners/${id}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     credentials: "include",
   });
 
@@ -102,9 +106,7 @@ export const updateDebtPartner = async (
 ): Promise<DebtPartner> => {
   const response = await fetch(`${API_URL}/api/debtpartners/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
     credentials: "include",
   });
@@ -131,9 +133,7 @@ export const updateDebtPartner = async (
 export const deleteDebtPartner = async (id: string): Promise<void> => {
   const response = await fetch(`${API_URL}/api/debtpartners/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     credentials: "include",
   });
 

@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { LoginSchema, LoginInput } from "../types/auth";
 import { login } from "../api/auth";
 import { parseErrorResponse } from "../utils/errorParser";
+import { setAuthToken } from "@/lib/authToken";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -36,9 +37,7 @@ export const LoginForm = () => {
     setIsLoading(true);
     try {
       const response = await login(data);
-      // The JWT token should be handled via a secure, HttpOnly cookie set by the server.
-      // Storing it in localStorage is vulnerable to XSS attacks.
-      // localStorage.setItem("token", response.token);
+      setAuthToken(response.token);
       toast.success("Welcome!");
       router.push("/workspace");
     } catch (error: any) {
