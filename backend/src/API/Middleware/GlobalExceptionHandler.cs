@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json.Serialization;
@@ -59,6 +60,46 @@ namespace API.Middleware
                     Errors = new Dictionary<string, string[]>
                     {
                         { "Unauthorized", new string[] { unauthorizedAccessException.Message } }
+                    }
+                };
+
+                await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+                return true;
+            }
+            else if (exception is NotFoundException notFoundException)
+            {
+                _logger.LogWarning("Resource not found: {Message}", notFoundException.Message);
+
+                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+
+                var response = new ValidationErrorResponse
+                {
+                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                    Title = "Not Found",
+                    Status = StatusCodes.Status404NotFound,
+                    Errors = new Dictionary<string, string[]>
+                    {
+                        { "NotFound", new string[] { notFoundException.Message } }
+                    }
+                };
+
+                await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+                return true;
+            }
+            else if (exception is InvalidOperationException invalidOperationException)
+            {
+                _logger.LogWarning("Business rule violation: {Message}", invalidOperationException.Message);
+
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+                var response = new ValidationErrorResponse
+                {
+                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    Title = "Bad Request",
+                    Status = StatusCodes.Status400BadRequest,
+                    Errors = new Dictionary<string, string[]>
+                    {
+                        { "BusinessRule", new string[] { invalidOperationException.Message } }
                     }
                 };
 
