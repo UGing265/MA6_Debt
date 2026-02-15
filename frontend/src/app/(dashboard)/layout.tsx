@@ -1,5 +1,6 @@
 import React from 'react';
 import { Toaster } from 'sonner';
+import Link from "next/link";
 
 export default function DashboardLayout({
   children,

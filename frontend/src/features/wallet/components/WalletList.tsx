@@ -178,7 +178,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
                   variant="outline"
                   size="icon-sm"
                   onClick={() => onEdit(node.wallet)}
-                  className="border-[#1F2937]/10"
+                  className="border-[#1F2937]/15 bg-white hover:bg-[#FEF3C7] hover:border-[#FCD34D]/70 text-[#1F2937]"
                 >
                   <Edit2 className="h-4 w-4" />
                 </Button>
@@ -188,6 +188,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
                 size="icon-sm"
                 onClick={() => setWalletToDelete(node.wallet)}
                 disabled={deletingId === node.wallet.id}
+                className="bg-[#DC2626] hover:bg-[#B91C1C] border border-red-700/40"
               >
                 {deletingId === node.wallet.id ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -215,7 +216,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="bg-[#FFFDF5] border-[#1F2937]/10 shadow-xl">
           <DialogClose onClose={() => setWalletToDelete(null)} />
           <DialogHeader>
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
