@@ -12,9 +12,9 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { useDebtPartners } from "../debt/hooks/useDebtPartners";
-import { DebtPartnerList } from "../debt/components/DebtPartnerList";
-import { DebtPartnerForm } from "../debt/components/DebtPartnerForm";
+import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
+import { DebtPartnerList } from "@/features/debt/components/DebtPartnerList";
+import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
 
 /**
  * Debt Partners Tab Content

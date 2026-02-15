@@ -1,6 +1,6 @@
 "use client";
 
-import { useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   getWallets,
@@ -9,74 +9,103 @@ import {
   deleteWallet,
 } from "../api/wallets";
 import type { Wallet, CreateWalletRequest, UpdateWalletRequest } from "../types/wallet";
+import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 
-/**
- * Hook for fetching all wallets with Suspense support
- * Throws promise for Suspense boundary on initial load
- */
+type WalletsListener = () => void;
+
+const walletsListeners = new Set<WalletsListener>();
+
+const notifyWalletsChanged = () => {
+  walletsListeners.forEach((listener) => listener());
+};
+
 export const useWallets = () => {
-  return useSuspenseQuery({
-    queryKey: ["wallets"],
-    queryFn: getWallets,
-    staleTime: 30000, // 30 seconds
-  });
+  const [data, setData] = useState<Wallet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refetch = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const wallets = await getWallets();
+      setData(wallets);
+    } catch (err: any) {
+      const parsedError = parseErrorResponse(err);
+      setError(parsedError.general || "Failed to load wallets");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refetch();
+
+    const listener = () => {
+      void refetch();
+    };
+
+    walletsListeners.add(listener);
+    return () => {
+      walletsListeners.delete(listener);
+    };
+  }, [refetch]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+  };
 };
 
-/**
- * Hook for creating a new wallet
- */
 export const useCreateWallet = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateWalletRequest) => createWallet(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-      toast.success("Wallet created successfully!");
+  return {
+    mutateAsync: async (data: CreateWalletRequest) => {
+      try {
+        const result = await createWallet(data);
+        toast.success("Wallet created successfully!");
+        notifyWalletsChanged();
+        return result;
+      } catch (error: any) {
+        const message = error.general || "Failed to create wallet";
+        toast.error(message);
+        throw error;
+      }
     },
-    onError: (error: any) => {
-      const message = error.general || "Failed to create wallet";
-      toast.error(message);
-    },
-  });
+  };
 };
 
-/**
- * Hook for updating a wallet
- */
 export const useUpdateWallet = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateWalletRequest }) =>
-      updateWallet(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-      toast.success("Wallet updated successfully!");
+  return {
+    mutateAsync: async ({ id, data }: { id: string; data: UpdateWalletRequest }) => {
+      try {
+        const result = await updateWallet(id, data);
+        toast.success("Wallet updated successfully!");
+        notifyWalletsChanged();
+        return result;
+      } catch (error: any) {
+        const message = error.general || "Failed to update wallet";
+        toast.error(message);
+        throw error;
+      }
     },
-    onError: (error: any) => {
-      const message = error.general || "Failed to update wallet";
-      toast.error(message);
-    },
-  });
+  };
 };
 
-/**
- * Hook for deleting a wallet
- */
 export const useDeleteWallet = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => deleteWallet(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-      toast.success("Wallet deleted successfully!");
+  return {
+    mutateAsync: async (id: string) => {
+      try {
+        await deleteWallet(id);
+        toast.success("Wallet deleted successfully!");
+        notifyWalletsChanged();
+      } catch (error: any) {
+        const message = error.general || "Failed to delete wallet";
+        toast.error(message);
+        throw error;
+      }
     },
-    onError: (error: any) => {
-      // Surface backend constraint errors
-      const message = error.general || "Failed to delete wallet";
-      toast.error(message);
-    },
-  });
+  };
 };

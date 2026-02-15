@@ -40,7 +40,7 @@ export const LoginForm = () => {
       // Storing it in localStorage is vulnerable to XSS attacks.
       // localStorage.setItem("token", response.token);
       toast.success("Welcome!");
-      router.push("/dashboard");
+      router.push("/workspace");
     } catch (error: any) {
       const parsedError = parseErrorResponse(error);
       

@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { Trash2, Edit2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useWallets, useDeleteWallet } from "../hooks/useWallets";
+import { useDeleteWallet } from "../hooks/useWallets";
 import type { Wallet } from "../types/wallet";
 
 interface WalletListProps {
+  wallets: Wallet[];
   onEdit?: (wallet: Wallet) => void;
 }
 
-export const WalletList = ({ onEdit }: WalletListProps) => {
-  const { data: wallets } = useWallets();
+export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   const deleteMutation = useDeleteWallet();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
