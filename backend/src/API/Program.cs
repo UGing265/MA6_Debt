@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
+using Persistence.Data;
 using Application;
 using Application.Common.Interfaces;
 using System.Text;
@@ -78,6 +79,33 @@ namespace API
                 });
 
             var app = builder.Build();
+
+            // Auto-migrate database in Development and Staging environments
+            using (var scope = app.Services.CreateScope())
+            {
+                var env = scope.ServiceProvider.GetRequiredService<IHostEnvironment>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                if (env.IsDevelopment() || env.IsEnvironment("Staging"))
+                {
+                    logger.LogInformation("{Environment} environment detected - applying pending migrations", env.EnvironmentName);
+                    try
+                    {
+                        dbContext.Database.Migrate();
+                        logger.LogInformation("Database migrations applied successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to apply database migrations");
+                        throw;
+                    }
+                }
+                else
+                {
+                    logger.LogInformation("{Environment} environment - skipping auto-migration", env.EnvironmentName);
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
