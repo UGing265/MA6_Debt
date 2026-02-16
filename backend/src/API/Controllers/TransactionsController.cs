@@ -83,10 +83,11 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Get all transactions for the current user, optionally filtered by wallet.
+        /// Get all transactions for the current user, optionally filtered by wallet and keyword search.
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyList<TransactionDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<IReadOnlyList<TransactionDto>>> GetAll([FromQuery] Guid? walletId, [FromQuery] string? search)
         {
@@ -103,6 +104,7 @@ namespace API.Controllers
         [HttpPut("{id:guid}/note")]
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<TransactionDto>> UpdateNote(Guid id, [FromBody] UpdateTransactionNoteRequest request)
         {
@@ -118,6 +120,8 @@ namespace API.Controllers
 
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Delete(Guid id)
         {
