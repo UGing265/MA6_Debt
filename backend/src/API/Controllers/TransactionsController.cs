@@ -2,9 +2,11 @@ using API.Middleware;
 using API.Contracts.Transactions;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
+using Application.Features.Transactions.DeleteTransaction;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
 using Application.Features.Transactions.QuickDeduct;
+using Application.Features.Transactions.UpdateTransactionNote;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -86,15 +88,46 @@ namespace API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyList<TransactionDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<IReadOnlyList<TransactionDto>>> GetAll([FromQuery] Guid? walletId)
+        public async Task<ActionResult<IReadOnlyList<TransactionDto>>> GetAll([FromQuery] Guid? walletId, [FromQuery] string? search)
         {
             var result = await _mediator.Send(new GetTransactionsQuery
             {
                 UserId = GetCurrentUserId(),
-                WalletId = walletId
+                WalletId = walletId,
+                SearchTerm = search
             });
 
             return Ok(result);
+        }
+
+        [HttpPut("{id:guid}/note")]
+        [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<TransactionDto>> UpdateNote(Guid id, [FromBody] UpdateTransactionNoteRequest request)
+        {
+            var result = await _mediator.Send(new UpdateTransactionNoteCommand
+            {
+                UserId = GetCurrentUserId(),
+                Id = id,
+                Note = request.Note
+            });
+
+            return Ok(result);
+        }
+
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _mediator.Send(new DeleteTransactionCommand
+            {
+                UserId = GetCurrentUserId(),
+                Id = id
+            });
+
+            return NoContent();
         }
 
         /// <summary>

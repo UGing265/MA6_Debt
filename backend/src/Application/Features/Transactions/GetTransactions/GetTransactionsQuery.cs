@@ -13,5 +13,10 @@ namespace Application.Features.Transactions.GetTransactions
         /// Optional wallet filter. If null, returns transactions from all user wallets.
         /// </summary>
         public Guid? WalletId { get; set; }
+
+        /// <summary>
+        /// Optional keyword search (case-insensitive). Filters by transaction note OR partner name.
+        /// </summary>
+        public string? SearchTerm { get; set; }
     }
 }

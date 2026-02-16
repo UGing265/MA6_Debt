@@ -13,6 +13,8 @@ namespace Application.Features.Transactions
         public string? Note { get; set; }
         public DateTime TransactionDate { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public bool IsLocked { get; set; }
         
         // US-03 specific fields for auditability
         public PayerMode? PayerMode { get; set; }
