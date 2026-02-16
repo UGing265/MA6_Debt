@@ -1,31 +1,46 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Wallet, Users, ArrowRight, Wallet2 } from "lucide-react";
+import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3 } from "lucide-react";
+
+const mockRecentHistory = [
+  { id: "t1", title: "Team Lunch", wallet: "Main Wallet", date: "16 Feb", amount: -150000, actor: "Minh" },
+  { id: "t2", title: "Monthly Salary", wallet: "Savings", date: "15 Feb", amount: 5000000, actor: "" },
+  { id: "t3", title: "Coffee", wallet: "Main Wallet", date: "14 Feb", amount: -80000, actor: "" },
+  { id: "t4", title: "Books", wallet: "Daily Wallet", date: "13 Feb", amount: -300000, actor: "Lan" },
+  { id: "t5", title: "Savings Transfer", wallet: "Main Wallet", date: "11 Feb", amount: -1000000, actor: "" },
+];
+
+function formatVnd(value: number) {
+  return `${value.toLocaleString("en-US")}d`;
+}
 
 export default function WalletDashboardPage() {
   const { data: wallets, isLoading, error } = useWallets();
 
-  const totalCash = wallets?.reduce((sum, wallet) => sum + (wallet.balance || 0), 0) || 0;
-  const parentCount = wallets?.filter((wallet) => !wallet.parentWalletId).length || 0;
-  const childCount = wallets?.filter((wallet) => wallet.parentWalletId).length || 0;
+  const safeWallets = wallets ?? [];
+  const totalCash = safeWallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
+  const parentWallets = safeWallets.filter((wallet) => !wallet.parentWalletId);
+  const childWallets = safeWallets.filter((wallet) => !!wallet.parentWalletId);
+
+  const mockReceivable = 1500000;
+  const mockPayable = 200000;
+  const netWorth = totalCash + mockReceivable - mockPayable;
 
   if (isLoading) {
     return (
       <div className="space-y-6" data-testid="wallet-dashboard-summary">
-        <h1 className="text-3xl font-bold text-ink-black">Wallet Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
+        <h1 className="text-3xl font-bold text-ink-black">Dashboard</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((item) => (
+            <Card key={item} className="animate-pulse">
               <CardHeader className="pb-2">
-                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded" />
               </CardHeader>
               <CardContent>
-                <div className="h-8 w-32 bg-gray-200 rounded"></div>
+                <div className="h-7 w-36 bg-gray-200 rounded" />
               </CardContent>
             </Card>
           ))}
@@ -37,10 +52,10 @@ export default function WalletDashboardPage() {
   if (error) {
     return (
       <div className="space-y-6" data-testid="wallet-dashboard-summary">
-        <h1 className="text-3xl font-bold text-ink-black">Wallet Dashboard</h1>
+        <h1 className="text-3xl font-bold text-ink-black">Dashboard</h1>
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
-            <p className="text-red-600">Failed to load wallet data: {error}</p>
+            <p className="text-red-600">Failed to load wallet data: {String(error)}</p>
           </CardContent>
         </Card>
       </div>
@@ -48,137 +63,135 @@ export default function WalletDashboardPage() {
   }
 
   return (
-    <div className="space-y-8" data-testid="wallet-dashboard-summary">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-ink-black">Wallet Dashboard</h1>
+    <div className="space-y-6" data-testid="wallet-dashboard-summary">
+      <div>
+        <h1 className="text-4xl font-bold text-ink-black">Dashboard</h1>
+        <p className="text-pencil-gray mt-1">Financial overview of your wallets</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card
-          className="border-note-yellow/30 hover:border-note-yellow/50 transition-colors"
-          data-testid="summary-total-cash"
-        >
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <Card data-testid="summary-net-worth" className="border-note-yellow/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-pencil-gray">
-              Total Cash
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-pencil-gray">Net Worth</CardTitle>
+            <TrendingUp className="h-4 w-4 text-note-yellow" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-orange-500">{formatVnd(netWorth)}</div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="summary-total-cash" className="border-note-yellow/30">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium text-pencil-gray">Total Wallets</CardTitle>
             <Wallet className="h-4 w-4 text-note-yellow" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-ink-black">
-              ${totalCash.toLocaleString()}
-            </div>
-            <p className="text-xs text-pencil-gray mt-1">
-              Across all wallets
-            </p>
+            <div className="text-3xl font-bold text-ink-black">{formatVnd(totalCash)}</div>
           </CardContent>
         </Card>
 
-        <Card
-          className="border-note-yellow/30 hover:border-note-yellow/50 transition-colors"
-          data-testid="summary-parent-count"
-        >
+        <Card data-testid="summary-receivable" className="border-note-yellow/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-pencil-gray">
-              Parent Wallets
-            </CardTitle>
-            <Wallet2 className="h-4 w-4 text-note-yellow" />
+            <CardTitle className="text-sm font-medium text-pencil-gray">Receivable</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-ink-black">
-              {parentCount}
-            </div>
-            <p className="text-xs text-pencil-gray mt-1">
-              Root-level wallets
-            </p>
+            <div className="text-3xl font-bold text-green-500">{formatVnd(mockReceivable)}</div>
           </CardContent>
         </Card>
 
-        <Card
-          className="border-note-yellow/30 hover:border-note-yellow/50 transition-colors"
-          data-testid="summary-child-count"
-        >
+        <Card data-testid="summary-payable" className="border-note-yellow/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-pencil-gray">
-              Sub-wallets
-            </CardTitle>
-            <Users className="h-4 w-4 text-note-yellow" />
+            <CardTitle className="text-sm font-medium text-pencil-gray">Payable</CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-ink-black">
-              {childCount}
-            </div>
-            <p className="text-xs text-pencil-gray mt-1">
-              Attached to parents
-            </p>
+            <div className="text-3xl font-bold text-red-500">{formatVnd(mockPayable)}</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-ink-black">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/wallets" data-testid="nav-to-wallets">
-            <Card className="cursor-pointer hover:border-note-yellow/50 transition-colors group">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-ink-black group-hover:text-note-yellow transition-colors">
-                    Manage Parent Wallets
-                  </h3>
-                  <p className="text-sm text-pencil-gray">
-                    View and manage your parent wallets
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-pencil-gray group-hover:text-note-yellow transition-colors" />
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/partners" data-testid="nav-to-partners">
-            <Card className="cursor-pointer hover:border-note-yellow/50 transition-colors group">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-ink-black group-hover:text-note-yellow transition-colors">
-                    Manage Partners
-                  </h3>
-                  <p className="text-sm text-pencil-gray">
-                    View and manage your debt partners
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-pencil-gray group-hover:text-note-yellow transition-colors" />
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-      </div>
-
-      {wallets && wallets.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-ink-black">Your Wallets</h2>
-          <Card className="border-note-yellow/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-pencil-gray">
-                    You have <span className="font-semibold text-ink-black">{wallets.length}</span> total wallets
-                  </p>
-                  <p className="text-xs text-pencil-gray mt-1">
-                    {parentCount} parent wallets and {childCount} sub-wallets
-                  </p>
-                </div>
-                <Link href="/wallets">
-                  <Button
-                    variant="outline"
-                    className="border-note-yellow hover:bg-note-yellow/10"
-                  >
-                    View All
-                  </Button>
-                </Link>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Card className="xl:col-span-2" data-testid="chart-container">
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold text-ink-black">Asset Trend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative h-72 rounded-md border border-note-yellow/20 bg-gradient-to-b from-orange-50 to-white overflow-hidden">
+              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4">
+                {Array.from({ length: 24 }).map((_, index) => (
+                  <div key={index} className="border-[0.5px] border-dashed border-note-yellow/20" />
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+              <div className="absolute left-4 right-4 bottom-12 h-24 border-t-2 border-orange-300 rounded-t-full" />
+              <div className="absolute left-4 right-4 bottom-6 flex justify-between text-xs text-pencil-gray">
+                <span>T8</span>
+                <span>T9</span>
+                <span>T10</span>
+                <span>T11</span>
+                <span>T12</span>
+                <span>T1</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="wallet-panel">
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold text-ink-black flex items-center gap-2">
+              <Wallet2 className="h-5 w-5 text-note-yellow" />
+              Your Wallets
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {parentWallets.slice(0, 6).map((wallet) => {
+              const childCount = childWallets.filter((child) => child.parentWalletId === wallet.id).length;
+              return (
+                <div key={wallet.id} className="rounded-md border border-note-yellow/20 px-3 py-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-ink-black">{wallet.name}</p>
+                      <p className="text-xs text-pencil-gray">{childCount} children</p>
+                    </div>
+                    <p className="font-semibold text-orange-500">{formatVnd(wallet.balance || 0)}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card data-testid="recent-history-section">
+        <CardHeader>
+          <CardTitle className="text-4xl font-bold text-ink-black flex items-center gap-2">
+            <Clock3 className="h-6 w-6 text-note-yellow" />
+            Recent History
+          </CardTitle>
+          <p className="text-sm text-pencil-gray">Mock entries for current redesign phase</p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {mockRecentHistory.map((item) => {
+              const positive = item.amount > 0;
+              return (
+                <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-2">
+                  <div>
+                    <p className="font-medium text-ink-black">{item.title}</p>
+                    <p className="text-xs text-pencil-gray">{item.wallet} - {item.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-semibold ${positive ? "text-green-600" : "text-red-600"}`}>
+                      {positive ? "+" : ""}{formatVnd(item.amount)}
+                    </p>
+                    {item.actor ? <p className="text-xs text-pencil-gray">{item.actor}</p> : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

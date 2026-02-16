@@ -14,10 +14,15 @@ import {
   ArrowLeft,
   Users,
   Plus,
+  Pencil,
   Trash2,
   Wallet2,
   DollarSign,
 } from "lucide-react";
+
+function formatVnd(value: number) {
+  return `${value.toLocaleString("en-US")}d`;
+}
 
 export default function WalletDetailPage() {
   const params = useParams();
@@ -104,10 +109,10 @@ export default function WalletDetailPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-ink-black">
+            <h1 className="text-4xl font-bold text-ink-black">
               {parentWallet.name}
             </h1>
-            <p className="text-pencil-gray">Parent Wallet</p>
+            <p className="text-pencil-gray">Parent wallet details and child management</p>
           </div>
         </div>
         <span className="inline-flex items-center rounded-md border border-note-yellow px-3 py-1 text-sm text-ink-black">
@@ -131,7 +136,7 @@ export default function WalletDetailPage() {
             <div>
               <p className="text-sm text-pencil-gray">Current Balance</p>
               <p className="text-3xl font-bold text-ink-black">
-                ${(parentWallet.balance || 0).toLocaleString()}
+                {formatVnd(parentWallet.balance || 0)}
               </p>
             </div>
             {parentWallet.description && (
@@ -160,15 +165,25 @@ export default function WalletDetailPage() {
               <Users className="h-5 w-5 text-note-yellow" />
               Sub-wallets
             </CardTitle>
-            <Button
-              size="sm"
-              className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-              data-testid="attach-child-open"
-              onClick={() => setIsAttachModalOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Attach
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="border-note-yellow/40">
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+              <Button variant="outline" size="sm" className="border-red-200 text-red-500 hover:text-red-600">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
+              <Button
+                size="sm"
+                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+                data-testid="attach-child-open"
+                onClick={() => setIsAttachModalOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Child Wallet
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {childWallets.length === 0 ? (
@@ -196,7 +211,7 @@ export default function WalletDetailPage() {
                           {child.name}
                         </p>
                         <p className="text-xs text-pencil-gray">
-                          ${(child.balance || 0).toLocaleString()}
+                          {formatVnd(child.balance || 0)}
                         </p>
                       </div>
                     </div>

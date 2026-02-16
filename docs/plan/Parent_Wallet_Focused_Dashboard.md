@@ -306,3 +306,32 @@ users (user_id, email, password_hash, created_at)
 
 **Plan Created**: February 2026  
 **Target Completion**: On demand based on user testing
+
+---
+
+## Screenshot Parity Wave (English-Only)
+
+### Scope
+- In-scope pages:
+  - `frontend/src/app/(dashboard)/layout.tsx`
+  - `frontend/src/app/(dashboard)/wallets/dashboard/page.tsx`
+  - `frontend/src/app/(dashboard)/wallets/page.tsx`
+  - `frontend/src/app/(dashboard)/wallets/[id]/page.tsx`
+  - `frontend/src/app/(dashboard)/partners/page.tsx`
+- Keep `Quick Deduct`, `History`, and `Transfer` visible and routeable, but unchanged in logic.
+
+### Requirements
+- All in-scope user-facing labels must be English-only.
+- Match visual hierarchy from screenshots in `img/img2/`:
+  - KPI row + chart area + wallet panel + recent history mock on dashboard
+  - Grouped parent/child wallet blocks on wallet management page
+  - Partner cards layout with add/edit/delete actions on partners page
+
+### Verification Checklist
+- [x] Navigation baseline updated with visible Quick Deduct/History/Transfer entries.
+- [x] Dashboard parity structure implemented with mock recent history section.
+- [x] Parent wallet management parity structure implemented.
+- [x] Parent detail parity structure implemented.
+- [x] Partners parity structure implemented.
+- [x] English-only sweep completed for in-scope dashboard files.
+- [x] Out-of-scope logic untouched (Quick Deduct/History/Transfer).

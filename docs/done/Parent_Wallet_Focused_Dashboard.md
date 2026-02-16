@@ -539,3 +539,27 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 
 **Implementation Completed**: February 2026  
 **Ready for**: Build & deployment verification
+
+---
+
+## Screenshot Parity Wave Completion (English-Only)
+
+### What was delivered
+- Reworked dashboard layout at `frontend/src/app/(dashboard)/wallets/dashboard/page.tsx` to follow screenshot hierarchy:
+  - 4 KPI cards
+  - Chart section container
+  - Wallet side panel
+  - Recent history mock section
+- Reworked parent wallet management page at `frontend/src/app/(dashboard)/wallets/page.tsx` into grouped parent/child blocks.
+- Refined parent detail page at `frontend/src/app/(dashboard)/wallets/[id]/page.tsx` for screenshot-aligned structure while keeping attach/detach behavior.
+- Rebuilt partners page at `frontend/src/app/(dashboard)/partners/page.tsx` with screenshot-like card composition and CRUD actions.
+- Updated dashboard navigation at `frontend/src/app/(dashboard)/layout.tsx` to expose Quick Deduct/History/Transfer links without introducing new logic.
+
+### Constraint compliance
+- English-only labels applied across in-scope dashboard pages.
+- Quick Deduct, History, and Transfer logic left untouched.
+- No backend changes required for this screenshot-parity wave.
+
+### Verification notes
+- In-scope copy scan found no Vietnamese characters in dashboard route files.
+- Route structure remains stable and consistent with parent-wallet-focused navigation.
