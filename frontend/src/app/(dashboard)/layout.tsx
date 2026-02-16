@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Toaster } from "sonner";
+import { getAuthToken } from "@/lib/authToken";
 import {
   ArrowLeftRight,
   Clock3,
@@ -61,12 +62,21 @@ const navItems: NavItem[] = [
   },
 ];
 
-function isActive(pathname: string, href: string) {
+function isActive(pathname: string, currentTab: string | null, href: string) {
   const cleanHref = href.split("?")[0];
+  const targetTab = href.includes("?") ? new URLSearchParams(href.split("?")[1]).get("tab") : null;
+
+  if (cleanHref === "/workspace" && targetTab) {
+    return pathname === "/workspace" && currentTab === targetTab;
+  }
+
   if (cleanHref === "/wallets/dashboard") {
     return pathname === "/wallets/dashboard";
   }
   if (cleanHref === "/wallets") {
+    if (pathname === "/wallets/dashboard" || pathname.startsWith("/wallets/dashboard/")) {
+      return false;
+    }
     return pathname === "/wallets" || pathname.startsWith("/wallets/");
   }
   if (cleanHref === "/partners") {
@@ -75,67 +85,97 @@ function isActive(pathname: string, href: string) {
   return pathname === cleanHref;
 }
 
+function getDisplayNameFromToken(token: string | null): string {
+  if (!token) return "User";
+
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return "User";
+
+    const payloadBase64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = payloadBase64.padEnd(Math.ceil(payloadBase64.length / 4) * 4, "=");
+    const payload = JSON.parse(atob(padded)) as Record<string, string>;
+
+    const name = payload.name || payload.unique_name || payload.username;
+    if (name && name.trim().length > 0) return name;
+
+    const email = payload.email;
+    if (email && email.includes("@")) return email.split("@")[0];
+  } catch {
+    return "User";
+  }
+
+  return "User";
+}
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
+  const [displayName, setDisplayName] = React.useState("User");
+
+  React.useEffect(() => {
+    const token = getAuthToken();
+    setDisplayName(getDisplayNameFromToken(token));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FFFBEB]">
-      <div className="flex min-h-screen">
-        <aside className="w-[250px] border-r border-note-yellow/20 bg-white/90 flex flex-col">
-          <div className="px-4 py-5 border-b border-note-yellow/20">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold">
-                G
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-ink-black">MA6 Debt</p>
-                <p className="text-sm text-pencil-gray">Hello, user</p>
-              </div>
+      <aside className="fixed inset-y-0 left-0 z-30 w-[250px] border-r border-note-yellow/20 bg-white/90 flex flex-col overflow-y-auto">
+        <div className="px-4 py-5 border-b border-note-yellow/20">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold">
+              G
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-ink-black">MA6 Debt</p>
+              <p className="text-sm text-pencil-gray">Hello, {displayName}</p>
             </div>
           </div>
-
-          <nav className="px-2 py-4 space-y-1">
-            {navItems.map((item) => {
-              const active = isActive(pathname, item.href);
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  data-testid={item.testId}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-note-yellow/20 text-[#D97706]"
-                      : "text-ink-black hover:bg-note-yellow/10"
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="mt-auto p-3">
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-black hover:bg-note-yellow/10"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </button>
-          </div>
-        </aside>
-
-        <div className="flex-1 min-w-0">
-          <header className="h-12 border-b border-note-yellow/20 flex items-center px-6">
-            <PanelLeft className="h-4 w-4 text-ink-black" />
-          </header>
-          <main className="p-6">{children}</main>
         </div>
+
+        <nav className="px-2 py-4 space-y-1">
+          {navItems.map((item) => {
+            const active = isActive(pathname, currentTab, item.href);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                scroll={false}
+                data-testid={item.testId}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-note-yellow/20 text-[#D97706]"
+                    : "text-ink-black hover:bg-note-yellow/10"
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto p-3">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-black hover:bg-note-yellow/10"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <div className="ml-[250px] min-h-screen">
+        <header className="sticky top-0 z-20 h-12 border-b border-note-yellow/20 bg-[#FFFBEB]/95 backdrop-blur flex items-center px-6">
+          <PanelLeft className="h-4 w-4 text-ink-black" />
+        </header>
+        <main className="p-6">{children}</main>
       </div>
       <Toaster />
     </div>

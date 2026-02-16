@@ -23,7 +23,6 @@ import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 const walletFormSchema = z.object({
   name: z.string().min(1, "Wallet name is required").max(100, "Name too long"),
   description: z.string().optional(),
-  parentWalletId: z.string().optional(),
 });
 
 type WalletFormInput = z.infer<typeof walletFormSchema>;
@@ -31,7 +30,7 @@ type WalletFormInput = z.infer<typeof walletFormSchema>;
 interface WalletFormProps {
   mode: "create" | "edit";
   wallet?: Wallet;
-  availableWallets?: Wallet[];
+  fixedParentWalletId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -39,7 +38,7 @@ interface WalletFormProps {
 export const WalletForm = ({
   mode,
   wallet,
-  availableWallets = [],
+  fixedParentWalletId,
   onSuccess,
   onCancel,
 }: WalletFormProps) => {
@@ -52,7 +51,6 @@ export const WalletForm = ({
     defaultValues: {
       name: wallet?.name || "",
       description: wallet?.description || "",
-      parentWalletId: wallet?.parentWalletId || "",
     },
   });
 
@@ -62,7 +60,6 @@ export const WalletForm = ({
       form.reset({
         name: wallet.name,
         description: wallet.description || "",
-        parentWalletId: wallet.parentWalletId || "",
       });
     }
   }, [wallet, form]);
@@ -74,7 +71,7 @@ export const WalletForm = ({
       const payload = {
         name: data.name,
         description: data.description || undefined,
-        parentWalletId: data.parentWalletId || undefined,
+        parentWalletId: fixedParentWalletId,
       };
 
       if (mode === "create") {
@@ -110,9 +107,6 @@ export const WalletForm = ({
       setIsLoading(false);
     }
   };
-
-  // Filter out current wallet from parent selection (can't be own parent)
-  const selectableParents = availableWallets.filter((w) => w.id !== wallet?.id);
 
   return (
     <Form {...form}>
@@ -154,33 +148,6 @@ export const WalletForm = ({
             </FormItem>
           )}
         />
-
-        {mode === "create" && (
-          <FormField
-            control={form.control}
-            name="parentWalletId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-700">Parent Wallet (Optional)</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    disabled={isLoading}
-                    className="w-full rounded-md border border-[#1F2937]/10 bg-white px-3 py-2 text-sm focus:border-[#FCD34D] focus:outline-none focus:ring-1 focus:ring-[#FCD34D]"
-                  >
-                    <option value="">-- No Parent --</option>
-                    {selectableParents.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.name}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <div className="flex gap-2 pt-4">
           <Button

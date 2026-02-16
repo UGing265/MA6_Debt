@@ -220,13 +220,10 @@ const WalletFormWrapper = ({
   onSuccess?: () => void;
   onCancel?: () => void;
 }) => {
-  const { data: wallets } = useWallets();
-
   return (
     <WalletForm
       mode={mode}
       wallet={wallet}
-      availableWallets={wallets}
       onSuccess={onSuccess}
       onCancel={onCancel}
     />
