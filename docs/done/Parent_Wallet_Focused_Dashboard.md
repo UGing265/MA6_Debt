@@ -563,3 +563,16 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 ### Verification notes
 - In-scope copy scan found no Vietnamese characters in dashboard route files.
 - Route structure remains stable and consistent with parent-wallet-focused navigation.
+
+## Stabilization Patch Completion
+
+### Interaction and layout hardening
+- Sidebar is fixed-left at 225px with matching main-content offset for stable cross-route rendering.
+- Parent wallet child-list reveal now uses parent-name click only (extra reveal button removed).
+- Wallet edit flow remains modal-only and limited to name/description.
+- Wallet delete flow adds explicit parent-with-children guard messaging and keeps child deletion confirmed.
+
+### Route clarity updates
+- Added canonical dashboard route at `/dashboard`.
+- Updated dashboard entry points and sidebar links to use `/dashboard`.
+- Preserved existing `/wallets/dashboard` page for compatibility.

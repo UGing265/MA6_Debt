@@ -59,7 +59,7 @@ export default function WorkspacePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/wallets/dashboard">
+            <Link href="/dashboard">
               <Button className="bg-note-yellow text-ink-black hover:bg-note-yellow/90">
                 <LayoutDashboard className="h-4 w-4 mr-2" />
                 Go to Dashboard

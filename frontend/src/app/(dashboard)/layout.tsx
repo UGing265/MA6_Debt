@@ -26,7 +26,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     label: "Dashboard",
-    href: "/wallets/dashboard",
+    href: "/dashboard",
     icon: <LayoutDashboard className="h-4 w-4" />,
     testId: "nav-wallet-dashboard",
   },
@@ -70,11 +70,16 @@ function isActive(pathname: string, currentTab: string | null, href: string) {
     return pathname === "/workspace" && currentTab === targetTab;
   }
 
-  if (cleanHref === "/wallets/dashboard") {
-    return pathname === "/wallets/dashboard";
+  if (cleanHref === "/dashboard") {
+    return pathname === "/dashboard" || pathname === "/wallets/dashboard";
   }
   if (cleanHref === "/wallets") {
-    if (pathname === "/wallets/dashboard" || pathname.startsWith("/wallets/dashboard/")) {
+    if (
+      pathname === "/dashboard" ||
+      pathname.startsWith("/dashboard/") ||
+      pathname === "/wallets/dashboard" ||
+      pathname.startsWith("/wallets/dashboard/")
+    ) {
       return false;
     }
     return pathname === "/wallets" || pathname.startsWith("/wallets/");
@@ -125,7 +130,7 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#FFFBEB]">
-      <aside className="fixed inset-y-0 left-0 z-30 w-[250px] border-r border-note-yellow/20 bg-white/90 flex flex-col overflow-y-auto">
+      <aside className="fixed inset-y-0 left-0 z-30 w-[225px] border-r border-note-yellow/20 bg-white/90 flex flex-col overflow-y-auto">
         <div className="px-4 py-5 border-b border-note-yellow/20">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold">
@@ -171,7 +176,7 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <div className="ml-[250px] min-h-screen">
+      <div className="ml-[225px] min-h-screen">
         <header className="sticky top-0 z-20 h-12 border-b border-note-yellow/20 bg-[#FFFBEB]/95 backdrop-blur flex items-center px-6">
           <PanelLeft className="h-4 w-4 text-ink-black" />
         </header>

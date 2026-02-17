@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Wallet2, Plus, Pencil, Trash2, ChevronDown } from "lucide-react";
+import { Wallet2, Plus, Pencil, Trash2 } from "lucide-react";
 
 function formatVnd(value: number) {
   return `${value.toLocaleString("en-US")}d`;
@@ -32,6 +32,10 @@ export default function WalletsPage() {
 
   const allWallets = wallets ?? [];
   const parentWallets = allWallets.filter((wallet) => !wallet.parentWalletId);
+  const deletingChildCount = deletingWallet
+    ? allWallets.filter((wallet) => wallet.parentWalletId === deletingWallet.id).length
+    : 0;
+  const canDeleteSelectedWallet = deletingWallet ? deletingChildCount === 0 : false;
 
   const handleDeleteWallet = async () => {
     if (!deletingWallet) return;
@@ -114,7 +118,13 @@ export default function WalletsPage() {
                         <Wallet2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-ink-black">{parent.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedParentId((prev) => (prev === parent.id ? null : parent.id))}
+                          className="text-left text-2xl font-bold text-ink-black hover:text-[#D97706]"
+                        >
+                          {parent.name}
+                        </button>
                         <p className="text-sm text-pencil-gray">
                           {parent.description || "No description"} - {children.length} children
                         </p>
@@ -122,18 +132,6 @@ export default function WalletsPage() {
                     </div>
                     <div className="flex items-center gap-3 self-start md:self-auto">
                       <p className="text-3xl font-bold text-orange-500">{formatVnd(parent.balance || 0)}</p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setExpandedParentId((prev) => (prev === parent.id ? null : parent.id))
-                        }
-                        className="inline-flex items-center gap-2 rounded-md border border-note-yellow/30 px-2 py-1 text-xs font-medium text-ink-black hover:bg-note-yellow/10"
-                      >
-                        {isExpanded ? "Hide children" : "View children"}
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : "rotate-0"}`}
-                        />
-                      </button>
                     </div>
                   </div>
 
@@ -201,7 +199,7 @@ export default function WalletsPage() {
                     </div>
                   ) : (
                     <div className="rounded-lg border border-dashed border-note-yellow/20 px-3 py-3 text-xs text-pencil-gray">
-                      Click "View children" to show child wallets.
+                      Click parent name to show child wallets.
                     </div>
                   )}
                 </CardContent>
@@ -256,6 +254,11 @@ export default function WalletsPage() {
             <DialogDescription>
               Are you sure you want to delete {deletingWallet?.name}? This action cannot be undone.
             </DialogDescription>
+            {deletingWallet && deletingChildCount > 0 ? (
+              <p className="text-sm text-red-600">
+                This parent wallet has {deletingChildCount} child wallet(s). Remove or detach child wallets first.
+              </p>
+            ) : null}
           </DialogHeader>
           <div className="flex justify-end gap-2 pt-2">
             <Button
@@ -268,9 +271,9 @@ export default function WalletsPage() {
             <Button
               variant="destructive"
               onClick={handleDeleteWallet}
-              disabled={isDeleting}
+              disabled={isDeleting || !canDeleteSelectedWallet}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? "Deleting..." : canDeleteSelectedWallet ? "Delete" : "Cannot Delete"}
             </Button>
           </div>
         </DialogContent>

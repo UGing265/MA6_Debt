@@ -335,3 +335,11 @@ users (user_id, email, password_hash, created_at)
 - [x] Partners parity structure implemented.
 - [x] English-only sweep completed for in-scope dashboard files.
 - [x] Out-of-scope logic untouched (Quick Deduct/History/Transfer).
+
+### Stabilization Patch Checklist
+- [x] Sidebar width normalized to 225px fixed-left with matching content offset.
+- [x] Parent-name click set as child-list reveal trigger; extra reveal control removed.
+- [x] Edit flow remains modal-first and constrained to name/description updates.
+- [x] Delete flow hardened with parent-child guard messaging in confirmation dialog.
+- [x] Child actions are explicitly split into "Create Child Wallet" and "Add Existing Child" in parent detail.
+- [x] Route clarity normalized with `/dashboard` entry while preserving legacy `/wallets/dashboard` compatibility.
