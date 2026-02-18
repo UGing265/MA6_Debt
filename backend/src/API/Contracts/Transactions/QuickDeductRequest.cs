@@ -1,4 +1,5 @@
 using Application.Features.Transactions;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Contracts.Transactions
 {
@@ -8,6 +9,8 @@ namespace API.Contracts.Transactions
 
         public Guid? PartnerId { get; set; }
 
+        [Required]
+        [EnumDataType(typeof(PayerMode))]
         public PayerMode PayerMode { get; set; }
 
         public decimal Total { get; set; }
