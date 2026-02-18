@@ -343,3 +343,12 @@ users (user_id, email, password_hash, created_at)
 - [x] Delete flow hardened with parent-child guard messaging in confirmation dialog.
 - [x] Child actions are explicitly split into "Create Child Wallet" and "Add Existing Child" in parent detail.
 - [x] Route clarity normalized with `/dashboard` entry while preserving legacy `/wallets/dashboard` compatibility.
+
+### Refinement Patch Round 2 Checklist
+- [x] Child reveal uses down-arrow icon control (no text reveal trigger).
+- [x] Arrow click expands/collapses child-wallet list inline per parent row.
+- [x] Parent name has hover/pointer behavior and routes to `/wallets/[id]`.
+- [x] Parent-detail child section removes `Add Existing Child`.
+- [x] Parent-detail child section removes parent-level edit noise.
+- [x] Child edit remains at child-row level in wallet list and detail views.
+- [x] Overview/Sub-wallet spacing reduced clutter for parent detail.

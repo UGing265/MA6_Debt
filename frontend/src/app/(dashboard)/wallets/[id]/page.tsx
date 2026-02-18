@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { WalletForm } from "@/features/wallet/components/WalletForm";
-import { AttachWalletModal } from "@/features/wallet/components/AttachWalletModal";
 import { DetachWalletModal } from "@/features/wallet/components/DetachWalletModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,8 +37,9 @@ export default function WalletDetailPage() {
   const walletId = params.id as string;
   const { data: wallets, isLoading, error, refetch } = useWallets();
   const [isCreateChildModalOpen, setIsCreateChildModalOpen] = useState(false);
-  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
   const [isDetachModalOpen, setIsDetachModalOpen] = useState(false);
+  const [isEditChildModalOpen, setIsEditChildModalOpen] = useState(false);
+  const [editingChildWallet, setEditingChildWallet] = useState<Wallet | null>(null);
   const [selectedChildWallet, setSelectedChildWallet] = useState<Wallet | null>(null);
 
   const parentWallet = wallets?.find((w) => w.id === walletId);
@@ -175,34 +175,14 @@ export default function WalletDetailPage() {
               <Users className="h-5 w-5 text-note-yellow" />
               Sub-wallets
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="border-note-yellow/40">
-                <Pencil className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-              <Button variant="outline" size="sm" className="border-red-200 text-red-500 hover:text-red-600">
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-              <Button
-                size="sm"
-                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-                onClick={() => setIsCreateChildModalOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Create Child Wallet
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-note-yellow/40"
-                data-testid="attach-child-open"
-                onClick={() => setIsAttachModalOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Existing Child
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+              onClick={() => setIsCreateChildModalOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create Child Wallet
+            </Button>
           </CardHeader>
           <CardContent>
             {childWallets.length === 0 ? (
@@ -212,7 +192,7 @@ export default function WalletDetailPage() {
                   No sub-wallets attached
                 </p>
                 <p className="text-xs text-pencil-gray mt-1">
-                  Click Attach to add sub-wallets
+                  Click Create Child Wallet to add sub-wallets
                 </p>
               </div>
             ) : (
@@ -237,6 +217,17 @@ export default function WalletDetailPage() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="text-ink-black hover:bg-note-yellow/10"
+                      onClick={() => {
+                        setEditingChildWallet(child);
+                        setIsEditChildModalOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="text-red-500 hover:text-red-700 hover:bg-red-50"
                       data-testid="detach-child-open"
                       onClick={() => {
@@ -253,14 +244,6 @@ export default function WalletDetailPage() {
           </CardContent>
         </Card>
       </div>
-
-      <AttachWalletModal
-        isOpen={isAttachModalOpen}
-        onClose={() => setIsAttachModalOpen(false)}
-        parentId={walletId}
-        availableWallets={wallets || []}
-        onSuccess={refetch}
-      />
 
       <Dialog open={isCreateChildModalOpen} onOpenChange={setIsCreateChildModalOpen}>
         <DialogContent>
@@ -280,6 +263,38 @@ export default function WalletDetailPage() {
             }}
             onCancel={() => setIsCreateChildModalOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditChildModalOpen} onOpenChange={setIsEditChildModalOpen}>
+        <DialogContent>
+          <DialogClose
+            onClose={() => {
+              setIsEditChildModalOpen(false);
+              setEditingChildWallet(null);
+            }}
+          />
+          <DialogHeader>
+            <DialogTitle>Edit Child Wallet</DialogTitle>
+            <DialogDescription>
+              Update child wallet name and description.
+            </DialogDescription>
+          </DialogHeader>
+          {editingChildWallet ? (
+            <WalletForm
+              mode="edit"
+              wallet={editingChildWallet}
+              onSuccess={() => {
+                setIsEditChildModalOpen(false);
+                setEditingChildWallet(null);
+                refetch();
+              }}
+              onCancel={() => {
+                setIsEditChildModalOpen(false);
+                setEditingChildWallet(null);
+              }}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
 

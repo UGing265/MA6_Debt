@@ -576,3 +576,22 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 - Added canonical dashboard route at `/dashboard`.
 - Updated dashboard entry points and sidebar links to use `/dashboard`.
 - Preserved existing `/wallets/dashboard` page for compatibility.
+
+## Refinement Patch Round 2 Completion
+
+### Wallet list interaction updates
+- Child reveal trigger changed to icon-only down-arrow control on each parent row.
+- Arrow click now toggles child-wallet expansion inline without text-based reveal controls.
+- Parent name now behaves as navigation to parent detail (`/wallets/[id]`) with interactive hover styling.
+- Parent-level action noise was reduced; expanded state surfaces contextual actions while child row keeps edit/delete.
+
+### Parent detail declutter updates
+- Removed `Add Existing Child` action from parent detail child-management header.
+- Removed parent-level edit/delete controls from child-management header.
+- Added child-row edit action in parent detail, keeping edit/delete operations where child data is displayed.
+- Kept `Create Child Wallet` as the single parent-level child creation action.
+
+### UX consistency outcomes
+- Interaction pattern now aligns with user expectation: arrow expands/collapses child sections.
+- Parent/child responsibilities are clearer with less control clutter.
+- Wallet management flow remains frontend-only with no backend contract change.

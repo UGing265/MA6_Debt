@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Wallet2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Wallet2, Plus, Pencil, Trash2, ChevronDown } from "lucide-react";
 
 function formatVnd(value: number) {
   return `${value.toLocaleString("en-US")}d`;
@@ -118,13 +118,12 @@ export default function WalletsPage() {
                         <Wallet2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <button
-                          type="button"
-                          onClick={() => setExpandedParentId((prev) => (prev === parent.id ? null : parent.id))}
-                          className="text-left text-2xl font-bold text-ink-black hover:text-[#D97706]"
+                        <Link
+                          href={`/wallets/${parent.id}`}
+                          className="inline-block cursor-pointer text-left text-2xl font-bold text-ink-black hover:text-[#D97706]"
                         >
                           {parent.name}
-                        </button>
+                        </Link>
                         <p className="text-sm text-pencil-gray">
                           {parent.description || "No description"} - {children.length} children
                         </p>
@@ -132,76 +131,78 @@ export default function WalletsPage() {
                     </div>
                     <div className="flex items-center gap-3 self-start md:self-auto">
                       <p className="text-3xl font-bold text-orange-500">{formatVnd(parent.balance || 0)}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      variant="outline"
-                      className="border-note-yellow/40"
-                      onClick={() => setEditingWallet(parent)}
-                    >
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-red-200 text-red-500 hover:text-red-600"
-                      onClick={() => setDeletingWallet(parent)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                    <Link href={`/wallets/${parent.id}`}>
-                      <Button variant="outline" className="border-note-yellow/40">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Child Wallet
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        aria-label={isExpanded ? "Collapse child wallets" : "Expand child wallets"}
+                        onClick={() => setExpandedParentId((prev) => (prev === parent.id ? null : parent.id))}
+                        className="h-8 w-8 border border-note-yellow/30 hover:bg-note-yellow/10"
+                      >
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : "rotate-0"}`} />
                       </Button>
-                    </Link>
+                    </div>
                   </div>
 
-                  {isExpanded && children.length > 0 ? (
-                    <div className="space-y-2">
-                      {children.map((child) => (
-                        <div
-                          key={child.id}
-                          className="rounded-lg border border-note-yellow/20 px-3 py-3 flex items-center justify-between"
+                  {isExpanded ? (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          variant="outline"
+                          className="border-red-200 text-red-500 hover:text-red-600"
+                          onClick={() => setDeletingWallet(parent)}
                         >
-                          <div>
-                            <p className="font-medium text-ink-black">{child.name}</p>
-                            <p className="text-sm text-pencil-gray">{child.description || "No description"}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <p className="font-bold text-ink-black">{formatVnd(child.balance || 0)}</p>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setEditingWallet(child)}
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Parent Wallet
+                        </Button>
+                        <Link href={`/wallets/${parent.id}`}>
+                          <Button variant="outline" className="border-note-yellow/40">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Child Wallet
+                          </Button>
+                        </Link>
+                      </div>
+
+                      {children.length > 0 ? (
+                        <div className="space-y-2">
+                          {children.map((child) => (
+                            <div
+                              key={child.id}
+                              className="rounded-lg border border-note-yellow/20 px-3 py-3 flex items-center justify-between"
                             >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-600"
-                              onClick={() => setDeletingWallet(child)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                              <div>
+                                <p className="font-medium text-ink-black">{child.name}</p>
+                                <p className="text-sm text-pencil-gray">{child.description || "No description"}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <p className="font-bold text-ink-black">{formatVnd(child.balance || 0)}</p>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => setEditingWallet(child)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-red-500 hover:text-red-600"
+                                  onClick={() => setDeletingWallet(child)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        <div className="rounded-lg border border-dashed border-note-yellow/35 px-3 py-4 text-sm text-pencil-gray">
+                          No child wallets attached yet.
+                        </div>
+                      )}
                     </div>
-                  ) : isExpanded ? (
-                    <div className="rounded-lg border border-dashed border-note-yellow/35 px-3 py-4 text-sm text-pencil-gray">
-                      No child wallets attached yet.
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-dashed border-note-yellow/20 px-3 py-3 text-xs text-pencil-gray">
-                      Click parent name to show child wallets.
-                    </div>
-                  )}
+                  ) : null}
                 </CardContent>
               </Card>
             );
