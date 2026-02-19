@@ -303,3 +303,16 @@ Partner balance before delete: 100000
 - `docs/done/US03_US04_QuickDeduct_Backend.md` - Related transaction implementation
 - `docs/plan/US03_US04_QuickDeduct_Backend.md` - Plan structure baseline
 
+---
+
+## Scalar/OpenAPI Metadata Hardening (Addendum)
+
+Planned metadata hardening pass for API contract visibility in Scalar:
+
+1. Standardize `ProducesResponseType` coverage across controllers (Auth, Wallets, DebtPartners, Transactions) to align with global exception mapping (`400/401/404/500`).
+2. Ensure transactions list query parameters (`walletId`, `search`) have explicit XML parameter descriptions.
+3. Improve request schema metadata for transactions contracts while keeping decimal fields plain/readable per user preference.
+4. Keep strict scope constraints:
+   - no DB schema/entity/migration changes,
+   - no package additions,
+   - no build/test execution by agent.

@@ -418,4 +418,31 @@ docs/done/US05_US06_HistorySearch_DataLocking_Backend.md
 
 ---
 
+## Scalar/OpenAPI Metadata Hardening (Post-Implementation)
+
+Additional API contract visibility improvements applied for Scalar:
+
+- Standardized `ProducesResponseType` annotations across controllers to better reflect mapped error outcomes.
+- Added transactions query parameter documentation (`walletId`, `search`) for clearer Scalar display.
+- Added minimal request schema metadata in transactions request contracts, while preserving plain decimal property style for readability.
+- Enabled XML documentation generation in API project for richer OpenAPI metadata extraction.
+
+Files involved in this hardening pass:
+
+- `backend/src/API/API.csproj`
+- `backend/src/API/Controllers/AuthController.cs`
+- `backend/src/API/Controllers/WalletsController.cs`
+- `backend/src/API/Controllers/DebtPartnersController.cs`
+- `backend/src/API/Controllers/TransactionsController.cs`
+- `backend/src/API/Contracts/Transactions/UpdateTransactionNoteRequest.cs`
+- `backend/src/API/Contracts/Transactions/QuickDeductRequest.cs`
+- `backend/src/API/Contracts/Transactions/CashAdjustmentRequest.cs`
+
+Constraint confirmation:
+
+- No DB schema/entity/migration changes in this metadata pass.
+- Build/test commands were not run by agent (per `RULES.md`).
+
+---
+
 *Completed by OpenCode Agent on 2026-02-16*

@@ -53,7 +53,7 @@ public class DebtPartnersController : ControllerBase
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(DebtPartnerDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<DebtPartnerDto>> GetById(Guid id)
@@ -70,7 +70,7 @@ public class DebtPartnersController : ControllerBase
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(DebtPartnerDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<DebtPartnerDto>> Update(Guid id, [FromBody] UpdateDebtPartnerCommand command)
@@ -83,7 +83,7 @@ public class DebtPartnersController : ControllerBase
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Delete(Guid id)

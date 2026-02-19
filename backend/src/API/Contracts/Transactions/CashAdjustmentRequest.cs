@@ -1,24 +1,32 @@
 using Application.Features.Transactions.CashAdjustment;
-using System.ComponentModel.DataAnnotations;
 
 namespace API.Contracts.Transactions
 {
     public class CashAdjustmentRequest
     {
-        [Required]
+        /// <summary>
+        /// Wallet that receives the adjustment transaction.
+        /// </summary>
         public Guid WalletId { get; set; }
 
-        [Required]
-        [EnumDataType(typeof(AdjustmentDirection))]
+        /// <summary>
+        /// Adjustment direction (`Increase` or `Decrease`).
+        /// </summary>
         public AdjustmentDirection Direction { get; set; }
 
+        /// <summary>
+        /// Absolute adjustment amount.
+        /// </summary>
         public decimal Amount { get; set; }
 
-        [Required]
-        [MinLength(3)]
-        [MaxLength(255)]
+        /// <summary>
+        /// Required note for audit trail.
+        /// </summary>
         public string Note { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Optional transaction date. Uses current server date/time when omitted.
+        /// </summary>
         public DateTime? TransactionDate { get; set; }
     }
 }

@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace API.Contracts.Transactions
 {
     public class UpdateTransactionNoteRequest
     {
-        [MaxLength(255)]
+        /// <summary>
+        /// Optional note content. Max length is enforced by validator rules.
+        /// </summary>
         public string? Note { get; set; }
     }
 }

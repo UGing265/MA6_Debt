@@ -54,7 +54,7 @@ public class WalletsController : ControllerBase
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(WalletDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<WalletDto>> GetById(Guid id)
@@ -71,7 +71,7 @@ public class WalletsController : ControllerBase
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(WalletDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<WalletDto>> Update(Guid id, [FromBody] UpdateWalletCommand command)
@@ -85,7 +85,7 @@ public class WalletsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Delete(Guid id)

@@ -38,7 +38,7 @@ namespace API.Controllers
         [ProducesResponseType(typeof(QuickDeductResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<QuickDeductResponse>> QuickDeduct([FromBody] QuickDeductRequest request)
         {
@@ -66,7 +66,7 @@ namespace API.Controllers
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TransactionDto>> CashAdjustment([FromBody] CashAdjustmentRequest request)
         {
@@ -109,7 +109,7 @@ namespace API.Controllers
         [HttpPut("{id:guid}/note")]
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TransactionDto>> UpdateNote(Guid id, [FromBody] UpdateTransactionNoteRequest request)
@@ -127,7 +127,7 @@ namespace API.Controllers
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(Guid id)
@@ -146,7 +146,7 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TransactionDto>> GetById(Guid id)
