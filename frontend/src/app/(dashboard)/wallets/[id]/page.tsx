@@ -41,6 +41,7 @@ export default function WalletDetailPage() {
   const [isEditChildModalOpen, setIsEditChildModalOpen] = useState(false);
   const [editingChildWallet, setEditingChildWallet] = useState<Wallet | null>(null);
   const [selectedChildWallet, setSelectedChildWallet] = useState<Wallet | null>(null);
+  const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
 
   const parentWallet = wallets?.find((w) => w.id === walletId);
   const childWallets =
@@ -74,7 +75,12 @@ export default function WalletDetailPage() {
         </Link>
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
-            <p className="text-red-600">Failed to load wallet: {error}</p>
+            <p className="text-red-600">Failed to load wallet: {String(error)}</p>
+            <div className="pt-4">
+              <Button variant="outline" onClick={() => void refetch()}>
+                Retry
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -131,16 +137,27 @@ export default function WalletDetailPage() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section data-testid="parent-overview">
         <Card
           className="border-note-yellow/30"
           data-testid="parent-overview-stats"
         >
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-ink-black flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-note-yellow" />
-              Overview
-            </CardTitle>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="text-lg font-semibold text-ink-black flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-note-yellow" />
+                Overview
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-ink-black hover:bg-note-yellow/10"
+                data-testid="edit-parent-wallet-button"
+                onClick={() => setIsEditParentModalOpen(true)}
+              >
+                <Pencil className="h-4 w-4 mr-1" /> Edit Parent Wallet
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -165,24 +182,51 @@ export default function WalletDetailPage() {
             </div>
           </CardContent>
         </Card>
+      </section>
 
+      
+      <Dialog
+        open={isEditParentModalOpen}
+        onOpenChange={(open) => {
+          setIsEditParentModalOpen(open);
+        }}
+      >
+        <DialogContent>
+          <DialogClose
+            onClose={() => {
+              setIsEditParentModalOpen(false);
+            }}
+          />
+          <DialogHeader>
+            <DialogTitle>Edit Parent Wallet</DialogTitle>
+            <DialogDescription>
+              Update parent wallet name and description.
+            </DialogDescription>
+          </DialogHeader>
+          {parentWallet ? (
+            <WalletForm
+              mode="edit"
+              wallet={parentWallet}
+              onSuccess={() => {
+                setIsEditParentModalOpen(false);
+                refetch();
+              }}
+              onCancel={() => setIsEditParentModalOpen(false)}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <section data-testid="subwallet-section">
         <Card
           className="border-note-yellow/30"
           data-testid="child-wallet-management"
         >
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-lg font-semibold text-ink-black flex items-center gap-2">
               <Users className="h-5 w-5 text-note-yellow" />
               Sub-wallets
             </CardTitle>
-            <Button
-              size="sm"
-              className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-              onClick={() => setIsCreateChildModalOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Create Child Wallet
-            </Button>
           </CardHeader>
           <CardContent>
             {childWallets.length === 0 ? (
@@ -201,7 +245,7 @@ export default function WalletDetailPage() {
                   <div
                     key={child.id}
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    data-testid="child-wallet-row"
+                    data-testid={`child-wallet-row-${child.id}`}
                   >
                     <div className="flex items-center gap-3">
                       <Wallet className="h-4 w-4 text-note-yellow" />
@@ -214,38 +258,68 @@ export default function WalletDetailPage() {
                         </p>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-ink-black hover:bg-note-yellow/10"
-                      onClick={() => {
-                        setEditingChildWallet(child);
-                        setIsEditChildModalOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      data-testid="detach-child-open"
-                      onClick={() => {
-                        setSelectedChildWallet(child);
-                        setIsDetachModalOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-ink-black hover:bg-note-yellow/10"
+                        data-testid={`detail-child-edit-${child.id}`}
+                        onClick={() => {
+                          setIsDetachModalOpen(false);
+                          setSelectedChildWallet(null);
+                          setIsCreateChildModalOpen(false);
+                          setEditingChildWallet(child);
+                          setIsEditChildModalOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        data-testid={`detail-child-delete-${child.id}`}
+                        onClick={() => {
+                          setIsEditChildModalOpen(false);
+                          setEditingChildWallet(null);
+                          setIsCreateChildModalOpen(false);
+                          setSelectedChildWallet(child);
+                          setIsDetachModalOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <Button
+                size="sm"
+                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+                onClick={() => {
+                  setIsDetachModalOpen(false);
+                  setSelectedChildWallet(null);
+                  setIsEditChildModalOpen(false);
+                  setEditingChildWallet(null);
+                  setIsCreateChildModalOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Create Child Wallet
+              </Button>
+            </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
-      <Dialog open={isCreateChildModalOpen} onOpenChange={setIsCreateChildModalOpen}>
+      <Dialog
+        open={isCreateChildModalOpen}
+        onOpenChange={(open) => {
+          setIsCreateChildModalOpen(open);
+        }}
+      >
         <DialogContent>
           <DialogClose onClose={() => setIsCreateChildModalOpen(false)} />
           <DialogHeader>
@@ -266,7 +340,15 @@ export default function WalletDetailPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isEditChildModalOpen} onOpenChange={setIsEditChildModalOpen}>
+      <Dialog
+        open={isEditChildModalOpen}
+        onOpenChange={(open) => {
+          setIsEditChildModalOpen(open);
+          if (!open) {
+            setEditingChildWallet(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogClose
             onClose={() => {

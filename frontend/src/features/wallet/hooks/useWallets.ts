@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   getWallets,
@@ -23,23 +23,34 @@ export const useWallets = () => {
   const [data, setData] = useState<Wallet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestIdRef = useRef(0);
 
   const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+    const requestId = ++requestIdRef.current;
+
+    if (isMountedRef.current) {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       const wallets = await getWallets();
+
+      if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setData(wallets);
     } catch (err: any) {
+      if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       const parsedError = parseErrorResponse(err);
       setError(parsedError.general || "Failed to load wallets");
     } finally {
+      if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
     void refetch();
 
     const listener = () => {
@@ -48,6 +59,7 @@ export const useWallets = () => {
 
     walletsListeners.add(listener);
     return () => {
+      isMountedRef.current = false;
       walletsListeners.delete(listener);
     };
   }, [refetch]);
