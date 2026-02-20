@@ -23,10 +23,13 @@ function formatVnd(value: number) {
 
 export default function WalletsPage() {
   const [isCreateParentOpen, setIsCreateParentOpen] = React.useState(false);
+  // inline create child: stores parent ID to create child under
+  const [createChildForParentId, setCreateChildForParentId] = React.useState<string | null>(null);
   const [editingWallet, setEditingWallet] = React.useState<Wallet | null>(null);
   const [deletingWallet, setDeletingWallet] = React.useState<Wallet | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
-  const [expandedParentId, setExpandedParentId] = React.useState<string | null>(null);
+  // FIX 1: Allow multiple parents expanded at once (Set instead of single string)
+  const [expandedParentIds, setExpandedParentIds] = React.useState<Set<string>>(new Set());
   const isMountedRef = React.useRef(true);
   const deleteInFlightRef = React.useRef(false);
   const { data: wallets, isLoading, error, refetch } = useWallets();
@@ -39,6 +42,18 @@ export default function WalletsPage() {
     : 0;
   const canDeleteSelectedWallet = deletingWallet ? deletingChildCount === 0 : false;
 
+  const toggleExpand = (parentId: string) => {
+    setExpandedParentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(parentId)) {
+        next.delete(parentId);
+      } else {
+        next.add(parentId);
+      }
+      return next;
+    });
+  };
+
   React.useEffect(() => {
     isMountedRef.current = true;
     return () => {
@@ -46,17 +61,17 @@ export default function WalletsPage() {
     };
   }, []);
 
+  // Clean up expanded IDs for deleted parents
   React.useEffect(() => {
-    if (!expandedParentId) return;
-
-    const stillParentExists = allWallets.some(
-      (wallet) => wallet.id === expandedParentId && !wallet.parentWalletId,
-    );
-
-    if (!stillParentExists) {
-      setExpandedParentId(null);
-    }
-  }, [allWallets, expandedParentId]);
+    setExpandedParentIds((prev) => {
+      const validIds = new Set(
+        allWallets.filter((w) => !w.parentWalletId).map((w) => w.id),
+      );
+      const next = new Set([...prev].filter((id) => validIds.has(id)));
+      if (next.size !== prev.size) return next;
+      return prev;
+    });
+  }, [allWallets]);
 
   const handleDeleteWallet = async () => {
     if (!deletingWallet) return;
@@ -77,6 +92,14 @@ export default function WalletsPage() {
         setIsDeleting(false);
       }
     }
+  };
+
+  // helper: close all dialogs cleanly
+  const closeAllDialogs = () => {
+    setIsCreateParentOpen(false);
+    setCreateChildForParentId(null);
+    setEditingWallet(null);
+    setDeletingWallet(null);
   };
 
   if (isLoading) {
@@ -126,8 +149,7 @@ export default function WalletsPage() {
           className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
           disabled={isDeleting}
           onClick={() => {
-            setEditingWallet(null);
-            setDeletingWallet(null);
+            closeAllDialogs();
             setIsCreateParentOpen(true);
           }}
         >
@@ -148,23 +170,27 @@ export default function WalletsPage() {
         <div className="space-y-4">
           {parentWallets.map((parent) => {
             const children = allWallets.filter((wallet) => wallet.parentWalletId === parent.id);
-            const isExpanded = expandedParentId === parent.id;
+            const isExpanded = expandedParentIds.has(parent.id);
+
+            // FIX 4: Aggregate balance = parent's own balance + sum of children balances
+            // (SRS: "Hệ thống phải tự động cộng dồn số dư từ các Ví con để hiển thị tổng")
+            const aggregatedBalance =
+              (parent.balance || 0) +
+              children.reduce((sum, child) => sum + (child.balance || 0), 0);
+
             return (
-              // Wrap the card to enable full-area click while preserving existing selectors
               <div
                 key={parent.id}
                 data-testid={`parent-card-${parent.id}`}
                 onClick={(e) => {
                   const target = e.target as HTMLElement;
-                  // If the click originated from a link, do nothing (navigation should occur)
-                  if (target.closest?.(`[data-testid="parent-link-${parent.id}"]`)) return;
-                  // If the click originated from the toggle button, let its handler manage state
-                  if (target.closest?.(`[data-testid="parent-toggle-${parent.id}"]`)) return;
-                  // Otherwise, toggle expand/collapse for this parent
-                  setExpandedParentId((prev) => (prev === parent.id ? null : parent.id));
+                  if (target.closest?.("a")) return;
+                  if (target.closest?.("button")) return;
+                  if (target.closest?.("[role='dialog']")) return;
+                  toggleExpand(parent.id);
                 }}
               >
-                <Card className="border-note-yellow/25" data-testid="parent-wallet-card">
+                <Card className="border-note-yellow/25 cursor-pointer hover:border-note-yellow/50 transition-colors" data-testid="parent-wallet-card">
                   <CardContent className="p-4 md:p-5 space-y-4">
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div className="flex items-start gap-3">
@@ -176,16 +202,32 @@ export default function WalletsPage() {
                             href={`/wallets/${parent.id}`}
                             data-testid={`parent-link-${parent.id}`}
                             className="inline-block cursor-pointer text-left text-2xl font-bold text-ink-black hover:text-[#D97706]"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             {parent.name}
                           </Link>
                           <p className="text-sm text-pencil-gray">
-                            {parent.description || "No description"} - {children.length} children
+                            {parent.description || "No description"} · {children.length} sub-wallet{children.length !== 1 ? "s" : ""}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 self-start md:self-auto">
-                        <p className="text-3xl font-bold text-orange-500">{formatVnd(parent.balance || 0)}</p>
+                        <p className="text-3xl font-bold text-orange-500">{formatVnd(aggregatedBalance)}</p>
+                        {/* FIX 3: inline edit parent button */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-ink-black hover:text-note-yellow"
+                          disabled={isDeleting}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closeAllDialogs();
+                            setEditingWallet(parent);
+                          }}
+                          aria-label={`Edit ${parent.name}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -196,10 +238,8 @@ export default function WalletsPage() {
                           data-testid={`parent-toggle-${parent.id}`}
                           disabled={isDeleting}
                           onClick={(e) => {
-                            if (isDeleting) return;
-                            // Prevent card-level click from triggering
                             e.stopPropagation();
-                            setExpandedParentId((prev) => (prev === parent.id ? null : parent.id));
+                            toggleExpand(parent.id);
                           }}
                           className="h-8 w-8 border border-note-yellow/30 hover:bg-note-yellow/10"
                         >
@@ -213,34 +253,33 @@ export default function WalletsPage() {
                     </div>
 
                     {isExpanded ? (
-                      <div className="space-y-3">
+                      <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-wrap items-center gap-2">
+                          {/* FIX 2: Create child wallet inline (dialog on this page) */}
+                          <Button
+                            variant="outline"
+                            className="border-note-yellow/40"
+                            disabled={isDeleting}
+                            onClick={() => {
+                              closeAllDialogs();
+                              setCreateChildForParentId(parent.id);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Sub-wallet
+                          </Button>
                           <Button
                             variant="outline"
                             className="border-red-200 text-red-500 hover:text-red-600"
                             disabled={isDeleting || deletingWallet !== null || editingWallet !== null}
                             onClick={() => {
-                              setEditingWallet(null);
-                              setIsCreateParentOpen(false);
+                              closeAllDialogs();
                               setDeletingWallet(parent);
                             }}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Parent Wallet
+                            Delete
                           </Button>
-                          {isDeleting ? (
-                            <Button variant="outline" className="border-note-yellow/40" disabled>
-                              <Plus className="h-4 w-4 mr-2" />
-                              Create Child Wallet
-                            </Button>
-                          ) : (
-                            <Link href={`/wallets/${parent.id}`}>
-                              <Button variant="outline" className="border-note-yellow/40">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Create Child Wallet
-                              </Button>
-                            </Link>
-                          )}
                         </div>
 
                         {children.length > 0 ? (
@@ -262,16 +301,17 @@ export default function WalletsPage() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                  <p className="text-sm font-semibold text-orange-500 mr-2">
+                                    {formatVnd(child.balance || 0)}
+                                  </p>
                                   <Button
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8 text-ink-black hover:text-note-yellow"
                                     data-testid={`child-edit-${child.id}`}
                                     disabled={isDeleting || deletingWallet !== null}
-                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                      e.stopPropagation();
-                                      setDeletingWallet(null);
-                                      setIsCreateParentOpen(false);
+                                    onClick={() => {
+                                      closeAllDialogs();
                                       setEditingWallet(child);
                                     }}
                                     aria-label={`Edit ${child.name}`}
@@ -284,10 +324,8 @@ export default function WalletsPage() {
                                     className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                     data-testid={`child-delete-${child.id}`}
                                     disabled={isDeleting || deletingWallet !== null || editingWallet !== null}
-                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                      e.stopPropagation();
-                                      setEditingWallet(null);
-                                      setIsCreateParentOpen(false);
+                                    onClick={() => {
+                                      closeAllDialogs();
                                       setDeletingWallet(child);
                                     }}
                                     aria-label={`Delete ${child.name}`}
@@ -299,8 +337,8 @@ export default function WalletsPage() {
                             ))}
                           </div>
                         ) : (
-                          <div className="rounded-lg border border-dashed border-note-yellow/35 px-3 py-4 text-sm text-pencil-gray">
-                            No child wallets attached yet.
+                          <div className="rounded-lg border border-dashed border-note-yellow/35 px-3 py-4 text-sm text-pencil-gray text-center">
+                            No sub-wallets yet. Click &quot;Add Sub-wallet&quot; to create one.
                           </div>
                         )}
                       </div>
@@ -313,13 +351,14 @@ export default function WalletsPage() {
         </div>
       )}
 
+      {/* Create Parent Wallet Dialog */}
       <Dialog open={isCreateParentOpen} onOpenChange={setIsCreateParentOpen}>
         <DialogContent>
           <DialogClose onClose={() => setIsCreateParentOpen(false)} />
           <DialogHeader>
             <DialogTitle>Create Parent Wallet</DialogTitle>
             <DialogDescription>
-              Create a new parent wallet. It will be added at root level.
+              Create a new parent wallet to organize your cash.
             </DialogDescription>
           </DialogHeader>
           <WalletForm
@@ -330,11 +369,39 @@ export default function WalletsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* FIX 2: Create Child Wallet Dialog (inline, no navigate) */}
+      <Dialog
+        open={createChildForParentId !== null}
+        onOpenChange={(open) => !open && setCreateChildForParentId(null)}
+      >
+        <DialogContent>
+          <DialogClose onClose={() => setCreateChildForParentId(null)} />
+          <DialogHeader>
+            <DialogTitle>Create Sub-wallet</DialogTitle>
+            <DialogDescription>
+              Add a sub-wallet under{" "}
+              {allWallets.find((w) => w.id === createChildForParentId)?.name || "this parent"}.
+            </DialogDescription>
+          </DialogHeader>
+          {createChildForParentId ? (
+            <WalletForm
+              mode="create"
+              fixedParentWalletId={createChildForParentId}
+              onSuccess={() => setCreateChildForParentId(null)}
+              onCancel={() => setCreateChildForParentId(null)}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Wallet Dialog (works for both parent and child) */}
       <Dialog open={editingWallet !== null} onOpenChange={(open) => !open && setEditingWallet(null)}>
         <DialogContent>
           <DialogClose onClose={() => setEditingWallet(null)} />
           <DialogHeader>
-            <DialogTitle>Edit Wallet</DialogTitle>
+            <DialogTitle>
+              Edit {editingWallet?.parentWalletId ? "Sub-wallet" : "Parent Wallet"}
+            </DialogTitle>
             <DialogDescription>
               Update wallet name and description.
             </DialogDescription>
@@ -350,6 +417,7 @@ export default function WalletsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Wallet Dialog */}
       <Dialog
         open={deletingWallet !== null}
         onOpenChange={(open) => {
@@ -373,7 +441,7 @@ export default function WalletsPage() {
             </DialogDescription>
             {deletingWallet && deletingChildCount > 0 ? (
               <p className="text-sm text-red-600">
-                This parent wallet has {deletingChildCount} child wallet(s). Remove or detach child wallets first.
+                This parent wallet has {deletingChildCount} sub-wallet(s). Remove sub-wallets first.
               </p>
             ) : null}
           </DialogHeader>

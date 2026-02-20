@@ -157,15 +157,18 @@ export default function WalletDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {parentWallets.slice(0, 6).map((wallet) => {
-              const childCount = childWallets.filter((child) => child.parentWalletId === wallet.id).length;
+              const walletChildren = childWallets.filter((child) => child.parentWalletId === wallet.id);
+              const aggregatedBalance =
+                (wallet.balance || 0) +
+                walletChildren.reduce((sum, child) => sum + (child.balance || 0), 0);
               return (
                 <div key={wallet.id} className="rounded-md border border-note-yellow/20 px-3 py-2">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium text-ink-black">{wallet.name}</p>
-                      <p className="text-xs text-pencil-gray">{childCount} children</p>
+                      <p className="text-xs text-pencil-gray">{walletChildren.length} sub-wallet{walletChildren.length !== 1 ? "s" : ""}</p>
                     </div>
-                    <p className="font-semibold text-orange-500">{formatVnd(wallet.balance || 0)}</p>
+                    <p className="font-semibold text-orange-500">{formatVnd(aggregatedBalance)}</p>
                   </div>
                 </div>
               );

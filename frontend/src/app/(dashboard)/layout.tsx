@@ -2,15 +2,18 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Toaster } from "sonner";
 import { getAuthToken, clearAuthToken } from "@/lib/authToken";
 import {
+  ArrowLeftRight,
+  Clock3,
   LayoutDashboard,
   LogOut,
   PanelLeft,
   Users,
   Wallet2,
+  Zap,
 } from "lucide-react";
 
 type NavItem = {
@@ -34,18 +37,50 @@ const navItems: NavItem[] = [
     testId: "nav-wallets",
   },
   {
+    label: "Quick Deduct",
+    href: "/workspace?tab=quick-deduct",
+    icon: <Zap className="h-4 w-4" />,
+    testId: "nav-quick-deduct",
+  },
+  {
     label: "Partners",
     href: "/partners",
     icon: <Users className="h-4 w-4" />,
     testId: "nav-partners",
   },
+  {
+    label: "History",
+    href: "/workspace?tab=history",
+    icon: <Clock3 className="h-4 w-4" />,
+    testId: "nav-history",
+  },
+  {
+    label: "Transfer",
+    href: "/workspace?tab=transfer",
+    icon: <ArrowLeftRight className="h-4 w-4" />,
+    testId: "nav-transfer",
+  },
 ];
 
-function isActive(pathname: string, href: string) {
-  if (href === "/dashboard") {
+const placeholderTabs = new Set(["quick-deduct", "history", "transfer"]);
+
+function isPlaceholderNav(href: string) {
+  if (!href.includes("/workspace?tab=")) return false;
+  const tab = new URLSearchParams(href.split("?")[1]).get("tab");
+  return tab ? placeholderTabs.has(tab) : false;
+}
+
+function isActive(pathname: string, searchTab: string | null, href: string) {
+  const cleanHref = href.split("?")[0];
+  const targetTab = href.includes("?") ? new URLSearchParams(href.split("?")[1]).get("tab") : null;
+
+  if (cleanHref === "/workspace" && targetTab) {
+    return pathname === "/workspace" && searchTab === targetTab;
+  }
+  if (cleanHref === "/dashboard") {
     return pathname === "/dashboard" || pathname === "/wallets/dashboard";
   }
-  if (href === "/wallets") {
+  if (cleanHref === "/wallets") {
     if (
       pathname === "/dashboard" ||
       pathname.startsWith("/dashboard/") ||
@@ -56,10 +91,10 @@ function isActive(pathname: string, href: string) {
     }
     return pathname === "/wallets" || pathname.startsWith("/wallets/");
   }
-  if (href === "/partners") {
+  if (cleanHref === "/partners") {
     return pathname === "/partners";
   }
-  return pathname === href;
+  return pathname === cleanHref;
 }
 
 function getDisplayNameFromToken(token: string | null): string {
@@ -92,6 +127,8 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
   const [displayName, setDisplayName] = React.useState("User");
 
   React.useEffect(() => {
@@ -116,7 +153,8 @@ export default function DashboardLayout({
 
         <nav className="px-2 py-4 space-y-1">
           {navItems.map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = isActive(pathname, currentTab, item.href);
+            const placeholder = isPlaceholderNav(item.href);
             return (
               <Link
                 key={item.label}
@@ -126,11 +164,16 @@ export default function DashboardLayout({
                 className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
                   active
                     ? "bg-note-yellow/20 text-[#D97706]"
-                    : "text-ink-black hover:bg-note-yellow/10"
+                    : placeholder
+                      ? "text-pencil-gray/50 cursor-default"
+                      : "text-ink-black hover:bg-note-yellow/10"
                 }`}
               >
                 {item.icon}
                 {item.label}
+                {placeholder ? (
+                  <span className="ml-auto text-[10px] rounded-full bg-pencil-gray/10 px-1.5 py-0.5 text-pencil-gray/60">Soon</span>
+                ) : null}
               </Link>
             );
           })}
