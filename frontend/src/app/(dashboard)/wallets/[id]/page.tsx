@@ -26,6 +26,7 @@ import {
   Trash2,
   Wallet2,
   DollarSign,
+  Star,
 } from "lucide-react";
 
 function formatVnd(value: number) {
@@ -44,6 +45,24 @@ export default function WalletDetailPage() {
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
   const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
   const [adjustAmount, setAdjustAmount] = useState("");
+  const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
+
+  // Load default wallet from localStorage
+  React.useEffect(() => {
+    const stored = localStorage.getItem("defaultWalletId") || "";
+    setDefaultWalletId(stored);
+  }, []);
+
+  // Save default wallet to localStorage
+  const setAsDefault = (walletId: string) => {
+    setDefaultWalletId(walletId);
+    localStorage.setItem("defaultWalletId", walletId);
+  };
+
+  const clearDefault = () => {
+    setDefaultWalletId("");
+    localStorage.removeItem("defaultWalletId");
+  };
 
   const parentWallet = wallets?.find((w) => w.id === walletId);
   const childWallets =
@@ -130,12 +149,12 @@ export default function WalletDetailPage() {
             <h1 className="text-4xl font-bold text-ink-black">
               {parentWallet.name}
             </h1>
-            <p className="text-pencil-gray">Parent wallet details and child management</p>
+            <p className="text-pencil-gray">{parentWallet.parentWalletId ? "Sub-wallet details" : "Parent wallet details and child management"}</p>
           </div>
         </div>
         <span className="inline-flex items-center rounded-md border border-note-yellow px-3 py-1 text-sm text-ink-black">
           <Wallet2 className="h-3 w-3 mr-1" />
-          Parent
+          {parentWallet.parentWalletId ? "Sub-wallet" : "Parent"}
         </span>
       </div>
 
@@ -150,65 +169,77 @@ export default function WalletDetailPage() {
                 <DollarSign className="h-5 w-5 text-note-yellow" />
                 Overview
               </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-ink-black hover:bg-note-yellow/10"
-                data-testid="edit-parent-wallet-button"
-                onClick={() => setIsEditParentModalOpen(true)}
-              >
-                <Pencil className="h-4 w-4 mr-1" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {parentWallet.parentWalletId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`${
+                      defaultWalletId === parentWallet.id
+                        ? "text-yellow-500 hover:text-yellow-600"
+                        : "text-pencil-gray hover:text-note-yellow"
+                    }`}
+                    onClick={() => {
+                      if (defaultWalletId === parentWallet.id) {
+                        clearDefault();
+                      } else {
+                        setAsDefault(parentWallet.id);
+                      }
+                    }}
+                    aria-label={defaultWalletId === parentWallet.id ? "Unset as default" : "Set as default"}
+                  >
+                    <Star className="h-4 w-4" fill={defaultWalletId === parentWallet.id ? "currentColor" : "none"} />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-ink-black hover:bg-note-yellow/10"
+                  data-testid="edit-parent-wallet-button"
+                  onClick={() => setIsEditParentModalOpen(true)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-pencil-gray">
-                {parentWallet.parentWalletId ? "Current Balance (Own)" : "Current Balance"}
-              </p>
-              <p className="text-3xl font-bold text-ink-black">
-                {formatVnd(parentWallet.balance || 0)}
-              </p>
-              {parentWallet.parentWalletId ? (
-                <Button
-                  variant="outline"
-                  className="mt-3 border-note-yellow hover:bg-note-yellow/10"
-                  size="sm"
-                  onClick={() => setIsAdjustBalanceModalOpen(true)}
-                >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Adjust Balance
-                </Button>
-              ) : null}
-            </div>
-            {parentWallet.description && (
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
               <div>
-                <p className="text-sm text-pencil-gray">Description</p>
-                <p className="text-ink-black">{parentWallet.description}</p>
+                <p className="text-sm text-pencil-gray">
+                  {parentWallet.parentWalletId ? "Current Balance (Own)" : "Current Balance"}
+                </p>
+                <p className="text-3xl font-bold text-ink-black">
+                  {formatVnd(parentWallet.balance || 0)}
+                </p>
+                {parentWallet.parentWalletId ? (
+                  <Button
+                    variant="outline"
+                    className="mt-3 border-note-yellow hover:bg-note-yellow/10"
+                    size="sm"
+                    onClick={() => setIsAdjustBalanceModalOpen(true)}
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Adjust Balance
+                  </Button>
+                ) : null}
               </div>
-            )}
-            {!parentWallet.parentWalletId && childWallets.length > 0 && (
-              <div className="pt-4 border-t border-gray-100">
-                <div className="space-y-3">
-                  <p className="text-sm text-pencil-gray font-medium">Sub-wallets Balance Breakdown</p>
-                  {childWallets.map((child) => (
-                    <div key={child.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                      <span className="text-sm text-ink-black font-medium">{child.name}</span>
-                      <span className="text-sm font-semibold text-orange-500">{formatVnd(child.balance || 0)}</span>
-                    </div>
-                  ))}
-                  <div className="flex items-center justify-between px-3 py-2 border border-note-yellow/30 rounded-lg bg-note-yellow/5">
-                    <span className="text-sm font-semibold text-ink-black">Total Sub-wallets</span>
-                    <span className="text-sm font-bold text-note-yellow">
-                      {formatVnd(childWallets.reduce((sum, w) => sum + (w.balance || 0), 0))}
-                    </span>
-                  </div>
+              {parentWallet.description && (
+                <div>
+                  <p className="text-sm text-pencil-gray">Description</p>
+                  <p className="text-ink-black">{parentWallet.description}</p>
                 </div>
-              </div>
-            )}
-            {!parentWallet.parentWalletId && childWallets.length === 0 && (
-              <div className="pt-4 border-t border-gray-100">
-                <p className="text-sm text-pencil-gray">No sub-wallets yet</p>
+              )}
+            </div>
+            {!parentWallet.parentWalletId && (
+              <div className="pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 md:pl-6">
+                <p className="text-sm text-pencil-gray">Sub-wallets</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {childWallets.length}
+                </p>
+                <p className="text-xs text-pencil-gray mt-1">
+                  {childWallets.length} wallet{childWallets.length !== 1 ? "s" : ""}
+                </p>
               </div>
             )}
           </CardContent>

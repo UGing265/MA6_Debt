@@ -87,7 +87,7 @@ export default function WalletDashboardPage() {
       <div className="space-y-6" data-testid="wallet-dashboard-summary">
         <h1 className="text-3xl font-bold text-ink-black">Dashboard</h1>
         <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 pb-4">
             <p className="text-red-600">Failed to load wallet data: {String(error)}</p>
           </CardContent>
         </Card>
@@ -146,51 +146,39 @@ export default function WalletDashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card data-testid="stats-total-wallets" className="border-blue-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-pencil-gray text-center">Total Wallets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{totalWallets}</div>
-              <p className="text-xs text-pencil-gray mt-2">
-                {parentWallets.length} parent · {childWallets.length} sub
-              </p>
-            </div>
-          </CardContent>
+          <div className="p-5 text-center space-y-1">
+            <p className="text-sm font-medium text-pencil-gray">Total Wallets</p>
+            <div className="text-4xl font-bold text-blue-600">{totalWallets}</div>
+            <p className="text-xs text-pencil-gray">
+              {parentWallets.length} parent · {childWallets.length} sub
+            </p>
+          </div>
         </Card>
 
         <Card data-testid="stats-parent-wallets" className="border-purple-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-pencil-gray text-center">Parent Wallets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">{parentWallets.length}</div>
-              <p className="text-xs text-pencil-gray mt-2">
-                Avg {childWallets.length > 0 ? (childWallets.length / parentWallets.length).toFixed(1) : 0} sub-wallet(s)
-              </p>
-            </div>
-          </CardContent>
+          <div className="p-5 text-center space-y-1">
+            <p className="text-sm font-medium text-pencil-gray">Parent Wallets</p>
+            <div className="text-4xl font-bold text-purple-600">{parentWallets.length}</div>
+            <p className="text-xs text-pencil-gray">
+              Avg {childWallets.length > 0 ? (childWallets.length / parentWallets.length).toFixed(1) : 0} sub-wallet(s)
+            </p>
+          </div>
         </Card>
 
         <Card data-testid="stats-debt-partners" className="border-emerald-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-pencil-gray text-center">Debt Partners</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-emerald-600">{partners.length}</div>
-              <p className="text-xs text-pencil-gray mt-2">
-                {partners.filter((p) => p.balance > 0).length} receivable · {partners.filter((p) => p.balance < 0).length} payable
-              </p>
-            </div>
-          </CardContent>
+          <div className="p-5 text-center space-y-1">
+            <p className="text-sm font-medium text-pencil-gray">Debt Partners</p>
+            <div className="text-4xl font-bold text-emerald-600">{partners.length}</div>
+            <p className="text-xs text-pencil-gray">
+              {partners.filter((p) => p.balance > 0).length} receivable · {partners.filter((p) => p.balance < 0).length} payable
+            </p>
+          </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="xl:col-span-2" data-testid="chart-container">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-3xl font-bold text-ink-black">Asset Trend</CardTitle>
           </CardHeader>
           <CardContent>
@@ -214,13 +202,13 @@ export default function WalletDashboardPage() {
         </Card>
 
         <Card data-testid="wallet-panel">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-1">
             <CardTitle className="text-3xl font-bold text-ink-black flex items-center gap-2">
               <Wallet2 className="h-5 w-5 text-note-yellow" />
               Your Wallets
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="pt-2 pb-3 space-y-3">
             {parentWallets.slice(0, 6).map((wallet) => {
               const walletChildren = childWallets.filter((child) => child.parentWalletId === wallet.id);
               const aggregatedBalance =
@@ -253,58 +241,10 @@ export default function WalletDashboardPage() {
             })}
           </CardContent>
         </Card>
-
-        <Card data-testid="debt-partners-panel">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-3xl font-bold text-ink-black flex items-center gap-2">
-              <Users className="h-5 w-5 text-note-yellow" />
-              Debt Partners
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {partners.slice(0, 5).map((partner) => {
-              const isDefault = defaultPartnerId === partner.id;
-              const receivable = partner.balance > 0;
-              const payable = partner.balance < 0;
-              return (
-                <div 
-                  key={partner.id} 
-                  className={`rounded-md border px-3 py-2 transition-colors ${
-                    isDefault 
-                      ? "border-yellow-300 bg-yellow-50" 
-                      : receivable
-                      ? "border-green-200"
-                      : "border-red-200"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-ink-black">{partner.name}</p>
-                        {isDefault && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                        )}
-                      </div>
-                      <p className="text-xs text-pencil-gray">
-                        {receivable ? "They owe me" : payable ? "I owe them" : "No debt"}
-                      </p>
-                    </div>
-                    <p className={`font-semibold ${receivable ? "text-green-600" : payable ? "text-red-600" : "text-ink-black"}`}>
-                      {formatVnd(Math.abs(partner.balance))}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-            {partners.length === 0 && (
-              <p className="text-sm text-pencil-gray text-center py-4">No debt partners yet</p>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
       <Card data-testid="recent-history-section">
-        <CardHeader>
+        <CardHeader className="pb-2">
           <CardTitle className="text-4xl font-bold text-ink-black flex items-center gap-2">
             <Clock3 className="h-6 w-6 text-note-yellow" />
             Recent History

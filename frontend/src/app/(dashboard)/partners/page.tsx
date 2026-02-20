@@ -170,7 +170,7 @@ export default function PartnersPage() {
           </div>
         ) : (
           <Card className="border-note-yellow/30">
-            <CardContent className="p-10 text-center">
+            <CardContent className="p-6 text-center">
               <p className="text-xl font-semibold text-ink-black">No partners yet</p>
               <p className="text-sm text-pencil-gray">Add a partner to start tracking debts.</p>
             </CardContent>
