@@ -5,8 +5,8 @@ using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.DeleteTransaction;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
+using Application.Features.Transactions.UpdateTransaction;
 using Application.Features.Transactions.QuickDeduct;
-using Application.Features.Transactions.UpdateTransactionNote;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -106,21 +106,26 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{id:guid}/note")]
+        [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<TransactionDto>> UpdateNote(Guid id, [FromBody] UpdateTransactionNoteRequest request)
+        public async Task<ActionResult<TransactionDto>> Update(Guid id, [FromBody] UpdateTransactionRequest request)
         {
-            var result = await _mediator.Send(new UpdateTransactionNoteCommand
+            var command = new UpdateTransactionCommand
             {
-                UserId = GetCurrentUserId(),
                 Id = id,
-                Note = request.Note
-            });
+                UserId = GetCurrentUserId(),
+                PayerMode = request.PayerMode,
+                Total = request.Total,
+                DebtAmount = request.DebtAmount,
+                Note = request.Note,
+                TransactionDate = request.TransactionDate
+            };
 
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
 
