@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Wallet2, Plus, Pencil, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Wallet2, Plus, Pencil, Trash2, Search, Star } from "lucide-react";
 
 function formatVnd(value: number) {
   return `${value.toLocaleString("en-US")}d`;
@@ -23,36 +23,75 @@ function formatVnd(value: number) {
 
 export default function WalletsPage() {
   const [isCreateParentOpen, setIsCreateParentOpen] = React.useState(false);
-  // inline create child: stores parent ID to create child under
-  const [createChildForParentId, setCreateChildForParentId] = React.useState<string | null>(null);
   const [editingWallet, setEditingWallet] = React.useState<Wallet | null>(null);
   const [deletingWallet, setDeletingWallet] = React.useState<Wallet | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
-  // FIX 1: Allow multiple parents expanded at once (Set instead of single string)
-  const [expandedParentIds, setExpandedParentIds] = React.useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [sortBy, setSortBy] = React.useState<"name" | "balance" | "children">("name");
+  const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
   const isMountedRef = React.useRef(true);
   const deleteInFlightRef = React.useRef(false);
   const { data: wallets, isLoading, error, refetch } = useWallets();
   const deleteWalletMutation = useDeleteWallet();
 
+  // Load default wallet from localStorage
+  React.useEffect(() => {
+    const stored = localStorage.getItem("defaultWalletId") || "";
+    setDefaultWalletId(stored);
+  }, []);
+
+  // Save default wallet to localStorage
+  const setAsDefault = (walletId: string) => {
+    setDefaultWalletId(walletId);
+    localStorage.setItem("defaultWalletId", walletId);
+  };
+
+  const clearDefault = () => {
+    setDefaultWalletId("");
+    localStorage.removeItem("defaultWalletId");
+  };
+
   const allWallets = wallets ?? [];
   const parentWallets = allWallets.filter((wallet) => !wallet.parentWalletId);
+  
+  // Filter by search query
+  const filteredParentWallets = parentWallets.filter((wallet) =>
+    wallet.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate stats
+  const totalBalance = parentWallets.reduce((sum, wallet) => {
+    const children = allWallets.filter((w) => w.parentWalletId === wallet.id);
+    const aggregated = (wallet.balance || 0) + children.reduce((sum, child) => sum + (child.balance || 0), 0);
+    return sum + aggregated;
+  }, 0);
+
+  // Sort based on selected criteria
+  const sortedParentWallets = [...filteredParentWallets].sort((a, b) => {
+    const childrenA = allWallets.filter((w) => w.parentWalletId === a.id).length;
+    const childrenB = allWallets.filter((w) => w.parentWalletId === b.id).length;
+    
+    const balanceA = (a.balance || 0) + allWallets
+      .filter((w) => w.parentWalletId === a.id)
+      .reduce((sum, w) => sum + (w.balance || 0), 0);
+    const balanceB = (b.balance || 0) + allWallets
+      .filter((w) => w.parentWalletId === b.id)
+      .reduce((sum, w) => sum + (w.balance || 0), 0);
+
+    if (sortBy === "name") {
+      return a.name.localeCompare(b.name);
+    } else if (sortBy === "balance") {
+      return balanceB - balanceA;
+    } else if (sortBy === "children") {
+      return childrenB - childrenA;
+    }
+    return 0;
+  });
+
   const deletingChildCount = deletingWallet
     ? allWallets.filter((wallet) => wallet.parentWalletId === deletingWallet.id).length
     : 0;
   const canDeleteSelectedWallet = deletingWallet ? deletingChildCount === 0 : false;
-
-  const toggleExpand = (parentId: string) => {
-    setExpandedParentIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(parentId)) {
-        next.delete(parentId);
-      } else {
-        next.add(parentId);
-      }
-      return next;
-    });
-  };
 
   React.useEffect(() => {
     isMountedRef.current = true;
@@ -60,18 +99,6 @@ export default function WalletsPage() {
       isMountedRef.current = false;
     };
   }, []);
-
-  // Clean up expanded IDs for deleted parents
-  React.useEffect(() => {
-    setExpandedParentIds((prev) => {
-      const validIds = new Set(
-        allWallets.filter((w) => !w.parentWalletId).map((w) => w.id),
-      );
-      const next = new Set([...prev].filter((id) => validIds.has(id)));
-      if (next.size !== prev.size) return next;
-      return prev;
-    });
-  }, [allWallets]);
 
   const handleDeleteWallet = async () => {
     if (!deletingWallet) return;
@@ -94,14 +121,6 @@ export default function WalletsPage() {
     }
   };
 
-  // helper: close all dialogs cleanly
-  const closeAllDialogs = () => {
-    setIsCreateParentOpen(false);
-    setCreateChildForParentId(null);
-    setEditingWallet(null);
-    setDeletingWallet(null);
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-6" data-testid="parent-wallet-list">
@@ -110,6 +129,11 @@ export default function WalletsPage() {
             <h1 className="text-5xl font-bold text-ink-black">Wallet Management</h1>
             <p className="text-pencil-gray mt-2">Parent and child wallets</p>
           </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => (
+            <Card key={i} className="animate-pulse h-24" />
+          ))}
         </div>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -125,7 +149,7 @@ export default function WalletsPage() {
       <div className="space-y-6" data-testid="parent-wallet-list">
         <h1 className="text-5xl font-bold text-ink-black">Wallet Management</h1>
         <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 pb-4">
             <p className="text-red-600">Failed to load wallets: {String(error)}</p>
             <div className="pt-4">
               <Button variant="outline" onClick={() => void refetch()}>
@@ -149,7 +173,6 @@ export default function WalletsPage() {
           className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
           disabled={isDeleting}
           onClick={() => {
-            closeAllDialogs();
             setIsCreateParentOpen(true);
           }}
         >
@@ -158,7 +181,79 @@ export default function WalletsPage() {
         </Button>
       </div>
 
-      {parentWallets.length === 0 ? (
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:max-w-2xl">
+        <Card className="border-blue-100">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-pencil-gray">Total Wallets</p>
+              <p className="text-3xl font-bold text-blue-600 mt-2">{parentWallets.length}</p>
+              <p className="text-xs text-pencil-gray mt-3">+ {allWallets.filter((w) => w.parentWalletId).length} sub-wallets</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-100">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-pencil-gray">Total Balance</p>
+              <p className="text-3xl font-bold text-orange-500 mt-2">{formatVnd(totalBalance)}</p>
+              <p className="text-xs text-pencil-gray mt-3">Aggregated</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search & Sort Controls */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-pencil-gray" />
+          <input
+            type="text"
+            placeholder="Search wallet by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow text-ink-black"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            variant={sortBy === "name" ? "default" : "outline"}
+            className={sortBy === "name" ? "bg-note-yellow text-ink-black hover:bg-note-yellow/90" : "border-note-yellow"}
+            onClick={() => setSortBy("name")}
+            size="sm"
+          >
+            Name
+          </Button>
+          <Button
+            variant={sortBy === "balance" ? "default" : "outline"}
+            className={sortBy === "balance" ? "bg-note-yellow text-ink-black hover:bg-note-yellow/90" : "border-note-yellow"}
+            onClick={() => setSortBy("balance")}
+            size="sm"
+          >
+            Balance
+          </Button>
+          <Button
+            variant={sortBy === "children" ? "default" : "outline"}
+            className={sortBy === "children" ? "bg-note-yellow text-ink-black hover:bg-note-yellow/90" : "border-note-yellow"}
+            onClick={() => setSortBy("children")}
+            size="sm"
+          >
+            Sub-wallets
+          </Button>
+        </div>
+      </div>
+
+      {filteredParentWallets.length === 0 && searchQuery ? (
+        <Card className="border-note-yellow/30">
+          <CardContent className="p-10 text-center">
+            <Search className="h-12 w-12 mx-auto text-pencil-gray mb-3 opacity-50" />
+            <p className="text-ink-black font-semibold">No wallets found</p>
+            <p className="text-sm text-pencil-gray">Try adjusting your search query</p>
+          </CardContent>
+        </Card>
+      ) : parentWallets.length === 0 ? (
         <Card className="border-note-yellow/30">
           <CardContent className="p-10 text-center">
             <Wallet2 className="h-12 w-12 mx-auto text-note-yellow mb-3" />
@@ -168,10 +263,8 @@ export default function WalletsPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {parentWallets.map((parent) => {
+          {sortedParentWallets.map((parent) => {
             const children = allWallets.filter((wallet) => wallet.parentWalletId === parent.id);
-            const isExpanded = expandedParentIds.has(parent.id);
-
             // FIX 4: Aggregate balance = parent's own balance + sum of children balances
             // (SRS: "Hệ thống phải tự động cộng dồn số dư từ các Ví con để hiển thị tổng")
             const aggregatedBalance =
@@ -179,173 +272,82 @@ export default function WalletsPage() {
               children.reduce((sum, child) => sum + (child.balance || 0), 0);
 
             return (
-              <div
+              <Link
                 key={parent.id}
-                data-testid={`parent-card-${parent.id}`}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (target.closest?.("a")) return;
-                  if (target.closest?.("button")) return;
-                  if (target.closest?.("[role='dialog']")) return;
-                  toggleExpand(parent.id);
-                }}
+                href={`/wallets/${parent.id}`}
+                data-testid={`parent-wallet-card-${parent.id}`}
               >
-                <Card className="border-note-yellow/25 cursor-pointer hover:border-note-yellow/50 transition-colors" data-testid="parent-wallet-card">
-                  <CardContent className="p-4 md:p-5 space-y-4">
+                <Card className="border-note-yellow/25 cursor-pointer transition-all duration-200 hover:border-note-yellow/60 hover:shadow-md hover:-translate-y-0.5">
+                  <CardContent className="p-3 md:p-4 space-y-2">
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-note-yellow/20 text-note-yellow flex items-center justify-center">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="h-10 w-10 rounded-xl bg-note-yellow/20 text-note-yellow flex items-center justify-center shrink-0">
                           <Wallet2 className="h-5 w-5" />
                         </div>
-                        <div>
-                          <Link
-                            href={`/wallets/${parent.id}`}
-                            data-testid={`parent-link-${parent.id}`}
-                            className="inline-block cursor-pointer text-left text-2xl font-bold text-ink-black hover:text-[#D97706]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                        <div className="flex-1">
+                          <p className="text-left text-2xl font-bold text-ink-black group-hover:text-[#D97706]">
                             {parent.name}
-                          </Link>
-                          <p className="text-sm text-pencil-gray">
-                            {parent.description || "No description"} · {children.length} sub-wallet{children.length !== 1 ? "s" : ""}
                           </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 self-start md:self-auto">
-                        <p className="text-3xl font-bold text-orange-500">{formatVnd(aggregatedBalance)}</p>
-                        {/* FIX 3: inline edit parent button */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-ink-black hover:text-note-yellow"
-                          disabled={isDeleting}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            closeAllDialogs();
-                            setEditingWallet(parent);
-                          }}
-                          aria-label={`Edit ${parent.name}`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          aria-label={isExpanded ? "Collapse child wallets" : "Expand child wallets"}
-                          aria-expanded={isExpanded}
-                          aria-controls={`child-list-${parent.id}`}
-                          data-testid={`parent-toggle-${parent.id}`}
-                          disabled={isDeleting}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleExpand(parent.id);
-                          }}
-                          className="h-8 w-8 border border-note-yellow/30 hover:bg-note-yellow/10"
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </Button>
+                        <p className="text-sm text-pencil-gray">
+                          {parent.description || "No description"} · {children.length} sub-wallet{children.length !== 1 ? "s" : ""}
+                        </p>
                       </div>
                     </div>
-
-                    {isExpanded ? (
-                      <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {/* FIX 2: Create child wallet inline (dialog on this page) */}
-                          <Button
-                            variant="outline"
-                            className="border-note-yellow/40"
-                            disabled={isDeleting}
-                            onClick={() => {
-                              closeAllDialogs();
-                              setCreateChildForParentId(parent.id);
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Sub-wallet
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="border-red-200 text-red-500 hover:text-red-600"
-                            disabled={isDeleting || deletingWallet !== null || editingWallet !== null}
-                            onClick={() => {
-                              closeAllDialogs();
-                              setDeletingWallet(parent);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </Button>
-                        </div>
-
-                        {children.length > 0 ? (
-                          <div
-                            id={`child-list-${parent.id}`}
-                            data-testid={`child-list-${parent.id}`}
-                            className="space-y-2"
-                          >
-                            {children.map((child) => (
-                              <div
-                                key={child.id}
-                                data-testid={`child-wallet-row-${child.id}`}
-                                className="rounded-lg border border-note-yellow/20 px-3 py-3 flex items-center justify-between"
-                              >
-                                <div>
-                                  <p className="font-medium text-ink-black">{child.name}</p>
-                                  <p className="text-sm text-pencil-gray">
-                                    {child.description || "No description"}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-semibold text-orange-500 mr-2">
-                                    {formatVnd(child.balance || 0)}
-                                  </p>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-ink-black hover:text-note-yellow"
-                                    data-testid={`child-edit-${child.id}`}
-                                    disabled={isDeleting || deletingWallet !== null}
-                                    onClick={() => {
-                                      closeAllDialogs();
-                                      setEditingWallet(child);
-                                    }}
-                                    aria-label={`Edit ${child.name}`}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                    data-testid={`child-delete-${child.id}`}
-                                    disabled={isDeleting || deletingWallet !== null || editingWallet !== null}
-                                    onClick={() => {
-                                      closeAllDialogs();
-                                      setDeletingWallet(child);
-                                    }}
-                                    aria-label={`Delete ${child.name}`}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="rounded-lg border border-dashed border-note-yellow/35 px-3 py-4 text-sm text-pencil-gray text-center">
-                            No sub-wallets yet. Click &quot;Add Sub-wallet&quot; to create one.
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              </div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-3xl font-bold text-orange-500 text-right">{formatVnd(aggregatedBalance)}</p>
+                      {/* Set as default button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-8 w-8 shrink-0 transition-colors ${
+                          defaultWalletId === parent.id
+                            ? "text-yellow-500 hover:text-yellow-600"
+                            : "text-pencil-gray hover:text-note-yellow"
+                        }`}
+                        disabled={isDeleting}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (defaultWalletId === parent.id) {
+                            clearDefault();
+                          } else {
+                            setAsDefault(parent.id);
+                          }
+                        }}
+                        aria-label={defaultWalletId === parent.id ? `Unset default wallet` : `Set as default wallet`}
+                      >
+                        <Star className="h-4 w-4" fill={defaultWalletId === parent.id ? "currentColor" : "none"} />
+                      </Button>
+                      {/* Edit parent button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-ink-black hover:text-note-yellow shrink-0"
+                        disabled={isDeleting}
+                        onClick={() => {
+                          setEditingWallet(parent);
+                        }}
+                        aria-label={`Edit ${parent.name}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      {/* Delete parent button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                        disabled={isDeleting}
+                        onClick={() => {
+                          setDeletingWallet(parent);
+                        }}
+                        aria-label={`Delete ${parent.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
             );
           })}
         </div>
@@ -366,31 +368,6 @@ export default function WalletsPage() {
             onSuccess={() => setIsCreateParentOpen(false)}
             onCancel={() => setIsCreateParentOpen(false)}
           />
-        </DialogContent>
-      </Dialog>
-
-      {/* FIX 2: Create Child Wallet Dialog (inline, no navigate) */}
-      <Dialog
-        open={createChildForParentId !== null}
-        onOpenChange={(open) => !open && setCreateChildForParentId(null)}
-      >
-        <DialogContent>
-          <DialogClose onClose={() => setCreateChildForParentId(null)} />
-          <DialogHeader>
-            <DialogTitle>Create Sub-wallet</DialogTitle>
-            <DialogDescription>
-              Add a sub-wallet under{" "}
-              {allWallets.find((w) => w.id === createChildForParentId)?.name || "this parent"}.
-            </DialogDescription>
-          </DialogHeader>
-          {createChildForParentId ? (
-            <WalletForm
-              mode="create"
-              fixedParentWalletId={createChildForParentId}
-              onSuccess={() => setCreateChildForParentId(null)}
-              onCancel={() => setCreateChildForParentId(null)}
-            />
-          ) : null}
         </DialogContent>
       </Dialog>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star } from "lucide-react";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +26,24 @@ export default function PartnersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingPartner, setEditingPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
+  const [defaultPartnerId, setDefaultPartnerId] = useState<string>("");
+
+  // Load default partner from localStorage
+  React.useEffect(() => {
+    const stored = localStorage.getItem("defaultPartnerId") || "";
+    setDefaultPartnerId(stored);
+  }, []);
+
+  // Save/clear default partner
+  const setAsDefault = (partnerId: string) => {
+    setDefaultPartnerId(partnerId);
+    localStorage.setItem("defaultPartnerId", partnerId);
+  };
+
+  const clearDefault = () => {
+    setDefaultPartnerId("");
+    localStorage.removeItem("defaultPartnerId");
+  };
 
   const sortedPartners = [...partners].sort((a, b) => {
     if (b.balance !== a.balance) return b.balance - a.balance;
@@ -90,7 +108,7 @@ export default function PartnersPage() {
               const neutral = partner.balance === 0;
               return (
                 <Card key={partner.id} className="border-note-yellow/25">
-                  <CardContent className="p-5">
+                  <CardContent className="p-3 md:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
                         <div className="h-12 w-12 rounded-full bg-note-yellow/25 text-note-yellow flex items-center justify-center font-bold text-xl">
@@ -102,6 +120,23 @@ export default function PartnersPage() {
                       </div>
 
                       <div className="flex items-center gap-1">
+                        <button
+                          className={`p-2 rounded-md transition-colors ${
+                            defaultPartnerId === partner.id
+                              ? "text-yellow-500 hover:text-yellow-600"
+                              : "text-pencil-gray hover:text-note-yellow"
+                          }`}
+                          onClick={() => {
+                            if (defaultPartnerId === partner.id) {
+                              clearDefault();
+                            } else {
+                              setAsDefault(partner.id);
+                            }
+                          }}
+                          aria-label={defaultPartnerId === partner.id ? "Unset default partner" : "Set as default partner"}
+                        >
+                          <Star className="h-4 w-4" fill={defaultPartnerId === partner.id ? "currentColor" : "none"} />
+                        </button>
                         <button
                           className="p-2 rounded-md text-ink-black hover:bg-note-yellow/20"
                           onClick={() => setEditingPartner(partner)}

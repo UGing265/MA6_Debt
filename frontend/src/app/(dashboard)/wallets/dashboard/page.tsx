@@ -4,7 +4,7 @@ import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3 } from "lucide-react";
+import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
 
 const mockRecentHistory = [
   { id: "t1", title: "Team Lunch", wallet: "Main Wallet", date: "16 Feb", amount: -150000, actor: "Minh" },
@@ -21,6 +21,14 @@ function formatVnd(value: number) {
 export default function WalletDashboardPage() {
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
   const { partners, isLoading: partnersLoading, error: partnersError } = useDebtPartners();
+  const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
+  const [defaultPartnerId, setDefaultPartnerId] = React.useState<string>("");
+
+  // Load defaults from localStorage
+  React.useEffect(() => {
+    setDefaultWalletId(localStorage.getItem("defaultWalletId") || "");
+    setDefaultPartnerId(localStorage.getItem("defaultPartnerId") || "");
+  }, []);
 
   const isLoading = walletsLoading || partnersLoading;
   const error = walletsError || partnersError;
@@ -29,6 +37,7 @@ export default function WalletDashboardPage() {
   const totalCash = safeWallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
   const parentWallets = safeWallets.filter((wallet) => !wallet.parentWalletId);
   const childWallets = safeWallets.filter((wallet) => !!wallet.parentWalletId);
+  const totalWallets = parentWallets.length + childWallets.length;
 
   // SRS: Total = Σ(Tất cả Ví con) + (Tiền nợ)
   // Receivable = partner balance > 0 (họ nợ mình)
@@ -48,6 +57,18 @@ export default function WalletDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((item) => (
             <Card key={item} className="animate-pulse">
+              <CardHeader className="pb-2">
+                <div className="h-4 w-24 bg-gray-200 rounded" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-7 w-36 bg-gray-200 rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((item) => (
+            <Card key={`stats-${item}`} className="animate-pulse">
               <CardHeader className="pb-2">
                 <div className="h-4 w-24 bg-gray-200 rounded" />
               </CardHeader>
@@ -123,6 +144,50 @@ export default function WalletDashboardPage() {
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card data-testid="stats-total-wallets" className="border-blue-100">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-pencil-gray text-center">Total Wallets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600">{totalWallets}</div>
+              <p className="text-xs text-pencil-gray mt-2">
+                {parentWallets.length} parent · {childWallets.length} sub
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="stats-parent-wallets" className="border-purple-100">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-pencil-gray text-center">Parent Wallets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600">{parentWallets.length}</div>
+              <p className="text-xs text-pencil-gray mt-2">
+                Avg {childWallets.length > 0 ? (childWallets.length / parentWallets.length).toFixed(1) : 0} sub-wallet(s)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="stats-debt-partners" className="border-emerald-100">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-pencil-gray text-center">Debt Partners</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-emerald-600">{partners.length}</div>
+              <p className="text-xs text-pencil-gray mt-2">
+                {partners.filter((p) => p.balance > 0).length} receivable · {partners.filter((p) => p.balance < 0).length} payable
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="xl:col-span-2" data-testid="chart-container">
           <CardHeader>
@@ -149,7 +214,7 @@ export default function WalletDashboardPage() {
         </Card>
 
         <Card data-testid="wallet-panel">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-3xl font-bold text-ink-black flex items-center gap-2">
               <Wallet2 className="h-5 w-5 text-note-yellow" />
               Your Wallets
@@ -161,11 +226,24 @@ export default function WalletDashboardPage() {
               const aggregatedBalance =
                 (wallet.balance || 0) +
                 walletChildren.reduce((sum, child) => sum + (child.balance || 0), 0);
+              const isDefault = defaultWalletId === wallet.id;
               return (
-                <div key={wallet.id} className="rounded-md border border-note-yellow/20 px-3 py-2">
+                <div 
+                  key={wallet.id} 
+                  className={`rounded-md border px-3 py-2 transition-colors ${
+                    isDefault 
+                      ? "border-yellow-300 bg-yellow-50" 
+                      : "border-note-yellow/20"
+                  }`}
+                >
                   <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-ink-black">{wallet.name}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-ink-black">{wallet.name}</p>
+                        {isDefault && (
+                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        )}
+                      </div>
                       <p className="text-xs text-pencil-gray">{walletChildren.length} sub-wallet{walletChildren.length !== 1 ? "s" : ""}</p>
                     </div>
                     <p className="font-semibold text-orange-500">{formatVnd(aggregatedBalance)}</p>
@@ -173,6 +251,54 @@ export default function WalletDashboardPage() {
                 </div>
               );
             })}
+          </CardContent>
+        </Card>
+
+        <Card data-testid="debt-partners-panel">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-3xl font-bold text-ink-black flex items-center gap-2">
+              <Users className="h-5 w-5 text-note-yellow" />
+              Debt Partners
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {partners.slice(0, 5).map((partner) => {
+              const isDefault = defaultPartnerId === partner.id;
+              const receivable = partner.balance > 0;
+              const payable = partner.balance < 0;
+              return (
+                <div 
+                  key={partner.id} 
+                  className={`rounded-md border px-3 py-2 transition-colors ${
+                    isDefault 
+                      ? "border-yellow-300 bg-yellow-50" 
+                      : receivable
+                      ? "border-green-200"
+                      : "border-red-200"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-ink-black">{partner.name}</p>
+                        {isDefault && (
+                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        )}
+                      </div>
+                      <p className="text-xs text-pencil-gray">
+                        {receivable ? "They owe me" : payable ? "I owe them" : "No debt"}
+                      </p>
+                    </div>
+                    <p className={`font-semibold ${receivable ? "text-green-600" : payable ? "text-red-600" : "text-ink-black"}`}>
+                      {formatVnd(Math.abs(partner.balance))}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+            {partners.length === 0 && (
+              <p className="text-sm text-pencil-gray text-center py-4">No debt partners yet</p>
+            )}
           </CardContent>
         </Card>
       </div>

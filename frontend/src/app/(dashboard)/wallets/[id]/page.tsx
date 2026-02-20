@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import {
-  Wallet,
+  WalletIcon,
   ArrowLeft,
   Users,
   Plus,
@@ -42,6 +42,8 @@ export default function WalletDetailPage() {
   const [editingChildWallet, setEditingChildWallet] = useState<Wallet | null>(null);
   const [selectedChildWallet, setSelectedChildWallet] = useState<Wallet | null>(null);
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
+  const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
+  const [adjustAmount, setAdjustAmount] = useState("");
 
   const parentWallet = wallets?.find((w) => w.id === walletId);
   const childWallets =
@@ -98,7 +100,7 @@ export default function WalletDetailPage() {
         </Link>
         <Card className="border-dashed border-2 border-note-yellow/30">
           <CardContent className="p-12 text-center">
-            <Wallet className="h-12 w-12 text-pencil-gray mx-auto mb-4" />
+            <WalletIcon className="h-12 w-12 text-pencil-gray mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-ink-black mb-2">
               Wallet not found
             </h3>
@@ -155,16 +157,29 @@ export default function WalletDetailPage() {
                 data-testid="edit-parent-wallet-button"
                 onClick={() => setIsEditParentModalOpen(true)}
               >
-                <Pencil className="h-4 w-4 mr-1" /> Edit Parent Wallet
+                <Pencil className="h-4 w-4 mr-1" />
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-pencil-gray">Current Balance</p>
+              <p className="text-sm text-pencil-gray">
+                {parentWallet.parentWalletId ? "Current Balance (Own)" : "Current Balance"}
+              </p>
               <p className="text-3xl font-bold text-ink-black">
                 {formatVnd(parentWallet.balance || 0)}
               </p>
+              {parentWallet.parentWalletId ? (
+                <Button
+                  variant="outline"
+                  className="mt-3 border-note-yellow hover:bg-note-yellow/10"
+                  size="sm"
+                  onClick={() => setIsAdjustBalanceModalOpen(true)}
+                >
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Adjust Balance
+                </Button>
+              ) : null}
             </div>
             {parentWallet.description && (
               <div>
@@ -172,14 +187,30 @@ export default function WalletDetailPage() {
                 <p className="text-ink-black">{parentWallet.description}</p>
               </div>
             )}
-            <div className="pt-4 border-t border-gray-100">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-pencil-gray">Sub-wallets</span>
-                <span className="font-semibold text-ink-black">
-                  {childWallets.length}
-                </span>
+            {!parentWallet.parentWalletId && childWallets.length > 0 && (
+              <div className="pt-4 border-t border-gray-100">
+                <div className="space-y-3">
+                  <p className="text-sm text-pencil-gray font-medium">Sub-wallets Balance Breakdown</p>
+                  {childWallets.map((child) => (
+                    <div key={child.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-ink-black font-medium">{child.name}</span>
+                      <span className="text-sm font-semibold text-orange-500">{formatVnd(child.balance || 0)}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-3 py-2 border border-note-yellow/30 rounded-lg bg-note-yellow/5">
+                    <span className="text-sm font-semibold text-ink-black">Total Sub-wallets</span>
+                    <span className="text-sm font-bold text-note-yellow">
+                      {formatVnd(childWallets.reduce((sum, w) => sum + (w.balance || 0), 0))}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+            {!parentWallet.parentWalletId && childWallets.length === 0 && (
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-sm text-pencil-gray">No sub-wallets yet</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
@@ -217,16 +248,111 @@ export default function WalletDetailPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Adjust Balance Dialog (Mock for Quick Deduct feature) */}
+      <Dialog
+        open={isAdjustBalanceModalOpen}
+        onOpenChange={(open) => {
+          setIsAdjustBalanceModalOpen(open);
+          if (!open) setAdjustAmount("");
+        }}
+      >
+        <DialogContent>
+          <DialogClose
+            onClose={() => {
+              setIsAdjustBalanceModalOpen(false);
+              setAdjustAmount("");
+            }}
+          />
+          <DialogHeader>
+            <DialogTitle>
+              {parentWallet?.parentWalletId ? "Adjust Sub-wallet Balance" : "Adjust Wallet Balance"}
+            </DialogTitle>
+            <DialogDescription>
+              Quickly add or subtract amount from &quot;{parentWallet?.name}&quot;. 
+              {parentWallet?.parentWalletId ? " (Sub-wallet)" : ""} 
+              (This is a preview for Quick Deduct feature)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-5 gap-2">
+              {[100000, 500000, 1000000, 2000000, 5000000].map((amount) => (
+                <Button
+                  key={amount}
+                  variant="outline"
+                  className="text-xs border-note-yellow hover:bg-note-yellow/20"
+                  onClick={() => {
+                    setAdjustAmount(amount.toString());
+                  }}
+                >
+                  {(amount / 1000000).toFixed(0)}M
+                </Button>
+              ))}
+            </div>
+            <input
+              type="number"
+              placeholder="Or enter custom amount"
+              value={adjustAmount}
+              onChange={(e) => setAdjustAmount(e.target.value)}
+              className="w-full px-3 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow"
+            />
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-pencil-gray mb-2">Preview: Quick Deduct amount</p>
+              <p className="text-lg font-bold text-ink-black">
+                {adjustAmount ? `${adjustAmount}d` : "No amount selected"}
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setIsAdjustBalanceModalOpen(false);
+                  setAdjustAmount("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+                disabled={!adjustAmount}
+                onClick={() => {
+                  // Mock implementation - will connect to Quick Deduct backend later
+                  console.log(`[MOCK] Adjusting ${parentWallet?.name} by ${adjustAmount}d`);
+                  setIsAdjustBalanceModalOpen(false);
+                  setAdjustAmount("");
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <section data-testid="subwallet-section">
         <Card
           className="border-note-yellow/30"
           data-testid="child-wallet-management"
         >
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-lg font-semibold text-ink-black flex items-center gap-2">
               <Users className="h-5 w-5 text-note-yellow" />
               Sub-wallets
             </CardTitle>
+            <Button
+              size="sm"
+              className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-semibold"
+              onClick={() => {
+                setIsDetachModalOpen(false);
+                setSelectedChildWallet(null);
+                setIsEditChildModalOpen(false);
+                setEditingChildWallet(null);
+                setIsCreateChildModalOpen(true);
+              }}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create
+            </Button>
           </CardHeader>
           <CardContent>
             {childWallets.length === 0 ? (
@@ -248,7 +374,7 @@ export default function WalletDetailPage() {
                     data-testid={`child-wallet-row-${child.id}`}
                   >
                     <div className="flex items-center gap-3">
-                      <Wallet className="h-4 w-4 text-note-yellow" />
+                      <WalletIcon className="h-4 w-4 text-note-yellow" />
                       <div>
                         <p className="font-medium text-ink-black">
                           {child.name}
@@ -294,22 +420,7 @@ export default function WalletDetailPage() {
                 ))}
               </div>
             )}
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <Button
-                size="lg"
-                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-semibold shadow-lg px-6 py-3"
-                onClick={() => {
-                  setIsDetachModalOpen(false);
-                  setSelectedChildWallet(null);
-                  setIsEditChildModalOpen(false);
-                  setEditingChildWallet(null);
-                  setIsCreateChildModalOpen(true);
-                }}
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Create Child Wallet
-              </Button>
-            </div>
+
           </CardContent>
         </Card>
       </section>
