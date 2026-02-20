@@ -261,12 +261,11 @@ export default function WalletsPage() {
                                     {child.description || "No description"}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <p className="font-bold text-ink-black">{formatVnd(child.balance || 0)}</p>
+                                <div className="flex items-center gap-2">
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8"
+                                    className="h-8 w-8 text-ink-black hover:text-note-yellow"
                                     data-testid={`child-edit-${child.id}`}
                                     disabled={isDeleting || deletingWallet !== null}
                                     onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -275,13 +274,14 @@ export default function WalletsPage() {
                                       setIsCreateParentOpen(false);
                                       setEditingWallet(child);
                                     }}
+                                    aria-label={`Edit ${child.name}`}
                                   >
                                     <Pencil className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-red-500 hover:text-red-600"
+                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                     data-testid={`child-delete-${child.id}`}
                                     disabled={isDeleting || deletingWallet !== null || editingWallet !== null}
                                     onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -290,6 +290,7 @@ export default function WalletsPage() {
                                       setIsCreateParentOpen(false);
                                       setDeletingWallet(child);
                                     }}
+                                    aria-label={`Delete ${child.name}`}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>

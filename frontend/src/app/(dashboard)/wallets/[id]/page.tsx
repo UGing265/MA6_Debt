@@ -296,8 +296,8 @@ export default function WalletDetailPage() {
             )}
             <div className="mt-4 pt-4 border-t border-gray-100">
               <Button
-                size="sm"
-                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+                size="lg"
+                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-semibold shadow-lg px-6 py-3"
                 onClick={() => {
                   setIsDetachModalOpen(false);
                   setSelectedChildWallet(null);
@@ -306,7 +306,7 @@ export default function WalletDetailPage() {
                   setIsCreateChildModalOpen(true);
                 }}
               >
-                <Plus className="h-4 w-4 mr-1" />
+                <Plus className="h-5 w-5 mr-2" />
                 Create Child Wallet
               </Button>
             </div>
