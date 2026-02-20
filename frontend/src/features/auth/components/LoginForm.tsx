@@ -39,7 +39,7 @@ export const LoginForm = () => {
       const response = await login(data);
       setAuthToken(response.token);
       toast.success("Welcome!");
-      router.push("/workspace");
+      router.push("/dashboard");
     } catch (error: any) {
       const parsedError = parseErrorResponse(error);
       

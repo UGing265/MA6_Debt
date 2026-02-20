@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Pencil, Star, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,10 +88,8 @@ export default function PartnersPage() {
               const receivable = partner.balance > 0;
               const payable = partner.balance < 0;
               const neutral = partner.balance === 0;
-              const isDefault = index === 0;
-
               return (
-                <Card key={partner.id} className={isDefault ? "border-note-yellow/60 bg-note-yellow/10" : "border-note-yellow/25"}>
+                <Card key={partner.id} className="border-note-yellow/25">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
@@ -100,12 +98,6 @@ export default function PartnersPage() {
                         </div>
                         <div>
                           <p className="text-3xl font-semibold text-ink-black">{partner.name}</p>
-                          {isDefault ? (
-                            <span className="inline-flex items-center rounded-full bg-note-yellow px-3 py-1 text-xs font-semibold text-ink-black">
-                              <Star className="h-3 w-3 mr-1" />
-                              Default
-                            </span>
-                          ) : null}
                         </div>
                       </div>
 

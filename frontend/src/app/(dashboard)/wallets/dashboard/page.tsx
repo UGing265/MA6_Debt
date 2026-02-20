@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
+import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3 } from "lucide-react";
 
@@ -18,16 +19,27 @@ function formatVnd(value: number) {
 }
 
 export default function WalletDashboardPage() {
-  const { data: wallets, isLoading, error } = useWallets();
+  const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
+  const { partners, isLoading: partnersLoading, error: partnersError } = useDebtPartners();
+
+  const isLoading = walletsLoading || partnersLoading;
+  const error = walletsError || partnersError;
 
   const safeWallets = wallets ?? [];
   const totalCash = safeWallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
   const parentWallets = safeWallets.filter((wallet) => !wallet.parentWalletId);
   const childWallets = safeWallets.filter((wallet) => !!wallet.parentWalletId);
 
-  const mockReceivable = 1500000;
-  const mockPayable = 200000;
-  const netWorth = totalCash + mockReceivable - mockPayable;
+  // SRS: Total = Σ(Tất cả Ví con) + (Tiền nợ)
+  // Receivable = partner balance > 0 (họ nợ mình)
+  // Payable = partner balance < 0 (mình nợ họ)
+  const totalReceivable = partners
+    .filter((p) => p.balance > 0)
+    .reduce((sum, p) => sum + p.balance, 0);
+  const totalPayable = partners
+    .filter((p) => p.balance < 0)
+    .reduce((sum, p) => sum + Math.abs(p.balance), 0);
+  const netWorth = totalCash + totalReceivable - totalPayable;
 
   if (isLoading) {
     return (
@@ -82,7 +94,7 @@ export default function WalletDashboardPage() {
 
         <Card data-testid="summary-total-cash" className="border-note-yellow/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-pencil-gray">Total Wallets</CardTitle>
+            <CardTitle className="text-sm font-medium text-pencil-gray">Total Cash</CardTitle>
             <Wallet className="h-4 w-4 text-note-yellow" />
           </CardHeader>
           <CardContent>
@@ -96,7 +108,7 @@ export default function WalletDashboardPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-500">{formatVnd(mockReceivable)}</div>
+            <div className="text-3xl font-bold text-green-500">{formatVnd(totalReceivable)}</div>
           </CardContent>
         </Card>
 
@@ -106,7 +118,7 @@ export default function WalletDashboardPage() {
             <TrendingDown className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-500">{formatVnd(mockPayable)}</div>
+            <div className="text-3xl font-bold text-red-500">{formatVnd(totalPayable)}</div>
           </CardContent>
         </Card>
       </div>

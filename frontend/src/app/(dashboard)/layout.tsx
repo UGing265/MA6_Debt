@@ -2,18 +2,15 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
-import { getAuthToken } from "@/lib/authToken";
+import { getAuthToken, clearAuthToken } from "@/lib/authToken";
 import {
-  ArrowLeftRight,
-  Clock3,
   LayoutDashboard,
   LogOut,
   PanelLeft,
   Users,
   Wallet2,
-  Zap,
 } from "lucide-react";
 
 type NavItem = {
@@ -37,43 +34,18 @@ const navItems: NavItem[] = [
     testId: "nav-wallets",
   },
   {
-    label: "Quick Deduct",
-    href: "/workspace?tab=quick-deduct",
-    icon: <Zap className="h-4 w-4" />,
-    testId: "nav-quick-deduct",
-  },
-  {
     label: "Partners",
     href: "/partners",
     icon: <Users className="h-4 w-4" />,
     testId: "nav-partners",
   },
-  {
-    label: "History",
-    href: "/workspace?tab=history",
-    icon: <Clock3 className="h-4 w-4" />,
-    testId: "nav-history",
-  },
-  {
-    label: "Transfer",
-    href: "/workspace?tab=transfer",
-    icon: <ArrowLeftRight className="h-4 w-4" />,
-    testId: "nav-transfer",
-  },
 ];
 
-function isActive(pathname: string, currentTab: string | null, href: string) {
-  const cleanHref = href.split("?")[0];
-  const targetTab = href.includes("?") ? new URLSearchParams(href.split("?")[1]).get("tab") : null;
-
-  if (cleanHref === "/workspace" && targetTab) {
-    return pathname === "/workspace" && currentTab === targetTab;
-  }
-
-  if (cleanHref === "/dashboard") {
+function isActive(pathname: string, href: string) {
+  if (href === "/dashboard") {
     return pathname === "/dashboard" || pathname === "/wallets/dashboard";
   }
-  if (cleanHref === "/wallets") {
+  if (href === "/wallets") {
     if (
       pathname === "/dashboard" ||
       pathname.startsWith("/dashboard/") ||
@@ -84,10 +56,10 @@ function isActive(pathname: string, currentTab: string | null, href: string) {
     }
     return pathname === "/wallets" || pathname.startsWith("/wallets/");
   }
-  if (cleanHref === "/partners") {
+  if (href === "/partners") {
     return pathname === "/partners";
   }
-  return pathname === cleanHref;
+  return pathname === href;
 }
 
 function getDisplayNameFromToken(token: string | null): string {
@@ -119,8 +91,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("tab");
+  const router = useRouter();
   const [displayName, setDisplayName] = React.useState("User");
 
   React.useEffect(() => {
@@ -145,7 +116,7 @@ export default function DashboardLayout({
 
         <nav className="px-2 py-4 space-y-1">
           {navItems.map((item) => {
-            const active = isActive(pathname, currentTab, item.href);
+            const active = isActive(pathname, item.href);
             return (
               <Link
                 key={item.label}
@@ -168,6 +139,10 @@ export default function DashboardLayout({
         <div className="mt-auto p-3">
           <button
             type="button"
+            onClick={() => {
+              clearAuthToken();
+              router.push("/login");
+            }}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-black hover:bg-note-yellow/10"
           >
             <LogOut className="h-4 w-4" />
