@@ -2,8 +2,10 @@ using API.Middleware;
 using API.Contracts.Transactions;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
+using Application.Features.Transactions.DeleteTransaction;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
+using Application.Features.Transactions.UpdateTransaction;
 using Application.Features.Transactions.QuickDeduct;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +38,8 @@ namespace API.Controllers
         [ProducesResponseType(typeof(QuickDeductResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<QuickDeductResponse>> QuickDeduct([FromBody] QuickDeductRequest request)
         {
             var command = new QuickDeductCommand
@@ -63,7 +66,8 @@ namespace API.Controllers
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TransactionDto>> CashAdjustment([FromBody] CashAdjustmentRequest request)
         {
             var command = new CreateCashAdjustmentCommand
@@ -81,20 +85,65 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Get all transactions for the current user, optionally filtered by wallet.
+        /// Get all transactions for the current user, optionally filtered by wallet and keyword search.
         /// </summary>
+        /// <param name="walletId">Optional wallet identifier. When provided, returns only transactions in that wallet.</param>
+        /// <param name="search">Optional keyword filter (case-insensitive) applied to transaction note and debt partner name.</param>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyList<TransactionDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<IReadOnlyList<TransactionDto>>> GetAll([FromQuery] Guid? walletId)
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IReadOnlyList<TransactionDto>>> GetAll([FromQuery] Guid? walletId, [FromQuery] string? search)
         {
             var result = await _mediator.Send(new GetTransactionsQuery
             {
                 UserId = GetCurrentUserId(),
-                WalletId = walletId
+                WalletId = walletId,
+                SearchTerm = search
             });
 
             return Ok(result);
+        }
+
+        [HttpPut("{id:guid}")]
+        [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<TransactionDto>> Update(Guid id, [FromBody] UpdateTransactionRequest request)
+        {
+            var command = new UpdateTransactionCommand
+            {
+                Id = id,
+                UserId = GetCurrentUserId(),
+                PayerMode = request.PayerMode,
+                Total = request.Total,
+                DebtAmount = request.DebtAmount,
+                Note = request.Note,
+                TransactionDate = request.TransactionDate
+            };
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _mediator.Send(new DeleteTransactionCommand
+            {
+                UserId = GetCurrentUserId(),
+                Id = id
+            });
+
+            return NoContent();
         }
 
         /// <summary>
@@ -102,8 +151,9 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TransactionDto>> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetTransactionByIdQuery

@@ -20,7 +20,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -32,9 +32,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
     {

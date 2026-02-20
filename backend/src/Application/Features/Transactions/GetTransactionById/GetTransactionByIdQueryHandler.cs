@@ -1,5 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
+using Application.Common.Locking;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,8 @@ namespace Application.Features.Transactions.GetTransactionById
 
         public async Task<TransactionDto> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken)
         {
+            var nowUtc = DateTimeOffset.UtcNow;
+
             var transaction = await _context.Transactions
                 .AsNoTracking()
                 .Where(t => t.Id == request.Id && t.Wallet.UserId == request.UserId)
@@ -42,6 +45,8 @@ namespace Application.Features.Transactions.GetTransactionById
             {
                 throw new NotFoundException("Transaction", request.Id);
             }
+
+            transaction.IsLocked = MonthLockPolicy.IsLocked(transaction.TransactionDate, nowUtc);
 
             return transaction;
         }
