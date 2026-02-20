@@ -179,7 +179,9 @@ export default function WalletDetailPage() {
                         ? "text-yellow-500 hover:text-yellow-600"
                         : "text-pencil-gray hover:text-note-yellow"
                     }`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
                       if (defaultWalletId === parentWallet.id) {
                         clearDefault();
                       } else {
@@ -217,7 +219,11 @@ export default function WalletDetailPage() {
                     variant="outline"
                     className="mt-3 border-note-yellow hover:bg-note-yellow/10"
                     size="sm"
-                    onClick={() => setIsAdjustBalanceModalOpen(true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setIsAdjustBalanceModalOpen(true);
+                    }}
                   >
                     <DollarSign className="h-4 w-4 mr-2" />
                     Adjust Balance
@@ -398,57 +404,72 @@ export default function WalletDetailPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                {childWallets.map((child) => (
-                  <div
-                    key={child.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    data-testid={`child-wallet-row-${child.id}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <WalletIcon className="h-4 w-4 text-note-yellow" />
-                      <div>
-                        <p className="font-medium text-ink-black">
-                          {child.name}
-                        </p>
-                        <p className="text-xs text-pencil-gray">
-                          {formatVnd(child.balance || 0)}
-                        </p>
+                {childWallets.map((child) => {
+                  const isDefault = defaultWalletId === child.id;
+                  return (
+                    <div
+                      key={child.id}
+                      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        isDefault
+                          ? "bg-yellow-50 border border-yellow-200"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }`}
+                      data-testid={`child-wallet-row-${child.id}`}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <WalletIcon className="h-4 w-4 text-note-yellow" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-ink-black">
+                              {child.name}
+                            </p>
+                            {isDefault && (
+                              <span className="inline-flex items-center gap-1 bg-yellow-200 text-yellow-900 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                <Star className="h-3 w-3 fill-current" />
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-pencil-gray">
+                            {formatVnd(child.balance || 0)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-ink-black hover:bg-note-yellow/10"
+                          data-testid={`detail-child-edit-${child.id}`}
+                          onClick={() => {
+                            setIsDetachModalOpen(false);
+                            setSelectedChildWallet(null);
+                            setIsCreateChildModalOpen(false);
+                            setEditingChildWallet(child);
+                            setIsEditChildModalOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          data-testid={`detail-child-delete-${child.id}`}
+                          onClick={() => {
+                            setIsEditChildModalOpen(false);
+                            setEditingChildWallet(null);
+                            setIsCreateChildModalOpen(false);
+                            setSelectedChildWallet(child);
+                            setIsDetachModalOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-ink-black hover:bg-note-yellow/10"
-                        data-testid={`detail-child-edit-${child.id}`}
-                        onClick={() => {
-                          setIsDetachModalOpen(false);
-                          setSelectedChildWallet(null);
-                          setIsCreateChildModalOpen(false);
-                          setEditingChildWallet(child);
-                          setIsEditChildModalOpen(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        data-testid={`detail-child-delete-${child.id}`}
-                        onClick={() => {
-                          setIsEditChildModalOpen(false);
-                          setEditingChildWallet(null);
-                          setIsCreateChildModalOpen(false);
-                          setSelectedChildWallet(child);
-                          setIsDetachModalOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

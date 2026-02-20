@@ -207,13 +207,13 @@ export default function WalletsPage() {
       {/* Search & Sort Controls */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-pencil-gray" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-note-yellow" />
           <input
             type="text"
             placeholder="Search wallet by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow text-ink-black"
+            className="w-full pl-11 pr-4 py-3 border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow focus:ring-1 focus:ring-note-yellow text-ink-black font-medium placeholder:text-pencil-gray/70"
           />
         </div>
 
@@ -270,6 +270,7 @@ export default function WalletsPage() {
             const aggregatedBalance =
               (parent.balance || 0) +
               children.reduce((sum, child) => sum + (child.balance || 0), 0);
+            const hasDefaultChild = children.some((child) => defaultWalletId === child.id);
 
             return (
               <Link
@@ -277,7 +278,9 @@ export default function WalletsPage() {
                 href={`/wallets/${parent.id}`}
                 data-testid={`parent-wallet-card-${parent.id}`}
               >
-                <Card className="border-note-yellow/25 cursor-pointer transition-all duration-200 hover:border-note-yellow/60 hover:shadow-md hover:-translate-y-0.5">
+                <Card className={`border-note-yellow/25 cursor-pointer transition-all duration-200 hover:border-note-yellow/60 hover:shadow-md hover:-translate-y-0.5 ${
+                  hasDefaultChild ? "border-yellow-200 bg-yellow-50/50" : ""
+                }`}>
                   <CardContent className="p-3 md:p-4 space-y-2">
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div className="flex items-start gap-3 flex-1">
@@ -285,9 +288,17 @@ export default function WalletsPage() {
                           <Wallet2 className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-left text-2xl font-bold text-ink-black group-hover:text-[#D97706]">
-                            {parent.name}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-left text-2xl font-bold text-ink-black group-hover:text-[#D97706]">
+                              {parent.name}
+                            </p>
+                            {hasDefaultChild && (
+                              <span className="inline-flex items-center gap-1 bg-yellow-300 text-yellow-900 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                <Star className="h-3 w-3 fill-current" />
+                                Has Default
+                              </span>
+                            )}
+                          </div>
                         <p className="text-sm text-pencil-gray">
                           {parent.description || "No description"} · {children.length} sub-wallet{children.length !== 1 ? "s" : ""}
                         </p>
@@ -295,28 +306,6 @@ export default function WalletsPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <p className="text-3xl font-bold text-orange-500 text-right">{formatVnd(aggregatedBalance)}</p>
-                      {/* Set as default button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-8 w-8 shrink-0 transition-colors ${
-                          defaultWalletId === parent.id
-                            ? "text-yellow-500 hover:text-yellow-600"
-                            : "text-pencil-gray hover:text-note-yellow"
-                        }`}
-                        disabled={isDeleting}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (defaultWalletId === parent.id) {
-                            clearDefault();
-                          } else {
-                            setAsDefault(parent.id);
-                          }
-                        }}
-                        aria-label={defaultWalletId === parent.id ? `Unset default wallet` : `Set as default wallet`}
-                      >
-                        <Star className="h-4 w-4" fill={defaultWalletId === parent.id ? "currentColor" : "none"} />
-                      </Button>
                       {/* Edit parent button */}
                       <Button
                         variant="ghost"
