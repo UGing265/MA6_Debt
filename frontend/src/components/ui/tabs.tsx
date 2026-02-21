@@ -74,6 +74,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
 
     return (
       <button
+        type="button"
         ref={ref}
         onClick={() => onValueChange(value)}
         className={cn(

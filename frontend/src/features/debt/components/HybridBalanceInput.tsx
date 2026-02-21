@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 export type BalanceDirection = "receivable" | "payable";
@@ -46,6 +47,9 @@ export function HybridBalanceInput({
   // Track last modified mode for sync logic
   const [lastModified, setLastModified] = useState<"guided" | "direct">("guided");
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"guided" | "direct">("guided");
+
   // Sync from external value changes (e.g., form reset)
   useEffect(() => {
     const absValue = Math.abs(value);
@@ -54,7 +58,7 @@ export function HybridBalanceInput({
     setAmount(absValue.toString());
     setDirection(newDirection);
     setDirectValue(value.toString());
-  }, [value]);
+  }, [value, lastModified]);
 
   // Handle guided mode amount change
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,87 +115,82 @@ export function HybridBalanceInput({
 
   return (
     <div className="space-y-4">
-      {/* Guided Mode */}
-      <div className="space-y-2">
-        <Label className="text-gray-700 font-medium">Guided Mode</Label>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              type="text"
-              inputMode="decimal"
-              placeholder="0"
-              value={amount}
-              onChange={handleAmountChange}
-              disabled={disabled}
-              className={cn(
-                "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]",
-                error && "border-red-500"
-              )}
-            />
-          </div>
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => handleDirectionToggle("receivable")}
-              disabled={disabled}
-              className={cn(
-                "px-4 py-2 rounded-lg font-medium transition-all text-sm whitespace-nowrap",
-                direction === "receivable"
-                  ? "bg-green-500 text-white border-2 border-green-600"
-                  : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
-              )}
-            >
-              Partner owes me
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDirectionToggle("payable")}
-              disabled={disabled}
-              className={cn(
-                "px-4 py-2 rounded-lg font-medium transition-all text-sm whitespace-nowrap",
-                direction === "payable"
-                  ? "bg-red-500 text-white border-2 border-red-600"
-                  : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
-              )}
-            >
-              I owe partner
-            </button>
-          </div>
-        </div>
-        <p className="text-xs text-gray-500">
-          Amount must be non-negative. Use direction to specify who owes whom.
-        </p>
-      </div>
+      <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as "guided" | "direct")}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger type="button" value="guided">Guided Mode</TabsTrigger>
+          <TabsTrigger type="button" value="direct">Direct Mode</TabsTrigger>
+        </TabsList>
 
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200"></div>
-        </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-[#FFFBEB] px-2 text-gray-500">OR</span>
-        </div>
-      </div>
+        {/* Guided Mode Tab */}
+        <TabsContent value="guided" className="space-y-2">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                type="text"
+                inputMode="decimal"
+                placeholder="0"
+                value={amount}
+                onChange={handleAmountChange}
+                disabled={disabled}
+                className={cn(
+                  "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]",
+                  error && "border-red-500"
+                )}
+              />
+            </div>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => handleDirectionToggle("receivable")}
+                disabled={disabled}
+                className={cn(
+                  "px-4 py-2 rounded-lg font-medium transition-all text-sm whitespace-nowrap",
+                  direction === "receivable"
+                    ? "bg-green-500 text-white border-2 border-green-600"
+                    : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
+                )}
+              >
+                Partner owes me
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDirectionToggle("payable")}
+                disabled={disabled}
+                className={cn(
+                  "px-4 py-2 rounded-lg font-medium transition-all text-sm whitespace-nowrap",
+                  direction === "payable"
+                    ? "bg-red-500 text-white border-2 border-red-600"
+                    : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
+                )}
+              >
+                I owe partner
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500">
+            Amount must be non-negative. Use direction to specify who owes whom.
+          </p>
+        </TabsContent>
 
-      {/* Direct Mode */}
-      <div className="space-y-2">
-        <Label className="text-gray-700 font-medium">Direct Mode</Label>
-        <Input
-          type="text"
-          inputMode="decimal"
-          placeholder="0 (positive = receivable, negative = payable)"
-          value={directValue}
-          onChange={handleDirectValueChange}
-          disabled={disabled}
-          className={cn(
-            "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]",
-            error && "border-red-500"
-          )}
-        />
-        <p className="text-xs text-gray-500">
-          Enter signed number: positive = receivable, negative = payable
-        </p>
-      </div>
+        {/* Direct Mode Tab */}
+        <TabsContent value="direct" className="space-y-2">
+          <Input
+            type="text"
+            inputMode="decimal"
+            placeholder="0 (positive = receivable, negative = payable)"
+            value={directValue}
+            onChange={handleDirectValueChange}
+            disabled={disabled}
+            className={cn(
+              "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]",
+              error && "border-red-500"
+            )}
+          />
+          <p className="text-xs text-gray-500">
+            Enter signed number: positive = receivable, negative = payable
+          </p>
+        </TabsContent>
+      </Tabs>
 
       {/* Error Message */}
       {error && (
