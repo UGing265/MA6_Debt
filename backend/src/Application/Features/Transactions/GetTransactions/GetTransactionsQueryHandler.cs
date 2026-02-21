@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Locking;
 using MediatR;
@@ -68,6 +67,48 @@ namespace Application.Features.Transactions.GetTransactions
                     DebtAmount = t.DebtAmount
                 })
                 .ToListAsync(cancellationToken);
+
+            if (transactions.Count > 0)
+            {
+                var transfers = await _context.Transfers
+                    .AsNoTracking()
+                    .Where(tr => tr.UserId == request.UserId
+                                 && (tr.SourceTransactionId != null || tr.DestinationTransactionId != null))
+                    .Select(tr => new
+                    {
+                        tr.Id,
+                        tr.FromWalletId,
+                        tr.ToWalletId,
+                        tr.SourceTransactionId,
+                        tr.DestinationTransactionId
+                    })
+                    .ToListAsync(cancellationToken);
+
+                var transferByTransactionId = new Dictionary<Guid, (Guid TransferId, Guid FromWalletId, Guid ToWalletId, TransferDirection Direction)>();
+                foreach (var transfer in transfers)
+                {
+                    if (transfer.SourceTransactionId.HasValue)
+                    {
+                        transferByTransactionId[transfer.SourceTransactionId.Value] = (transfer.Id, transfer.FromWalletId, transfer.ToWalletId, TransferDirection.Outgoing);
+                    }
+
+                    if (transfer.DestinationTransactionId.HasValue)
+                    {
+                        transferByTransactionId[transfer.DestinationTransactionId.Value] = (transfer.Id, transfer.FromWalletId, transfer.ToWalletId, TransferDirection.Incoming);
+                    }
+                }
+
+                foreach (var transaction in transactions)
+                {
+                    if (transferByTransactionId.TryGetValue(transaction.Id, out var transferContext))
+                    {
+                        transaction.TransferId = transferContext.TransferId;
+                        transaction.TransferFromWalletId = transferContext.FromWalletId;
+                        transaction.TransferToWalletId = transferContext.ToWalletId;
+                        transaction.TransferDirection = transferContext.Direction;
+                    }
+                }
+            }
 
             foreach (var transaction in transactions)
             {
