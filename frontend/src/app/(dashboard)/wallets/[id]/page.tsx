@@ -45,6 +45,7 @@ export default function WalletDetailPage() {
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
   const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
   const [adjustAmount, setAdjustAmount] = useState("");
+  const [adjustingChildWallet, setAdjustingChildWallet] = useState<Wallet | null>(null);
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
 
   // Load default wallet from localStorage
@@ -193,6 +194,12 @@ export default function WalletDetailPage() {
                     <Star className="h-4 w-4" fill={defaultWalletId === parentWallet.id ? "currentColor" : "none"} />
                   </Button>
                 )}
+                {!parentWallet.parentWalletId && defaultWalletId && childWallets.some((child) => defaultWalletId === child.id) && (
+                  <div className="flex items-center gap-1 bg-yellow-200 text-yellow-900 text-xs font-semibold px-2 py-1 rounded-full">
+                    <Star className="h-3 w-3 fill-current" />
+                    Has Default
+                  </div>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -302,11 +309,10 @@ export default function WalletDetailPage() {
           />
           <DialogHeader>
             <DialogTitle>
-              {parentWallet?.parentWalletId ? "Adjust Sub-wallet Balance" : "Adjust Wallet Balance"}
+              Adjust Sub-wallet Balance
             </DialogTitle>
             <DialogDescription>
-              Quickly add or subtract amount from &quot;{parentWallet?.name}&quot;. 
-              {parentWallet?.parentWalletId ? " (Sub-wallet)" : ""} 
+              Quickly add or subtract amount from &quot;{adjustingChildWallet?.name || parentWallet?.name}&quot;. 
               (This is a preview for Quick Deduct feature)
             </DialogDescription>
           </DialogHeader>
@@ -345,6 +351,7 @@ export default function WalletDetailPage() {
                 onClick={() => {
                   setIsAdjustBalanceModalOpen(false);
                   setAdjustAmount("");
+                  setAdjustingChildWallet(null);
                 }}
               >
                 Cancel
@@ -354,9 +361,10 @@ export default function WalletDetailPage() {
                 disabled={!adjustAmount}
                 onClick={() => {
                   // Mock implementation - will connect to Quick Deduct backend later
-                  console.log(`[MOCK] Adjusting ${parentWallet?.name} by ${adjustAmount}d`);
+                  console.log(`[MOCK] Adjusting ${adjustingChildWallet?.name || parentWallet?.name} by ${adjustAmount}d`);
                   setIsAdjustBalanceModalOpen(false);
                   setAdjustAmount("");
+                  setAdjustingChildWallet(null);
                 }}
               >
                 Next
@@ -436,6 +444,41 @@ export default function WalletDetailPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`${
+                            isDefault
+                              ? "text-yellow-500 hover:text-yellow-600"
+                              : "text-pencil-gray hover:text-note-yellow"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (isDefault) {
+                              clearDefault();
+                            } else {
+                              setAsDefault(child.id);
+                            }
+                          }}
+                          aria-label={isDefault ? "Unset as default" : "Set as default"}
+                        >
+                          <Star className="h-4 w-4" fill={isDefault ? "currentColor" : "none"} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-ink-black hover:bg-note-yellow/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setAdjustingChildWallet(child);
+                            setIsAdjustBalanceModalOpen(true);
+                          }}
+                          aria-label={`Adjust balance for ${child.name}`}
+                        >
+                          <DollarSign className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
