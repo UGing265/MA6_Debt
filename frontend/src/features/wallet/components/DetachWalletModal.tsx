@@ -38,6 +38,7 @@ export function DetachWalletModal({
         id: wallet.id,
         data: {
           name: wallet.name,
+          description: wallet.description || undefined,
           parentWalletId: null,
         },
       });

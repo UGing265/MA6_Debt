@@ -37,10 +37,12 @@ export function AttachWalletModal({
 
     try {
       setIsPending(true);
+      const selectedWallet = availableWallets.find((w) => w.id === selectedWalletId);
       await updateWallet({
         id: selectedWalletId,
         data: {
-          name: availableWallets.find((w) => w.id === selectedWalletId)?.name || "",
+          name: selectedWallet?.name || "",
+          description: selectedWallet?.description || undefined,
           parentWalletId: parentId,
         },
       });

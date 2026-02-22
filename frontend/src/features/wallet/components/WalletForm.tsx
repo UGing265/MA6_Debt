@@ -82,6 +82,7 @@ export const WalletForm = ({
           data: {
             name: payload.name,
             description: payload.description,
+            parentWalletId: wallet.parentWalletId,
           },
         });
       }
