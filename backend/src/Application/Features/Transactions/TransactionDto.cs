@@ -15,11 +15,16 @@ namespace Application.Features.Transactions
         public DateTime CreatedAt { get; set; }
 
         public bool IsLocked { get; set; }
-        
+         
         // US-03 specific fields for auditability
         public PayerMode? PayerMode { get; set; }
         public decimal? TotalAmount { get; set; }
         public decimal? DebtAmount { get; set; }
+
+        public Guid? TransferId { get; set; }
+        public Guid? TransferFromWalletId { get; set; }
+        public Guid? TransferToWalletId { get; set; }
+        public TransferDirection? TransferDirection { get; set; }
     }
     
     /// <summary>
@@ -38,5 +43,11 @@ namespace Application.Features.Transactions
         /// Wallet: 0, Partner: -(Total - DebtAmount)
         /// </summary>
         PartnerTra = 1
+    }
+
+    public enum TransferDirection
+    {
+        Outgoing = 0,
+        Incoming = 1
     }
 }
