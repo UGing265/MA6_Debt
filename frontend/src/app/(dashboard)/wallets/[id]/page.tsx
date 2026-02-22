@@ -339,10 +339,11 @@ export default function WalletDetailPage() {
                   variant="outline"
                   className="text-xs border-note-yellow hover:bg-note-yellow/20"
                   onClick={() => {
-                    setAdjustAmount(amount.toString());
+                    const amountStr = amount.toString();
+                    setAdjustAmount(amountStr.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
                   }}
                 >
-                  {(amount / 1000000).toFixed(0)}M
+                  {amount >= 1000000 ? `${(amount / 1000000).toFixed(0)}M` : `${(amount / 1000).toFixed(0)}k`}
                 </Button>
               ))}
             </div>
@@ -354,17 +355,24 @@ export default function WalletDetailPage() {
                 value={adjustAmount}
                 onChange={(e) => {
                   const v = e.target.value;
-                  setAdjustAmount(v);
-                  const parsed = parseMoneyInputFromWallet(v);
-                  if (v.trim() === "" || parsed.valid) {
+                  const cleaned = v.replace(/[^0-9.-]/g, "");
+                  
+                  // Format with commas
+                  const hasMinus = cleaned.startsWith("-");
+                  const sign = hasMinus ? "-" : "";
+                  const digits = cleaned.replace(/-/g, "");
+                  
+                  setAdjustAmount(sign + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                  const parsed = parseMoneyInputFromWallet(cleaned);
+                  if (cleaned.trim() === "" || parsed.valid) {
                     setInlineErrorAdjust(null);
                   } else {
                     setInlineErrorAdjust("Invalid amount format");
                   }
                 }}
-                className="w-full pl-3 pr-20 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow"
+                className="w-full pl-3 pr-12 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray select-none" aria-hidden="" >
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray select-none" aria-hidden="true" >
                 vnd
               </span>
             </div>

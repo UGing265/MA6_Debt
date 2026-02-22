@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { cn, formatVnd } from "@/lib/utils";
 
 export type BalanceDirection = "receivable" | "payable";
 
@@ -21,7 +21,7 @@ interface HybridBalanceInputProps {
  * 
  * Replaced legacy modes with a two-mode contract:
  * - Adjust Mode: Enter a non-negative delta and choose direction
- *   to apply against the current balance (current + delta or current - delta).
+ *   to apply against current balance (current + delta or current - delta).
  * - Set Mode: Enter a signed absolute balance (final target).
  * 
  * Sync Rule: When switching modes, we deterministically map values:
@@ -42,10 +42,11 @@ export function HybridBalanceInput({
 }: HybridBalanceInputProps) {
   const [baseline, setBaseline] = useState<number>(value);
   const mountedRef = useRef(false);
+  const lastNotifiedValueRef = useRef<number>(value);
 
   // Mode states (two-mode contract: Adjust and Set)
   // Adjust: delta input (non-negative) + direction toggle
-  const [amount, setAmount] = useState<string>(Math.abs(value).toString());
+  const [amount, setAmount] = useState<string>("0");
   const [direction, setDirection] = useState<BalanceDirection>(
     value >= 0 ? "receivable" : "payable"
   );
@@ -62,6 +63,25 @@ export function HybridBalanceInput({
   // Tab state (mode selector)
   const [activeTab, setActiveTab] = useState<"adjust" | "set">("adjust");
 
+  // Helper: format number with commas for display (for input value)
+  function formatWithCommas(num: string): string {
+    const digits = num.replace(/\D/g, "");
+    const hasMinus = num.startsWith("-");
+    const sign = hasMinus ? "-" : "";
+    return sign + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  // Helper: format number with commas and append vnd suffix
+  function formatInputWithCommasAndVnd(num: string): string {
+    if (!num) return "";
+    const cleaned = num.replace(/\D/g, "");
+    const hasMinus = cleaned.startsWith("-");
+    const sign = hasMinus ? "-" : "";
+    const digits = cleaned.replace(/-/g, "");
+    
+    return sign + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   // On first mount, capture baseline from initial value
   useEffect(() => {
     if (!mountedRef.current) {
@@ -70,28 +90,34 @@ export function HybridBalanceInput({
     }
   }, []);
 
-  
   useEffect(() => {
-    if (lastModified === "adjust") return; // do not drift while adjusting delta
-    const absValue = Math.abs(value);
-    const newDirection: BalanceDirection = value >= 0 ? "receivable" : "payable";
-    setAmount(absValue.toString());
-    setDirection(newDirection);
-    setDirectValue(value.toString());
-  }, [value, lastModified]);
+    if (value !== lastNotifiedValueRef.current) {
+      setBaseline(value);
+      setAmount("0");
+      setDirection(value >= 0 ? "receivable" : "payable");
+      setDirectValue(formatWithCommas(value.toString()));
+      lastNotifiedValueRef.current = value;
+    }
+  }, [value]);
 
   // Handle Adjust (delta) amount change
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    // Tolerant numeric parsing with thousand separators and optional vnd suffix
-    const parseResult = parseMoneyInput(inputValue, /*allowNegative=*/ false);
-    if (inputValue.trim() === "" || parseResult.valid) {
-      setAmount(inputValue);
-      setLastModified("adjust");
-      const delta = inputValue.trim() === "" ? 0 : Math.abs(parseResult.value);
+    // Remove non-numeric and commas for internal value, then re-format
+    const cleaned = inputValue.replace(/[^0-9.-]/g, "");
+    
+    // Update formatted display value
+    setAmount(formatWithCommas(cleaned));
+    setLastModified("adjust");
+    
+    // Parse numeric value for logic
+    const parseResult = parseMoneyInput(cleaned, /*allowNegative=*/ false);
+    if (cleaned.trim() === "" || parseResult.valid) {
+      const delta = cleaned.trim() === "" ? 0 : Math.abs(parseResult.value);
       const signedBalance = direction === "receivable" ? baseline + delta : baseline - delta;
+      lastNotifiedValueRef.current = signedBalance;
       onChange(signedBalance);
-      setDirectValue(signedBalance.toString());
+      setDirectValue(formatWithCommas(signedBalance.toString()));
       setInternalError(null);
       onValidityChange?.(true);
     } else {
@@ -110,26 +136,33 @@ export function HybridBalanceInput({
     const deltaParse = parseMoneyInput(amount, /*allowNegative=*/ false);
     const delta = deltaParse.valid ? Math.abs(deltaParse.value) : 0;
     const signedBalance = newDirection === "receivable" ? baseline + delta : baseline - delta;
+    lastNotifiedValueRef.current = signedBalance;
     onChange(signedBalance);
     
     // Sync to Set mode
-    setDirectValue(signedBalance.toString());
+    setDirectValue(formatWithCommas(signedBalance.toString()));
   };
 
   // Handle direct mode input change
   const handleDirectValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
+    // Remove non-numeric and commas for internal value, then re-format
+    const cleaned = inputValue.replace(/[^0-9.-]/g, "");
+    
+    // Update formatted display value
+    setDirectValue(formatWithCommas(cleaned));
+    setLastModified("set");
+    
     // Use tolerant parser for signed values
-    const parseResult = parseMoneyInput(inputValue, /*allowNegative=*/ true);
-    if (inputValue.trim() === "" || parseResult.valid) {
-      setDirectValue(inputValue);
-      setLastModified("set");
-      const numValue = inputValue.trim() === "" ? 0 : parseResult.value;
+    const parseResult = parseMoneyInput(cleaned, /*allowNegative=*/ true);
+    if (cleaned.trim() === "" || parseResult.valid) {
+      const numValue = cleaned.trim() === "" ? 0 : parseResult.value;
+      lastNotifiedValueRef.current = numValue;
       onChange(numValue);
       // Sync to adjust mode
-      const absValue = Math.abs(numValue);
-      setAmount(absValue.toString());
-      setDirection(numValue >= 0 ? "receivable" : "payable");
+      const delta = Math.abs(numValue - baseline);
+      setAmount(formatWithCommas(delta.toString()));
+      setDirection(numValue - baseline >= 0 ? "receivable" : "payable");
       setInternalError(null);
       onValidityChange?.(true);
     } else {
@@ -188,15 +221,16 @@ export function HybridBalanceInput({
       const deltaParse = parseMoneyInput(amount, /*allowNegative=*/ false);
       const delta = deltaParse.valid ? Math.abs(deltaParse.value) : 0;
       const signedBalance = direction === "receivable" ? baseline + delta : baseline - delta;
+      lastNotifiedValueRef.current = signedBalance;
       onChange(signedBalance);
-      setDirectValue(signedBalance.toString());
+      setDirectValue(formatWithCommas(signedBalance.toString()));
     }
     // Switching from Set to Adjust: derive delta and direction from target and current
     if (activeTab === "set" && newTab === "adjust") {
       const currentTargetParse = parseMoneyInput(directValue, /*allowNegative=*/ true);
       const currentTarget = currentTargetParse.valid ? currentTargetParse.value : 0;
       const delta = Math.abs(currentTarget - baseline);
-      setAmount(delta.toString());
+      setAmount(formatWithCommas(delta.toString()));
       setDirection(currentTarget - baseline >= 0 ? "receivable" : "payable");
     }
     setActiveTab(newTab);
@@ -214,19 +248,22 @@ export function HybridBalanceInput({
         {/* Adjust Mode Tab */}
         <TabsContent value="adjust" className="space-y-2">
           <div className="flex gap-2">
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <Input
                 type="text"
-                inputMode="decimal"
+                inputMode="numeric"
                 placeholder="0"
                 value={amount}
                 onChange={handleAmountChange}
                 disabled={disabled}
                 className={cn(
-                  "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow",
+                  "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow pr-12",
                   error && "border-red-500"
                 )}
               />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray select-none" aria-hidden="true">
+                vnd
+              </span>
             </div>
             <div className="flex gap-1">
               <button
@@ -264,18 +301,23 @@ export function HybridBalanceInput({
 
         {/* Set Mode Tab */}
         <TabsContent value="set" className="space-y-2">
-          <Input
-            type="text"
-            inputMode="decimal"
-            placeholder="0 (positive = receivable, negative = payable)"
-            value={directValue}
-            onChange={handleDirectValueChange}
-            disabled={disabled}
-            className={cn(
-              "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow",
-              error && "border-red-500"
-            )}
-          />
+          <div className="relative">
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="0 (positive = receivable, negative = payable)"
+              value={directValue}
+              onChange={handleDirectValueChange}
+              disabled={disabled}
+              className={cn(
+                "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow pr-12",
+                error && "border-red-500"
+              )}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray select-none" aria-hidden="true">
+              vnd
+            </span>
+          </div>
           <p className="text-xs text-gray-500">
             Enter signed number: positive = receivable, negative = payable
           </p>
@@ -302,7 +344,7 @@ export function HybridBalanceInput({
               value === 0 && "text-gray-600"
             )}
           >
-            {value.toFixed(2)}
+            {formatVnd(value)}
           </span>{" "}
           {value > 0 && "(Receivable - Partner owes you)"}
           {value < 0 && "(Payable - You owe this partner)"}
