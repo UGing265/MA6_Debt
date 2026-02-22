@@ -19,8 +19,17 @@ import { HybridBalanceInput } from "./HybridBalanceInput";
 import type { DebtPartner } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 
-// Validation schema
-const DebtPartnerFormSchema = z.object({
+export type DebtPartnerFormMode = "default" | "name-only" | "money-only";
+
+ 
+type DebtPartnerFormValues = { name: string; balance?: number };
+const DebtPartnerFormSchemaNameOnly = z.object({
+  name: z
+    .string()
+    .min(1, "Partner name is required")
+    .max(100, "Name must be less than 100 characters"),
+});
+const DebtPartnerFormSchemaDefault = z.object({
   name: z
     .string()
     .min(1, "Partner name is required")
@@ -28,12 +37,11 @@ const DebtPartnerFormSchema = z.object({
   balance: z.number(),
 });
 
-type DebtPartnerFormValues = z.infer<typeof DebtPartnerFormSchema>;
-
 interface DebtPartnerFormProps {
   partner?: DebtPartner; // For edit mode
-  onSubmit: (data: DebtPartnerFormValues) => Promise<void>;
+  onSubmit: (data: DebtPartnerFormValues, mode?: DebtPartnerFormMode) => Promise<void>;
   onCancel: () => void;
+  mode?: DebtPartnerFormMode;
 }
 
 /**
@@ -48,32 +56,42 @@ export function DebtPartnerForm({
   partner,
   onSubmit,
   onCancel,
+  mode = "default",
 }: DebtPartnerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isBalanceInputValid, setIsBalanceInputValid] = useState(true);
 
+  // Choose schema based on mode
+  const currentSchema = mode === "name-only" ? DebtPartnerFormSchemaNameOnly : DebtPartnerFormSchemaDefault;
+  // Field visibility based on mode: show Name input unless money-only; show Balance input unless name-only
+  const showName = mode !== "money-only";
+  const showBalance = mode !== "name-only";
   const form = useForm<DebtPartnerFormValues>({
-    resolver: zodResolver(DebtPartnerFormSchema),
+    resolver: zodResolver(currentSchema),
     defaultValues: {
       name: partner?.name || "",
-      balance: partner?.balance || 0,
+      balance: partner?.balance ?? 0,
     },
   });
 
   const handleSubmit = async (data: DebtPartnerFormValues) => {
     setIsLoading(true);
     try {
-      await onSubmit(data);
+      await onSubmit(data, mode);
       form.reset();
     } catch (error: any) {
       const parsedError = parseErrorResponse(error);
 
       // Map field errors
+  // Map field errors. In name-only mode we only map name errors.
       const fieldMap: Record<string, keyof DebtPartnerFormValues> = {
         Name: "name",
-        Balance: "balance",
         name: "name",
-        balance: "balance",
       };
+      if (mode !== "name-only") {
+        fieldMap.Balance = "balance";
+        fieldMap.balance = "balance";
+      }
 
       if (parsedError.fields) {
         Object.entries(parsedError.fields).forEach(([key, messages]) => {
@@ -92,48 +110,53 @@ export function DebtPartnerForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Partner Name */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700 font-medium">
-                Partner Name
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter partner name"
-                  {...field}
-                  disabled={isLoading}
-                  className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-[#FF7A00] focus:ring-[#FF7A00]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showName ? (
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-700 font-medium">
+                  Partner Name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter partner name"
+                    {...field}
+                    disabled={isLoading}
+                    className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
 
         {/* Balance (Hybrid Input) */}
-        <FormField
-          control={form.control}
-          name="balance"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700 font-medium">
-                Balance
-              </FormLabel>
-              <FormControl>
-                <HybridBalanceInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isLoading}
-                  error={form.formState.errors.balance?.message}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showBalance ? (
+          <FormField
+            control={form.control}
+            name="balance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-700 font-medium">
+                  Balance
+                </FormLabel>
+                <FormControl>
+                  <HybridBalanceInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isLoading}
+                    error={form.formState.errors.balance?.message}
+                    onValidityChange={(isValid) => setIsBalanceInputValid(isValid)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
 
         {/* Form Actions */}
         <div className="flex gap-3 justify-end pt-4">
@@ -148,8 +171,8 @@ export function DebtPartnerForm({
           </Button>
           <Button
             type="submit"
-            disabled={isLoading}
-            className="bg-[#FF7A00] hover:bg-[#E56E00] text-white font-bold border border-[#4A2C2A]/20"
+            disabled={isLoading || !isBalanceInputValid}
+            className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-bold"
           >
             {isLoading ? (
               <>

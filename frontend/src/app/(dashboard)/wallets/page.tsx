@@ -15,11 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatVnd } from "@/lib/utils";
 import { Wallet2, Plus, Pencil, Trash2, Search, Star } from "lucide-react";
 
-function formatVnd(value: number) {
-  return `${value.toLocaleString("en-US")}d`;
-}
 
 export default function WalletsPage() {
   const [isCreateParentOpen, setIsCreateParentOpen] = React.useState(false);
@@ -213,6 +211,7 @@ export default function WalletsPage() {
             placeholder="Search wallet by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search wallets by name"
             className="w-full pl-11 pr-4 py-3 border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow focus:ring-1 focus:ring-note-yellow text-ink-black font-medium placeholder:text-pencil-gray/70"
           />
         </div>
@@ -312,7 +311,9 @@ export default function WalletsPage() {
                         size="icon"
                         className="h-8 w-8 text-ink-black hover:text-note-yellow shrink-0"
                         disabled={isDeleting}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
                           setEditingWallet(parent);
                         }}
                         aria-label={`Edit ${parent.name}`}
@@ -325,7 +326,9 @@ export default function WalletsPage() {
                         size="icon"
                         className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
                         disabled={isDeleting}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
                           setDeletingWallet(parent);
                         }}
                         aria-label={`Delete ${parent.name}`}

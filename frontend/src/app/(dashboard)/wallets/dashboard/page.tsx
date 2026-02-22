@@ -5,6 +5,7 @@ import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
+import { formatVnd } from "@/lib/utils";
 
 const mockRecentHistory = [
   { id: "t1", title: "Team Lunch", wallet: "Main Wallet", date: "16 Feb", amount: -150000, actor: "Minh" },
@@ -14,9 +15,7 @@ const mockRecentHistory = [
   { id: "t5", title: "Savings Transfer", wallet: "Main Wallet", date: "11 Feb", amount: -1000000, actor: "" },
 ];
 
-function formatVnd(value: number) {
-  return `${value.toLocaleString("en-US")}d`;
-}
+// formatVnd centralized via '@/lib/utils'
 
 export default function WalletDashboardPage() {
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
@@ -38,6 +37,10 @@ export default function WalletDashboardPage() {
   const parentWallets = safeWallets.filter((wallet) => !wallet.parentWalletId);
   const childWallets = safeWallets.filter((wallet) => !!wallet.parentWalletId);
   const totalWallets = parentWallets.length + childWallets.length;
+
+  // Safeguard: avoid divide-by-zero when computing average sub-wallets per parent wallet
+  const parentWalletsCount = parentWallets.length;
+  const avgSubWalletsDisplay = parentWalletsCount > 0 ? (childWallets.length / parentWalletsCount).toFixed(1) : "0";
 
   // SRS: Total = Σ(Tất cả Ví con) + (Tiền nợ)
   // Receivable = partner balance > 0 (họ nợ mình)
@@ -159,9 +162,7 @@ export default function WalletDashboardPage() {
           <div className="p-5 text-center space-y-1">
             <p className="text-sm font-medium text-pencil-gray">Parent Wallets</p>
             <div className="text-4xl font-bold text-purple-600">{parentWallets.length}</div>
-            <p className="text-xs text-pencil-gray">
-              Avg {childWallets.length > 0 ? (childWallets.length / parentWallets.length).toFixed(1) : 0} sub-wallet(s)
-            </p>
+            <p className="text-xs text-pencil-gray">Avg {avgSubWalletsDisplay} sub-wallet(s)</p>
           </div>
         </Card>
 

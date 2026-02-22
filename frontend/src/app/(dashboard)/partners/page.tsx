@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star } from "lucide-react";
+import { formatVnd } from "@/lib/utils";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
+import { PartnerNameDialog } from "@/features/debt/components/PartnerNameDialog";
+import { PartnerMoneyDialog } from "@/features/debt/components/PartnerMoneyDialog";
 import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,14 +20,13 @@ import {
 } from "@/components/ui/dialog";
 import type { DebtPartner } from "@/features/debt/types/debtPartner";
 
-function formatVnd(value: number) {
-  return `${Math.abs(value).toLocaleString("en-US")}d`;
-}
+// formatVnd centralized via '@/lib/utils'
 
 export default function PartnersPage() {
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingPartner, setEditingPartner] = useState<DebtPartner | null>(null);
+  const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
+  const [moneyDialogPartner, setMoneyDialogPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
   const [defaultPartnerId, setDefaultPartnerId] = useState<string>("");
 
@@ -55,10 +57,18 @@ export default function PartnersPage() {
     setIsCreateOpen(false);
   };
 
-  const handleUpdate = async (data: { name: string; balance: number }) => {
-    if (!editingPartner) return;
-    await updatePartner(editingPartner.id, data);
-    setEditingPartner(null);
+  const handleNameSubmit = async (id: string, data: { name: string; balance: number }) => {
+    const existing = partners.find((p) => p.id === id);
+    if (!existing) return;
+    await updatePartner(id, { name: data.name, balance: existing.balance });
+    setNameDialogPartner(null);
+  };
+
+  const handleMoneySubmit = async (id: string, data: { name: string; balance: number }) => {
+    const existing = partners.find((p) => p.id === id);
+    if (!existing) return;
+    await updatePartner(id, { name: existing.name, balance: data.balance });
+    setMoneyDialogPartner(null);
   };
 
   const handleDelete = async () => {
@@ -121,11 +131,12 @@ export default function PartnersPage() {
 
                       <div className="flex items-center gap-1">
                         <button
+                          type="button"
                           className={`p-2 rounded-md transition-colors ${
                             defaultPartnerId === partner.id
                               ? "text-yellow-500 hover:text-yellow-600"
                               : "text-pencil-gray hover:text-note-yellow"
-                          }`}
+                          } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500`}
                           onClick={() => {
                             if (defaultPartnerId === partner.id) {
                               clearDefault();
@@ -138,14 +149,24 @@ export default function PartnersPage() {
                           <Star className="h-4 w-4" fill={defaultPartnerId === partner.id ? "currentColor" : "none"} />
                         </button>
                         <button
-                          className="p-2 rounded-md text-ink-black hover:bg-note-yellow/20"
-                          onClick={() => setEditingPartner(partner)}
-                          aria-label={`Edit ${partner.name}`}
+                          type="button"
+                          className="p-2 inline-flex items-center justify-center rounded-md text-ink-black hover:bg-note-yellow/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
+                          onClick={() => setNameDialogPartner(partner)}
+                          aria-label={`Edit name for ${partner.name}`}
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
-                          className="p-2 rounded-md text-red-500 hover:bg-red-50"
+                          type="button"
+                          className="p-2 inline-flex items-center justify-center rounded-md text-ink-black hover:bg-note-yellow/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
+                          onClick={() => setMoneyDialogPartner(partner)}
+                          aria-label={`Edit balance for ${partner.name}`}
+                        >
+                          <TrendingUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-2 inline-flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                           onClick={() => setDeletingPartner(partner)}
                           aria-label={`Delete ${partner.name}`}
                         >
@@ -189,18 +210,22 @@ export default function PartnersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={editingPartner !== null} onOpenChange={(open) => !open && setEditingPartner(null)}>
-        <DialogContent>
-          <DialogClose onClose={() => setEditingPartner(null)} />
-          <DialogHeader>
-            <DialogTitle>Edit Partner</DialogTitle>
-            <DialogDescription>Update partner name and balance.</DialogDescription>
-          </DialogHeader>
-          {editingPartner ? (
-            <DebtPartnerForm partner={editingPartner} onSubmit={handleUpdate} onCancel={() => setEditingPartner(null)} />
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <PartnerNameDialog
+        open={nameDialogPartner !== null}
+        partner={nameDialogPartner}
+        onOpenChange={(open) => {
+          if (!open) setNameDialogPartner(null);
+        }}
+        onSubmit={handleNameSubmit}
+      />
+      <PartnerMoneyDialog
+        open={moneyDialogPartner !== null}
+        partner={moneyDialogPartner}
+        onOpenChange={(open) => {
+          if (!open) setMoneyDialogPartner(null);
+        }}
+        onSubmit={handleMoneySubmit}
+      />
 
       <Dialog open={deletingPartner !== null} onOpenChange={(open) => !open && setDeletingPartner(null)}>
         <DialogContent>

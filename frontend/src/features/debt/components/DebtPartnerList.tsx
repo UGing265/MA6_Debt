@@ -13,9 +13,10 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { DebtPartnerForm } from "./DebtPartnerForm";
+import { PartnerNameDialog } from "./PartnerNameDialog";
+import { PartnerMoneyDialog } from "./PartnerMoneyDialog";
 import type { DebtPartner } from "../types/debtPartner";
-import { cn } from "@/lib/utils";
+import { cn, formatVnd } from "@/lib/utils";
 
 interface DebtPartnerListProps {
   partners: DebtPartner[];
@@ -35,7 +36,8 @@ export function DebtPartnerList({
   onUpdate,
   onDelete,
 }: DebtPartnerListProps) {
-  const [editingPartner, setEditingPartner] = useState<DebtPartner | null>(null);
+  const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
+  const [moneyDialogPartner, setMoneyDialogPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
 
   // Get badge info based on balance
@@ -64,11 +66,15 @@ export function DebtPartnerList({
     }
   };
 
-  const handleEdit = async (data: { name: string; balance: number }) => {
-    if (editingPartner) {
-      await onUpdate(editingPartner.id, data);
-      setEditingPartner(null);
-    }
+  const handleNameSubmit = async (id: string, data: { name: string; balance: number }) => {
+    if (!nameDialogPartner) return;
+    await onUpdate(nameDialogPartner.id, { name: data.name, balance: nameDialogPartner.balance });
+    setNameDialogPartner(null);
+  };
+  const handleMoneySubmit = async (id: string, data: { name: string; balance: number }) => {
+    if (!moneyDialogPartner) return;
+    await onUpdate(moneyDialogPartner.id, { name: moneyDialogPartner.name, balance: data.balance });
+    setMoneyDialogPartner(null);
   };
 
   const handleDelete = async () => {
@@ -101,18 +107,28 @@ export function DebtPartnerList({
                       {partner.name}
                     </h3>
                   </div>
-                  <div className="flex gap-1 ml-2">
+                    <div className="flex gap-1 ml-2">
                     <button
-                      onClick={() => setEditingPartner(partner)}
-                      className="p-1.5 text-gray-600 hover:text-[#FF7A00] hover:bg-gray-100 rounded transition-colors"
-                      title="Edit partner"
+                      type="button"
+                      aria-label={`Edit name for ${partner.name}`}
+                      onClick={() => setNameDialogPartner(partner)}
+                      className="p-2 inline-flex items-center justify-center rounded-md text-gray-600 hover:text-note-yellow hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
+                      aria-label={`Edit balance for ${partner.name}`}
+                      onClick={() => setMoneyDialogPartner(partner)}
+                      className="p-2 inline-flex items-center justify-center rounded-md text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setDeletingPartner(partner)}
-                      className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                      title="Delete partner"
+                      aria-label={`Delete partner ${partner.name}`}
+                      className="p-2 inline-flex items-center justify-center rounded-md text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -129,7 +145,7 @@ export function DebtPartnerList({
                   <BadgeIcon className="w-4 h-4" />
                   <div className="flex flex-col items-start">
                     <span className="font-bold">
-                      {Math.abs(partner.balance).toFixed(2)}
+                      {formatVnd(Math.abs(partner.balance))}
                     </span>
                     <span className="text-xs opacity-80">{badgeInfo.label}</span>
                   </div>
@@ -145,28 +161,25 @@ export function DebtPartnerList({
         })}
       </div>
 
-      {/* Edit Dialog */}
-      <Dialog
-        open={editingPartner !== null}
-        onOpenChange={(open) => !open && setEditingPartner(null)}
-      >
-        <DialogContent>
-          <DialogClose onClose={() => setEditingPartner(null)} />
-          <DialogHeader>
-            <DialogTitle>Edit Debt Partner</DialogTitle>
-            <DialogDescription>
-              Update partner information and balance
-            </DialogDescription>
-          </DialogHeader>
-          {editingPartner && (
-            <DebtPartnerForm
-              partner={editingPartner}
-              onSubmit={handleEdit}
-              onCancel={() => setEditingPartner(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Name-only Dialog */}
+      <PartnerNameDialog
+        open={nameDialogPartner !== null}
+        partner={nameDialogPartner}
+        onOpenChange={(open) => {
+          if (!open) setNameDialogPartner(null);
+        }}
+        onSubmit={handleNameSubmit}
+      />
+
+      {/* Money dialog */}
+      <PartnerMoneyDialog
+        open={moneyDialogPartner !== null}
+        partner={moneyDialogPartner}
+        onOpenChange={(open) => {
+          if (!open) setMoneyDialogPartner(null);
+        }}
+        onSubmit={handleMoneySubmit}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog

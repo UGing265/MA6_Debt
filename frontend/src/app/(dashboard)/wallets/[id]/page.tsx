@@ -29,9 +29,7 @@ import {
   Star,
 } from "lucide-react";
 
-function formatVnd(value: number) {
-  return `${value.toLocaleString("en-US")}d`;
-}
+import { formatVnd } from "@/lib/utils";
 
 export default function WalletDetailPage() {
   const params = useParams();
@@ -45,6 +43,8 @@ export default function WalletDetailPage() {
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
   const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
   const [adjustAmount, setAdjustAmount] = useState("");
+  const [isAdjustSubmitting, setIsAdjustSubmitting] = useState(false);
+  const [inlineErrorAdjust, setInlineErrorAdjust] = useState<string | null>(null);
   const [adjustingChildWallet, setAdjustingChildWallet] = useState<Wallet | null>(null);
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
 
@@ -131,6 +131,21 @@ export default function WalletDetailPage() {
         </Card>
       </div>
     );
+  }
+
+  // Local tolerant money parser for wallet quick-deduct inputs
+  function parseMoneyInputFromWallet(input: string): { valid: boolean; value: number } {
+    const raw = input.trim();
+    if (raw === "") return { valid: true, value: 0 };
+    let s = raw.replace(/\s*vnd$/i, "");
+    const hasMinus = /^-/.test(s);
+    if (hasMinus) return { valid: false, value: 0 };
+    s = s.replace(/[,.\s]/g, "");
+    // try parse as integer
+    if (s.length === 0) return { valid: false, value: 0 };
+    const v = parseInt(s, 10);
+    if (isNaN(v)) return { valid: false, value: 0 };
+    return { valid: true, value: v };
   }
 
   return (
@@ -331,19 +346,32 @@ export default function WalletDetailPage() {
                 </Button>
               ))}
             </div>
-            <input
-              type="number"
-              placeholder="Or enter custom amount"
-              value={adjustAmount}
-              onChange={(e) => setAdjustAmount(e.target.value)}
-              className="w-full px-3 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow"
-            />
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-xs text-pencil-gray mb-2">Preview: Quick Deduct amount</p>
-              <p className="text-lg font-bold text-ink-black">
-                {adjustAmount ? `${adjustAmount}d` : "No amount selected"}
-              </p>
+              <div className="relative">
+              <input
+                aria-label="Adjust amount"
+                type="text"
+                placeholder="Or enter custom amount"
+                value={adjustAmount}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setAdjustAmount(v);
+                  const parsed = parseMoneyInputFromWallet(v);
+                  if (v.trim() === "" || parsed.valid) {
+                    setInlineErrorAdjust(null);
+                  } else {
+                    setInlineErrorAdjust("Invalid amount format");
+                  }
+                }}
+                className="w-full pl-3 pr-20 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray select-none" aria-hidden="" >
+                vnd
+              </span>
             </div>
+            {inlineErrorAdjust ? (
+              <p className="text-sm text-red-500">{inlineErrorAdjust}</p>
+            ) : null}
+            {/* Preview block removed per T5 plan */}
             <div className="flex gap-2 pt-2">
               <Button
                 variant="outline"
@@ -352,19 +380,26 @@ export default function WalletDetailPage() {
                   setIsAdjustBalanceModalOpen(false);
                   setAdjustAmount("");
                   setAdjustingChildWallet(null);
+                  setInlineErrorAdjust(null);
                 }}
               >
                 Cancel
               </Button>
               <Button
                 className="flex-1 bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-                disabled={!adjustAmount}
+                disabled={!adjustAmount.trim() || !!inlineErrorAdjust || isAdjustSubmitting}
                 onClick={() => {
-                  // Mock implementation - will connect to Quick Deduct backend later
-                  console.log(`[MOCK] Adjusting ${adjustingChildWallet?.name || parentWallet?.name} by ${adjustAmount}d`);
-                  setIsAdjustBalanceModalOpen(false);
-                  setAdjustAmount("");
-                  setAdjustingChildWallet(null);
+                  if (!adjustAmount.trim() || !!inlineErrorAdjust) return;
+                  setIsAdjustSubmitting(true);
+                  // Mock async submit
+                  setTimeout(() => {
+                    console.log(`[MOCK] Adjusting ${adjustingChildWallet?.name || parentWallet?.name} by ${adjustAmount} vnd`);
+                    setIsAdjustBalanceModalOpen(false);
+                    setAdjustAmount("");
+                    setAdjustingChildWallet(null);
+                    setInlineErrorAdjust(null);
+                    setIsAdjustSubmitting(false);
+                  }, 300);
                 }}
               >
                 Next
@@ -448,10 +483,10 @@ export default function WalletDetailPage() {
                           variant="ghost"
                           size="sm"
                           className={`${
-                            isDefault
-                              ? "text-yellow-500 hover:text-yellow-600"
-                              : "text-pencil-gray hover:text-note-yellow"
-                          }`}
+                              isDefault
+                                ? "text-yellow-500 hover:text-yellow-600"
+                                : "text-pencil-gray hover:text-note-yellow"
+                            }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -461,9 +496,9 @@ export default function WalletDetailPage() {
                               setAsDefault(child.id);
                             }
                           }}
-                          aria-label={isDefault ? "Unset as default" : "Set as default"}
+                          aria-label={isDefault ? "Unset as default" : `Set as default for ${child.name}`}
                         >
-                          <Star className="h-4 w-4" fill={isDefault ? "currentColor" : "none"} />
+                            <Star className="h-4 w-4" fill={isDefault ? "currentColor" : "none"} />
                         </Button>
                         <Button
                           variant="ghost"
@@ -491,8 +526,9 @@ export default function WalletDetailPage() {
                             setEditingChildWallet(child);
                             setIsEditChildModalOpen(true);
                           }}
+                          aria-label={`Edit ${child.name}`}
                         >
-                          <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -506,8 +542,9 @@ export default function WalletDetailPage() {
                             setSelectedChildWallet(child);
                             setIsDetachModalOpen(true);
                           }}
+                          aria-label={`Delete ${child.name}`} 
                         >
-                          <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
