@@ -37,8 +37,8 @@
     --sidebar-ring: oklch(0.708 0 0);
 
     /* Custom Theme Colors */
-    --paper-cream: #F5EBE0;
-    --note-yellow: #FF7A00;
+    --paper-cream: #FFFBEB;
+    --note-yellow: #FCD34D;
     --ink-black: #1F2937;
     --pencil-gray: #4B5563;
 
@@ -50,7 +50,7 @@
      * Contrast Rule: ALWAYS use --brand-yellow-foreground (dark) for text on yellow.
      *                NEVER use white text on yellow (fails WCAG).
      */
-    --brand-yellow: #FF7A00;
+    --brand-yellow: #FCD34D;
     --brand-yellow-foreground: #1F2937;
 
     /* 
@@ -123,8 +123,8 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
      --sidebar-ring: oklch(0.439 0 0);
-    --paper-cream: #F5EBE0;
-    --note-yellow: #FF7A00;
+    --paper-cream: #FFFBEB;
+    --note-yellow: #FCD34D;
     --ink-black: #1F2937;
 }
 

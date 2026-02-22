@@ -8,14 +8,14 @@ export default function AuthLayout({
 }) {
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: '#F5EFE6' }}
+      className="min-h-screen flex items-center justify-center p-4 font-quicksand"
+      style={{ backgroundColor: '#FFFBEB' }}
     >
       <div 
         className="w-full max-w-md p-8 rounded-2xl shadow-lg border"
         style={{ 
-          backgroundColor: '#FFFFFF',
-          borderColor: 'rgba(74, 44, 42, 0.1)'
+          backgroundColor: '#FFFDF5',
+          borderColor: 'rgba(31, 41, 55, 0.12)'
         }}
       >
         {children}

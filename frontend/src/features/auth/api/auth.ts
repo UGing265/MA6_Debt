@@ -1,8 +1,8 @@
-import { LoginInput, RegisterInput, AuthResponse } from "../types/auth";
+import { LoginInput, RegisterInput, LoginResponse } from "../types/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
 
-export const login = async (data: LoginInput): Promise<AuthResponse> => {
+export const login = async (data: LoginInput): Promise<LoginResponse> => {
   const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: {

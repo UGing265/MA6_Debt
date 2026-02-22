@@ -26,6 +26,15 @@ namespace Application.Features.Wallets.UpdateWallet
 
             wallet.Name = request.Name;
             wallet.Description = request.Description;
+            
+            if (request.ParentWalletId.HasValue)
+            {
+                wallet.ParentWalletId = request.ParentWalletId.Value;
+            }
+            else
+            {
+                wallet.ParentWalletId = null;
+            }
 
             await _context.SaveChangesAsync(cancellationToken);
 

@@ -20,13 +20,13 @@ const useCases = [
 
 export const UseCaseCardsSection = () => {
   return (
-    <section className="bg-[#F5EFE6] py-24 sm:py-32">
+    <section className="bg-[#FFFBEB] py-24 sm:py-32 font-quicksand">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#4A2C2A] sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-[#1F2937] font-patrick sm:text-4xl">
             Keep cash in the right wallets
           </h2>
-          <p className="mt-4 text-lg leading-8 text-[#8D6E63]">
+          <p className="mt-4 text-lg leading-8 text-[#4B5563]">
             Every wallet has a clear purpose.
           </p>
         </div>
@@ -34,18 +34,18 @@ export const UseCaseCardsSection = () => {
           {useCases.map((useCase) => (
             <div
               key={useCase.title}
-              className="flex flex-col rounded-3xl border border-[#4A2C2A]/10 bg-white p-8 transition-all hover:shadow-md hover:border-[#FF7A00]/20"
+               className="flex flex-col rounded-3xl border border-[#1F2937]/10 bg-white p-8 transition-all hover:shadow-md hover:border-[#FCD34D]/60"
             >
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F5EFE6] text-[#FF7A00]">
+               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FEF3C7] text-[#D97706]">
                 <useCase.icon
                   className="h-6 w-6"
                   aria-hidden="true"
                 />
               </div>
-              <h3 className="text-xl font-semibold leading-7 text-[#4A2C2A]">
+               <h3 className="text-xl font-semibold leading-7 text-[#1F2937] font-patrick">
                 {useCase.title}
               </h3>
-              <p className="mt-4 flex-auto text-base leading-7 text-[#8D6E63]">
+               <p className="mt-4 flex-auto text-base leading-7 text-[#4B5563]">
                 {useCase.description}
               </p>
             </div>
