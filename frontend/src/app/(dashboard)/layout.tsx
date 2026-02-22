@@ -38,7 +38,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Quick Deduct",
-    href: "/workspace?tab=quick-deduct",
+    href: "/quick-deduct",
     icon: <Zap className="h-4 w-4" />,
     testId: "nav-quick-deduct",
   },

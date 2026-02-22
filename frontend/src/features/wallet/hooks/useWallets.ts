@@ -15,7 +15,7 @@ type WalletsListener = () => void;
 
 const walletsListeners = new Set<WalletsListener>();
 
-const notifyWalletsChanged = () => {
+export const triggerWalletsRefresh = () => {
   walletsListeners.forEach((listener) => listener());
 };
 
@@ -78,7 +78,7 @@ export const useCreateWallet = () => {
       try {
         const result = await createWallet(data);
         toast.success("Wallet created successfully!");
-        notifyWalletsChanged();
+        triggerWalletsRefresh();
         return result;
       } catch (error: any) {
         const message = error.general || "Failed to create wallet";
@@ -95,7 +95,7 @@ export const useUpdateWallet = () => {
       try {
         const result = await updateWallet(id, data);
         toast.success("Wallet updated successfully!");
-        notifyWalletsChanged();
+        triggerWalletsRefresh();
         return result;
       } catch (error: any) {
         const message = error.general || "Failed to update wallet";
@@ -112,7 +112,7 @@ export const useDeleteWallet = () => {
       try {
         await deleteWallet(id);
         toast.success("Wallet deleted successfully!");
-        notifyWalletsChanged();
+        triggerWalletsRefresh();
       } catch (error: any) {
         const message = error.general || "Failed to delete wallet";
         toast.error(message);

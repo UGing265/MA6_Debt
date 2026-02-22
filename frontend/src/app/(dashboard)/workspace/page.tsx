@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeftRight, Clock3, LayoutDashboard, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,20 @@ const tabMap: Record<string, { title: string; description: string; icon: React.R
 export default function WorkspacePage() {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "";
+  const router = useRouter();
+
+  // Hand off to dedicated route for quick deductions to avoid placeholder UI on workspace
+  useEffect(() => {
+    if (tab === "quick-deduct") {
+      router.replace("/quick-deduct");
+    }
+  }, [tab, router]);
+
+  // Avoid rendering the placeholder card during redirect
+  if (tab === "quick-deduct") {
+    return null;
+  }
+
   const current = tabMap[tab];
 
   return (
