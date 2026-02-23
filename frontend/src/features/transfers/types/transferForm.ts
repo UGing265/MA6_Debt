@@ -9,7 +9,7 @@ export const TransferFormSchema = z
         required_error: "Amount is required",
         invalid_type_error: "Amount is required",
       })
-      .greaterThan(0, "Amount must be greater than zero"),
+      .positive("Amount must be greater than zero"),
     sourceBalance: z
       .number({
         required_error: "SourceBalance is required",

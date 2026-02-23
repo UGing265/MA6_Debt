@@ -31,6 +31,30 @@ type ParsedLikeError = {
   fields?: Record<string, string[]>;
 };
 
+type TransferFormInput = Omit<TransferFormValues, "amount"> & {
+  amount?: number;
+};
+
+const isParsedLikeError = (value: unknown): value is ParsedLikeError => {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+
+  if ("general" in v && v.general !== undefined && typeof v.general !== "string") {
+    return false;
+  }
+
+  if ("fields" in v && v.fields !== undefined) {
+    if (typeof v.fields !== "object" || v.fields === null) return false;
+    const fields = v.fields as Record<string, unknown>;
+    for (const [, messages] of Object.entries(fields)) {
+      if (!Array.isArray(messages)) return false;
+      if (!messages.every((m) => typeof m === "string")) return false;
+    }
+  }
+
+  return "general" in v || "fields" in v;
+};
+
 const getWalletLabel = (wallet: WalletDto) => {
   return wallet.name;
 };
@@ -42,12 +66,12 @@ export const TransferForm: React.FC = () => {
 
   const isDisabled = isWalletsLoading || isSubmitting;
 
-  const form = useForm<TransferFormValues>({
+  const form = useForm<TransferFormInput>({
     resolver: zodResolver(TransferFormSchema),
     defaultValues: {
       fromWalletId: "",
       toWalletId: "",
-      amount: undefined as unknown as number,
+      amount: undefined,
       sourceBalance: 0,
       note: "",
     },
@@ -105,10 +129,9 @@ export const TransferForm: React.FC = () => {
 
   const applyServerErrors = useCallback(
     (error: any) => {
-      const parsed: ParsedLikeError =
-        error && typeof error === "object" && ("fields" in error || "general" in error)
-          ? (error as ParsedLikeError)
-          : (parseErrorResponse(error) as any);
+      const parsed: ParsedLikeError = isParsedLikeError(error)
+        ? error
+        : parseErrorResponse(error);
 
       if (parsed.general) {
         toast.error(parsed.general);
@@ -127,20 +150,20 @@ export const TransferForm: React.FC = () => {
   );
 
   const onSubmit = useCallback(
-    async (values: TransferFormValues) => {
+    async (values: TransferFormInput) => {
       setIsSubmitting(true);
       try {
         await createTransfer({
           fromWalletId: values.fromWalletId,
           toWalletId: values.toWalletId,
-          amount: values.amount,
+          amount: values.amount!,
         });
 
         toast.success("Chuyển tiền thành công");
         form.reset({
           fromWalletId: "",
           toWalletId: "",
-          amount: undefined as unknown as number,
+          amount: undefined,
           sourceBalance: 0,
           note: "",
         });
@@ -241,10 +264,10 @@ export const TransferForm: React.FC = () => {
                   placeholder="0"
                   data-testid="transfer-amount"
                   disabled={isDisabled || !fromWalletId}
-                  value={(field.value as unknown as number | undefined) ?? ""}
+                  value={field.value ?? ""}
                   onChange={(e) => {
                     const next = e.target.value;
-                    field.onChange(next === "" ? (undefined as any) : Number(next));
+                    field.onChange(next === "" ? undefined : Number(next));
                   }}
                 />
               </FormControl>
