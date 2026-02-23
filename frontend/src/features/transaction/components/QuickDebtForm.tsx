@@ -4,18 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Zap, Tag } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
@@ -105,6 +95,7 @@ export function QuickDebtForm() {
     }
 
     setIsSubmitting(true);
+    setNotificationMessage(null);
 
     try {
       const input = {
@@ -167,195 +158,187 @@ export function QuickDebtForm() {
   };
 
   return (
-    <Form {...form}>
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="total"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Total Bill</FormLabel>
-              <FormControl>
-                <Input
-                  data-testid="qd-total"
-                  disabled={isSubmitting}
-                  inputMode="decimal"
-                  placeholder="0"
-                  type="number"
-                  value={field.value ?? ""}
-                  onChange={(event) => field.onChange(event.target.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="walletId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Child Wallet</FormLabel>
-              <FormControl>
-                <select
-                  data-testid="qd-wallet"
-                  disabled={isSubmitting || isWalletsLoading}
-                  value={field.value ?? ""}
-                  onChange={(event) => field.onChange(event.target.value)}
-                  className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Select child wallet</option>
-                  {childWallets.map((wallet) => (
-                    <option key={wallet.id} value={wallet.id}>
-                      {wallet.name}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="note"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Note</FormLabel>
-              <FormControl>
-                <Input
-                  disabled={isSubmitting}
-                  placeholder="Optional note"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="debtTag"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <label className="flex items-center gap-2 text-sm font-medium">
-                  <input
-                    data-testid="qd-debt-toggle"
-                    checked={field.value ?? false}
-                    disabled={isSubmitting}
-                    type="checkbox"
-                    onChange={(event) => field.onChange(event.target.checked)}
-                  />
-                  Apply debt-tag
-                </label>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {debtTag ? (
-          <>
-            <FormField
-              control={form.control}
-              name="payerMode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Payer Mode</FormLabel>
-                  <FormControl>
-                    <select
-                      disabled={isSubmitting}
-                      value={field.value ?? PayerMode.ToiTra}
-                      onChange={(event) => field.onChange(Number(event.target.value))}
-                      className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value={PayerMode.ToiTra}>Toi tra</option>
-                      <option value={PayerMode.PartnerTra}>Partner tra</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="partnerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Debt Partner</FormLabel>
-                  <FormControl>
-                    <select
-                      data-testid="qd-partner"
-                      disabled={isSubmitting || isPartnersLoading}
-                      value={field.value ?? ""}
-                      onChange={(event) => field.onChange(event.target.value)}
-                      className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="">Select partner</option>
-                      {partners.map((partner) => (
-                        <option key={partner.id} value={partner.id}>
-                          {partner.name}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="debtAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Debt Amount</FormLabel>
-                  <FormControl>
-                    <Input
-                      data-testid="qd-debt-amount"
-                      disabled={isSubmitting}
-                      inputMode="decimal"
-                      placeholder="0"
-                      type="number"
-                      value={field.value ?? ""}
-                      onChange={(event) => field.onChange(event.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        ) : null}
-
-        {notificationMessage ? (
-          <p className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
-            {notificationMessage}
-          </p>
-        ) : null}
-
-        <Button
-          data-testid="qd-submit"
+    <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+      <div className="space-y-2">
+        <label className="block text-center text-sm font-medium text-[#0B1B3A]">
+          Số tiền (- chi / + thu)
+        </label>
+        <input
+          data-testid="qd-total"
           disabled={isSubmitting}
-          type="submit"
-          className="w-full"
+          inputMode="decimal"
+          placeholder="0"
+          type="number"
+          value={form.watch("total") ?? ""}
+          onChange={(event) => form.setValue("total", event.target.value === "" ? undefined : Number(event.target.value), { shouldValidate: true })}
+          className="h-[72px] w-full rounded-lg border-2 border-[#E68600] bg-[#FBF7EA] px-4 py-3 text-center text-3xl font-semibold text-[#0B1B3A] outline-none transition-colors placeholder:text-[#B8B8B8] focus:border-[#D97900] focus:ring-2 focus:ring-[#E68600]/20 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        {form.formState.errors.total && (
+          <p className="text-center text-sm text-red-500">{form.formState.errors.total.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-left text-sm font-medium text-[#0B1B3A]">
+          Ví con nguồn
+        </label>
+        <select
+          data-testid="qd-wallet"
+          disabled={isSubmitting || isWalletsLoading || childWallets.length === 0}
+          value={form.watch("walletId") ?? ""}
+          onChange={(event) => form.setValue("walletId", event.target.value, { shouldValidate: true })}
+          className="h-12 w-full rounded-lg border border-[#E5E0D5] bg-[#FBF7EA] px-4 py-2 text-sm text-[#0B1B3A] outline-none transition-colors focus:border-[#E68600] focus:ring-2 focus:ring-[#E68600]/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Quick Debt"
-          )}
-        </Button>
-      </form>
-    </Form>
+          <option value="">{isWalletsLoading ? "Đang tải..." : childWallets.length === 0 ? "Chưa có ví con" : "Chọn ví con"}</option>
+          {childWallets.map((wallet) => (
+            <option key={wallet.id} value={wallet.id}>
+              {wallet.name}
+            </option>
+          ))}
+        </select>
+        {form.formState.errors.walletId && (
+          <p className="text-sm text-red-500">{form.formState.errors.walletId.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-left text-sm font-medium text-[#0B1B3A]">
+          Ghi chú
+        </label>
+        <input
+          disabled={isSubmitting}
+          placeholder="VD: Ăn trưa"
+          value={form.watch("note") ?? ""}
+          onChange={(event) => form.setValue("note", event.target.value, { shouldValidate: true })}
+          className="h-12 w-full rounded-lg border border-[#E5E0D5] bg-[#FBF7EA] px-4 py-2 text-sm text-[#0B1B3A] outline-none transition-colors placeholder:text-[#B8B8B8] focus:border-[#E68600] focus:ring-2 focus:ring-[#E68600]/20 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        {form.formState.errors.note && (
+          <p className="text-sm text-red-500">{form.formState.errors.note.message}</p>
+        )}
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => form.setValue("payerMode", PayerMode.ToiTra, { shouldValidate: true })}
+          className={`h-10 flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            form.watch("payerMode") === PayerMode.ToiTra
+              ? "bg-[#E68600] text-white hover:bg-[#D97900]"
+              : "border border-[#E5E0D5] bg-transparent text-[#6B7485] hover:bg-[#F1EEE7]"
+          }`}
+        >
+          Tôi trả
+        </button>
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => form.setValue("payerMode", PayerMode.PartnerTra, { shouldValidate: true })}
+          className={`h-10 flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            form.watch("payerMode") === PayerMode.PartnerTra
+              ? "bg-[#E68600] text-white hover:bg-[#D97900]"
+              : "border border-[#E5E0D5] bg-transparent text-[#6B7485] hover:bg-[#F1EEE7]"
+          }`}
+        >
+          Partner trả
+        </button>
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg bg-[#F1EEE7] px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Tag className="h-5 w-5 text-[#6B7485]" />
+          <span className="text-sm text-[#6B7485]">Gắn thẻ nợ</span>
+        </div>
+        <button
+          type="button"
+          data-testid="qd-debt-toggle"
+          role="switch"
+          aria-checked={debtTag}
+          disabled={isSubmitting}
+          onClick={() => form.setValue("debtTag", !debtTag, { shouldValidate: true })}
+          className={`relative h-6 w-11 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            debtTag ? "bg-[#E68600]" : "bg-[#D1CCC1]"
+          }`}
+        >
+          <span
+            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+              debtTag ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
+        </button>
+      </div>
+
+      {debtTag ? (
+        <div className="space-y-4 rounded-lg border border-[#F2C38B] bg-[#FBF7EA]/50 p-4">
+          <div className="space-y-2">
+            <label className="block text-left text-sm font-medium text-[#0B1B3A]">
+              Partner
+            </label>
+            <select
+              data-testid="qd-partner"
+              disabled={isSubmitting || isPartnersLoading}
+              value={form.watch("partnerId") ?? ""}
+              onChange={(event) => form.setValue("partnerId", event.target.value, { shouldValidate: true })}
+              className="h-12 w-full rounded-lg border border-[#E5E0D5] bg-white px-4 py-2 text-sm text-[#0B1B3A] outline-none transition-colors focus:border-[#E68600] focus:ring-2 focus:ring-[#E68600]/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Chọn partner</option>
+              {partners.map((partner) => (
+                <option key={partner.id} value={partner.id}>
+                  {partner.name}
+                </option>
+              ))}
+            </select>
+            {form.formState.errors.partnerId && (
+              <p className="text-sm text-red-500">{form.formState.errors.partnerId.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-left text-sm font-medium text-[#0B1B3A]">
+              Số tiền nợ
+            </label>
+            <input
+              data-testid="qd-debt-amount"
+              disabled={isSubmitting}
+              inputMode="decimal"
+              placeholder="0"
+              type="number"
+              value={form.watch("debtAmount") ?? ""}
+              onChange={(event) => form.setValue("debtAmount", event.target.value === "" ? undefined : Number(event.target.value), { shouldValidate: true })}
+              className="h-12 w-full rounded-lg border border-[#E5E0D5] bg-white px-4 py-2 text-sm text-[#0B1B3A] outline-none transition-colors placeholder:text-[#B8B8B8] focus:border-[#E68600] focus:ring-2 focus:ring-[#E68600]/20 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            {form.formState.errors.debtAmount && (
+              <p className="text-sm text-red-500">{form.formState.errors.debtAmount.message}</p>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {notificationMessage ? (
+        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          {notificationMessage}
+        </div>
+      ) : null}
+
+      <button
+        data-testid="qd-submit"
+        disabled={isSubmitting || isWalletsLoading || childWallets.length === 0}
+        type="submit"
+        className="flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#E68600] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[#D97900] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Đang xử lý...
+          </>
+        ) : (
+          <>
+            <Zap className="h-5 w-5" />
+            Ghi nhận
+          </>
+        )}
+      </button>
+    </form>
   );
 }
 

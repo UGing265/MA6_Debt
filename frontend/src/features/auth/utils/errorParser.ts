@@ -43,6 +43,18 @@ export const parseErrorResponse = (error: any): ParsedError => {
     fields: {},
   };
 
+  // Early return: if error is already in parsed format from API layer,
+  // prefer using the provided general/fields directly.
+  if (error && (error.general !== undefined || error.fields !== undefined)) {
+    if (error.general !== undefined && typeof error.general === 'string') {
+      result.general = error.general;
+    }
+    if (error.fields && typeof error.fields === 'object') {
+      result.fields = error.fields;
+    }
+    return result;
+  }
+
   if (!error) {
     return result;
   }

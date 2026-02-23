@@ -1,47 +1,54 @@
 "use client";
 
-import React from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import React, { useState } from "react";
 import { QuickDebtForm } from "@/features/transaction/components/QuickDebtForm";
 import { AdjustmentForm } from "@/features/transaction/components/AdjustmentForm";
 
-// Quick Deduct page: two-tab composition using existing forms
 export default function QuickDeductPage() {
+  const [activeTab, setActiveTab] = useState<"quick-debt" | "adjustment">("quick-debt");
+
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-4xl font-bold text-ink-black">Quick Deduct</h1>
-        <p className="text-pencil-gray mt-1">Two-tab composition using existing forms</p>
-      </div>
+    <div className="min-h-screen bg-[#FBF6E9] px-4 py-8">
+      <div className="mx-auto max-w-[480px]">
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <h1 className="text-[34px] font-bold leading-tight text-[#0B1B3A]">
+            Quick Deduct
+          </h1>
+          <p className="mt-1 text-base text-[#6B7485]">Ghi nhanh giao dịch</p>
+        </div>
 
-      <Tabs defaultValue="quick-deduct" className="mt-2">
-        <TabsList>
-          <TabsTrigger value="quick-deduct" data-testid="tab-quick-debt">
+        {/* Tabs */}
+        <div className="mb-4 flex gap-2">
+          <button
+            onClick={() => setActiveTab("quick-debt")}
+            data-testid="tab-quick-debt"
+            className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === "quick-debt"
+                ? "bg-[#E68600] text-white"
+                : "bg-[#F1EEE7] text-[#6B7485] hover:bg-[#E6DED1]"
+            }`}
+          >
             Quick Debt
-          </TabsTrigger>
-          <TabsTrigger value="adjustment" data-testid="tab-adjustment">
-            Dieu chinh vi
-          </TabsTrigger>
-        </TabsList>
+          </button>
+          <button
+            onClick={() => setActiveTab("adjustment")}
+            data-testid="tab-adjustment"
+            className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === "adjustment"
+                ? "bg-[#E68600] text-white"
+                : "bg-[#F1EEE7] text-[#6B7485] hover:bg-[#E6DED1]"
+            }`}
+          >
+            Điều chỉnh ví
+          </button>
+        </div>
 
-        <TabsContent value="quick-deduct">
-          <div className="p-4">
-            <div className="mb-4 text-sm text-pencil-gray">
-              No child wallets or partners? Use the forms to create or connect them.
-            </div>
-            <QuickDebtForm />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="adjustment">
-          <div className="p-4">
-            <div className="mb-4 text-sm text-pencil-gray">
-              No child wallets or partners? Use the forms to create or connect them.
-            </div>
-            <AdjustmentForm />
-          </div>
-        </TabsContent>
-      </Tabs>
+        {/* Card */}
+        <div className="rounded-[14px] border-2 border-[#F2C38B] bg-[#F9F6EF] p-6">
+          {activeTab === "quick-debt" ? <QuickDebtForm /> : <AdjustmentForm />}
+        </div>
+      </div>
     </div>
   );
 }
