@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Edit2, Loader2, Lock, Trash2 } from "lucide-react";
-import { HistoryDto, TransferDirection, formatWalletDisplay } from "../types/history";
+import { HistoryDto, TransferDirection } from "../types/history";
 import { formatVnd } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,7 +55,7 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
   const absAmount = Math.abs(amount);
   const isLocked = Boolean(item.isLocked);
   const lockReason = "This transaction is locked and can't be edited or deleted.";
-  const walletDisplay = formatWalletDisplay(item.walletName, item.parentWalletName);
+  const walletDisplay = item.walletName ?? "";
 
   const [isEditOpen, setIsEditOpen] = React.useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState<boolean>(false);

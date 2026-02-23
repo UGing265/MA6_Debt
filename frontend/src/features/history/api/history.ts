@@ -1,6 +1,6 @@
 import { HistoryDto } from "@/features/history/types/history";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@lib/authToken";
+import { getAuthToken } from "@/lib/authToken";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
 
