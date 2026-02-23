@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ArrowLeftRight, Loader2 } from "lucide-react";
+import { ArrowLeftRight, Loader2, Wallet2, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,11 @@ type TransferFormInput = Omit<TransferFormValues, "amount"> & {
   amount?: number;
 };
 
+type GroupedWallets = {
+  parent: WalletDto | null;
+  children: WalletDto[];
+};
+
 const isParsedLikeError = (value: unknown): value is ParsedLikeError => {
   if (!value || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
@@ -55,7 +60,17 @@ const isParsedLikeError = (value: unknown): value is ParsedLikeError => {
   return "general" in v || "fields" in v;
 };
 
-const getWalletLabel = (wallet: WalletDto) => {
+const formatBalance = (balance: number): string => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(balance);
+};
+
+const getWalletLabel = (wallet: WalletDto, includeBalance = false): string => {
+  if (includeBalance) {
+    return `${wallet.name} (${formatBalance(wallet.balance)})`;
+  }
   return wallet.name;
 };
 
@@ -83,6 +98,35 @@ export const TransferForm: React.FC = () => {
   const fromWallet = useMemo(() => {
     return wallets.find((w) => w.id === fromWalletId);
   }, [fromWalletId, wallets]);
+
+  // Group wallets by parent
+  const groupedWallets = useMemo((): GroupedWallets[] => {
+    const parentWallets = wallets.filter((w) => !w.parentWalletId);
+    const childWallets = wallets.filter((w) => w.parentWalletId);
+
+    const groups: GroupedWallets[] = [];
+
+    // Add parent wallets with their children
+    for (const parent of parentWallets) {
+      const children = childWallets.filter((c) => c.parentWalletId === parent.id);
+      groups.push({ parent, children });
+    }
+
+    // Add orphan children (if any)
+    const orphans = childWallets.filter(
+      (c) => !parentWallets.some((p) => p.id === c.parentWalletId)
+    );
+    if (orphans.length > 0) {
+      groups.push({ parent: null, children: orphans });
+    }
+
+    return groups;
+  }, [wallets]);
+
+  // Calculate total balance
+  const totalBalance = useMemo(() => {
+    return wallets.reduce((sum, w) => sum + w.balance, 0);
+  }, [wallets]);
 
   useEffect(() => {
     let isMounted = true;
@@ -177,141 +221,273 @@ export const TransferForm: React.FC = () => {
   );
 
   const walletSelectClassName =
-    "border-input h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
+    "border-input h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm shadow-sm transition-all outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30";
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-end">
-          <FormField
-            control={form.control}
-            name="fromWalletId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-700">Từ ví</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    data-testid="transfer-from-wallet"
-                    disabled={isDisabled}
-                    className={walletSelectClassName}
-                  >
-                    <option value="">Chọn ví</option>
-                    {wallets.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {getWalletLabel(w)}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex justify-center md:pb-1">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleSwap}
-              disabled={isDisabled || (!fromWalletId && !toWalletId)}
-              data-testid="transfer-swap"
-              className="h-9 w-9 p-0"
-              aria-label="Swap wallets"
-              title="Swap"
-            >
-              <ArrowLeftRight className="h-4 w-4" />
-            </Button>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Panel - Wallet Balances */}
+      <div className="lg:col-span-1">
+        <div className="bg-white rounded-xl border border-note-yellow/20 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-note-yellow/10 to-note-yellow/5 px-4 py-3 border-b border-note-yellow/20">
+            <h3 className="font-semibold text-ink-black flex items-center gap-2">
+              <Wallet2 className="h-4 w-4 text-note-yellow" />
+              Số dư ví
+            </h3>
           </div>
 
-          <FormField
-            control={form.control}
-            name="toWalletId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-700">Đến ví</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    data-testid="transfer-to-wallet"
-                    disabled={isDisabled}
-                    className={walletSelectClassName}
-                  >
-                    <option value="">Chọn ví</option>
-                    {wallets.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {getWalletLabel(w)}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="p-4">
+            {isWalletsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-note-yellow" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Total Balance */}
+                <div className="bg-gradient-to-r from-note-yellow/20 to-note-yellow/5 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-pencil-gray mb-1">Tổng số dư</p>
+                  <p className="text-xl font-bold text-ink-black">
+                    {formatBalance(totalBalance)}
+                  </p>
+                </div>
+
+                {/* Grouped Wallets */}
+                {groupedWallets.map((group, idx) => (
+                  <div key={group.parent?.id ?? `orphan-${idx}`} className="space-y-2">
+                    {group.parent && (
+                      <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <ChevronRight className="h-3 w-3 text-pencil-gray" />
+                          <span className="font-medium text-ink-black text-sm">
+                            {group.parent.name}
+                          </span>
+                        </div>
+                        <span className="text-sm font-semibold text-ink-black">
+                          {formatBalance(group.parent.balance)}
+                        </span>
+                      </div>
+                    )}
+
+                    {group.children.length > 0 && (
+                      <div className="ml-4 space-y-1">
+                        {group.children.map((child) => (
+                          <div
+                            key={child.id}
+                            className={`flex items-center justify-between py-2 px-3 rounded-lg transition-colors ${
+                              fromWalletId === child.id || toWalletId === child.id
+                                ? "bg-note-yellow/20 border border-note-yellow/30"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-sm text-pencil-gray">{child.name}</span>
+                            <span className="text-sm font-medium text-ink-black">
+                              {formatBalance(child.balance)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {wallets.length === 0 && (
+                  <p className="text-center text-pencil-gray py-4">Không có ví nào</p>
+                )}
+              </div>
             )}
-          />
+          </div>
         </div>
+      </div>
 
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Số tiền</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0"
-                  data-testid="transfer-amount"
-                  disabled={isDisabled || !fromWalletId}
-                  value={field.value ?? ""}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    field.onChange(next === "" ? undefined : Number(next));
-                  }}
+      {/* Right Panel - Transfer Form */}
+      <div className="lg:col-span-2">
+        <div className="bg-white rounded-xl border border-note-yellow/20 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-note-yellow/10 to-note-yellow/5 px-4 py-3 border-b border-note-yellow/20">
+            <h3 className="font-semibold text-ink-black">Chuyển tiền nội bộ</h3>
+            <p className="text-xs text-pencil-gray mt-1">Chuyển giữa các ví con của bạn</p>
+          </div>
+
+          <div className="p-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-end">
+                  {/* From Wallet */}
+                  <FormField
+                    control={form.control}
+                    name="fromWalletId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Từ ví</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            data-testid="transfer-from-wallet"
+                            disabled={isDisabled}
+                            className={walletSelectClassName}
+                          >
+                            <option value="">Chọn ví nguồn</option>
+                            {groupedWallets.map((group, idx) => (
+                              <optgroup
+                                key={group.parent?.id ?? `orphan-${idx}`}
+                                label={group.parent?.name ?? "Ví khác"}
+                              >
+                                {group.parent && (
+                                  <option value={group.parent.id}>
+                                    {getWalletLabel(group.parent, true)}
+                                  </option>
+                                )}
+                                {group.children.map((child) => (
+                                  <option key={child.id} value={child.id}>
+                                    {getWalletLabel(child, true)}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Swap Button */}
+                  <div className="flex justify-center md:pb-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleSwap}
+                      disabled={isDisabled || (!fromWalletId && !toWalletId)}
+                      data-testid="transfer-swap"
+                      className="h-10 w-10 p-0 rounded-full border-note-yellow/30 hover:bg-note-yellow/20 hover:border-note-yellow"
+                      aria-label="Swap wallets"
+                      title="Đổi ví"
+                    >
+                      <ArrowLeftRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* To Wallet */}
+                  <FormField
+                    control={form.control}
+                    name="toWalletId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Đến ví</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            data-testid="transfer-to-wallet"
+                            disabled={isDisabled}
+                            className={walletSelectClassName}
+                          >
+                            <option value="">Chọn ví đích</option>
+                            {groupedWallets.map((group, idx) => (
+                              <optgroup
+                                key={group.parent?.id ?? `orphan-${idx}`}
+                                label={group.parent?.name ?? "Ví khác"}
+                              >
+                                {group.parent && (
+                                  <option value={group.parent.id}>
+                                    {getWalletLabel(group.parent, true)}
+                                  </option>
+                                )}
+                                {group.children.map((child) => (
+                                  <option key={child.id} value={child.id}>
+                                    {getWalletLabel(child, true)}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Selected Wallet Balance Info */}
+                {fromWallet && (
+                  <div className="bg-gradient-to-r from-note-yellow/10 to-transparent rounded-lg p-3 flex items-center justify-between">
+                    <span className="text-sm text-pencil-gray">Số dư khả dụng</span>
+                    <span className="font-semibold text-ink-black">
+                      {formatBalance(fromWallet.balance)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Amount */}
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Số tiền</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder="Nhập số tiền"
+                          data-testid="transfer-amount"
+                          disabled={isDisabled || !fromWalletId}
+                          value={field.value ?? ""}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            field.onChange(next === "" ? undefined : Number(next));
+                          }}
+                          className="h-10"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name="note"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Ghi chú</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="(Tuỳ chọn)"
-                  data-testid="transfer-note"
+                {/* Note */}
+                <FormField
+                  control={form.control}
+                  name="note"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">
+                        Ghi chú{" "}
+                        <span className="text-pencil-gray font-normal">(tuỳ chọn)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="VD: Chuyển tiết kiệm"
+                          data-testid="transfer-note"
+                          disabled={isDisabled}
+                          className="h-10"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  data-testid="transfer-submit"
                   disabled={isDisabled}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button
-          type="submit"
-          data-testid="transfer-submit"
-          disabled={isDisabled}
-          className="w-full bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1F2937] font-bold"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Đang chuyển...
-            </>
-          ) : (
-            "Chuyển tiền"
-          )}
-        </Button>
-      </form>
-    </Form>
+                  className="w-full h-11 bg-gradient-to-r from-note-yellow to-amber-400 hover:from-amber-400 hover:to-note-yellow text-ink-black font-bold text-base rounded-lg shadow-md hover:shadow-lg transition-all"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Đang chuyển...
+                    </>
+                  ) : (
+                    "Chuyển tiền"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
