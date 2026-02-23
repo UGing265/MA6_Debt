@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown } from "lucide-react";
 import { HistoryDto } from "../types/history";
 import { Card, CardContent } from "@/components/ui/card";
 import { HistoryRow } from "./HistoryRow";
@@ -11,22 +11,24 @@ type HistoryListProps = {
   items?: HistoryDto[];
   isLoading: boolean;
   error?: any;
-  onRefresh?: () => void | Promise<void>;
   totalCount: number;
   totalPages: number;
   currentPage: number;
   currentPageSize: number;
+  sortOrder: "newest" | "oldest";
+  onSortChange: (order: "newest" | "oldest") => void;
 };
 
 export const HistoryList: React.FC<HistoryListProps> = ({
   items,
   isLoading,
   error,
-  onRefresh,
   totalCount,
   totalPages,
   currentPage,
   currentPageSize,
+  sortOrder,
+  onSortChange,
 }) => {
   const { setPage, setPageSize } = useHistoryQueryState();
 
@@ -66,23 +68,38 @@ export const HistoryList: React.FC<HistoryListProps> = ({
 
   const handleLastPage = () => setPage(totalPages);
 
+  const toggleSort = () => {
+    onSortChange(sortOrder === "newest" ? "oldest" : "newest");
+  };
+
   return (
     <div className="space-y-4">
       <Card>
         <CardContent className="flex flex-col gap-2">
           {items.map((it) => (
-            <HistoryRow key={it.id} item={it} onRefresh={onRefresh} />
+            <HistoryRow key={it.id} item={it} />
           ))}
         </CardContent>
       </Card>
 
       {/* Pagination Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
-        {/* Page info & page size selector */}
+        {/* Page info, sort & page size selector */}
         <div className="flex items-center gap-4">
           <span className="text-sm text-pencil-gray">
             Showing {items.length} of {totalCount} transactions
           </span>
+          
+          {/* Sort button */}
+          <button
+            onClick={toggleSort}
+            className="flex items-center gap-1 px-2 py-1 text-sm border-2 border-note-yellow rounded-lg bg-white hover:bg-gray-50 text-ink-black font-medium cursor-pointer"
+            aria-label="Toggle sort order"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+            {sortOrder === "newest" ? "Newest first" : "Oldest first"}
+          </button>
+
           <select
             value={currentPageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}

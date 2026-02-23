@@ -14,6 +14,7 @@ export const HistoryPageContainer: React.FC = () => {
   const [items, setItems] = React.useState<HistoryDto[]>([]);
   const [totalCount, setTotalCount] = React.useState<number>(0);
   const [totalPages, setTotalPages] = React.useState<number>(0);
+  const [sortOrder, setSortOrder] = React.useState<"newest" | "oldest">("newest");
 
   const mountedRef = React.useRef<boolean>(true);
 
@@ -35,27 +36,38 @@ export const HistoryPageContainer: React.FC = () => {
         pageSize: currentPageSize,
       });
       if (mountedRef.current) {
-        setItems(data.items ?? []);
+        // Sort items based on sortOrder
+        const sortedItems = [...(data.items ?? [])].sort((a, b) => {
+          const dateA = new Date(a.transactionDate ?? a.createdAt).getTime();
+          const dateB = new Date(b.transactionDate ?? b.createdAt).getTime();
+          return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+        });
+        
+        setItems(sortedItems);
         setTotalCount(data.totalCount ?? 0);
         setTotalPages(data.totalPages ?? 0);
       }
     } catch (e: any) {
       const msg =
-        (typeof e?.general === "string" && e.general.trim().length > 0)
+        typeof e?.general === "string" && e.general.trim().length > 0
           ? e.general
-          : (typeof e?.message === "string" && e.message.trim().length > 0)
+          : typeof e?.message === "string" && e.message.trim().length > 0
             ? e.message
             : String(e);
       if (mountedRef.current) setError(msg);
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [currentSearch, currentWalletId, currentPage, currentPageSize]);
+  }, [currentSearch, currentWalletId, currentPage, currentPageSize, sortOrder]);
 
   // Fetch history when filters change
   React.useEffect(() => {
     void fetchHistory();
   }, [fetchHistory]);
+
+  const handleSortChange = React.useCallback((order: "newest" | "oldest") => {
+    setSortOrder(order);
+  }, []);
 
   return (
     <div className="space-y-4" data-testid="history-page-container">
@@ -64,11 +76,12 @@ export const HistoryPageContainer: React.FC = () => {
         items={items}
         isLoading={loading}
         error={error}
-        onRefresh={fetchHistory}
         totalCount={totalCount}
         totalPages={totalPages}
         currentPage={currentPage}
         currentPageSize={currentPageSize}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
       />
     </div>
   );

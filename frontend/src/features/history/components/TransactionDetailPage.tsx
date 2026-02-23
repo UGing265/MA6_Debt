@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getHistoryItem, updateHistoryNote, deleteHistoryItem } from "../api/history";
-import { HistoryDto, TransferDirection, PayerMode, formatWalletDisplay } from "../types/history";
+import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
 import { formatVnd } from "@/lib/utils";
 
 const extractGeneralError = (e: any): string => {
@@ -210,7 +210,7 @@ export const TransactionDetailPage: React.FC = () => {
     ? "text-green-600"
     : "text-red-600";
 
-  const walletDisplay = formatWalletDisplay(transaction.walletName, transaction.parentWalletName);
+  const walletDisplay = transaction.walletName ?? "";
   const hasQuickDeduct = transaction.payerMode != null || transaction.totalAmount != null || transaction.debtAmount != null;
 
   return (
@@ -378,12 +378,12 @@ export const TransactionDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="text-center">
                 <p className="text-sm text-pencil-gray">From</p>
-                <p className="font-semibold text-ink-black">{transaction.transferFromWalletName || "Unknown"}</p>
+                <p className="font-bold text-ink-black">{transaction.transferFromWalletName || "Unknown"}</p>
               </div>
               <ArrowLeftRight className="h-6 w-6 text-blue-600" />
               <div className="text-center">
                 <p className="text-sm text-pencil-gray">To</p>
-                <p className="font-semibold text-ink-black">{transaction.transferToWalletName || "Unknown"}</p>
+                <p className="font-bold text-ink-black">{transaction.transferToWalletName || "Unknown"}</p>
               </div>
             </div>
           </CardContent>
