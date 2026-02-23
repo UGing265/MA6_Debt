@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.Common.Interfaces;
 using Application.Common.Locking;
 using MediatR;
@@ -8,7 +9,7 @@ namespace Application.Features.Transactions.GetTransactions
     /// <summary>
     /// Handler for GetTransactionsQuery returning user-scoped transaction list.
     /// </summary>
-    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, IReadOnlyList<TransactionDto>>
+    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PagedResult<TransactionDto>>
     {
         private readonly IApplicationDbContext _context;
 
@@ -17,7 +18,7 @@ namespace Application.Features.Transactions.GetTransactions
             _context = context;
         }
 
-        public async Task<IReadOnlyList<TransactionDto>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<TransactionDto>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             var nowUtc = DateTimeOffset.UtcNow;
 
@@ -49,9 +50,18 @@ namespace Application.Features.Transactions.GetTransactions
                                            && dp.Name.ToLower().Contains(keyword))));
             }
 
+            // Get total count before pagination
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            // Validate and apply pagination
+            var page = Math.Max(1, request.Page);
+            var pageSize = Math.Max(1, Math.Min(100, request.PageSize)); // Max 100 items per page
+
             var transactions = await query
                 .OrderByDescending(t => t.TransactionDate)
                 .ThenByDescending(t => t.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(t => new TransactionDto
                 {
                     Id = t.Id,
@@ -136,7 +146,13 @@ namespace Application.Features.Transactions.GetTransactions
                 transaction.IsLocked = MonthLockPolicy.IsLocked(transaction.TransactionDate, nowUtc);
             }
 
-            return transactions;
+            return new PagedResult<TransactionDto>
+            {
+                Items = transactions,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
     }
 }

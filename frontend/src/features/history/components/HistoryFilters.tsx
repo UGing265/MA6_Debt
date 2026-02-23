@@ -7,14 +7,20 @@ import { useHistoryQueryState } from "../hooks/useHistoryQueryState";
 import { useWallets } from "../../wallet/hooks/useWallets";
 
 export const HistoryFilters: React.FC = () => {
-  const { currentSearch, currentWalletId, setSearch, setWalletId } = useHistoryQueryState();
+  const { inputValue, currentWalletId, setSearch, setWalletId } = useHistoryQueryState();
   const { data: wallets } = useWallets();
 
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
-  const allWallets = wallets ?? [];
+  // Filter out grandchild wallets - only show root wallets and direct children
+  const allWallets = React.useMemo(() => {
+    const list = wallets ?? [];
+    const rootIds = new Set(list.filter(w => !w.parentWalletId).map(w => w.id));
+    // Include: root wallets OR direct children of root wallets
+    return list.filter(w => !w.parentWalletId || rootIds.has(w.parentWalletId));
+  }, [wallets]);
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -24,7 +30,7 @@ export const HistoryFilters: React.FC = () => {
         <input
           type="text"
           placeholder="Search by note, partner..."
-          value={currentSearch ?? ""}
+          value={inputValue ?? ""}
           onChange={onSearchChange}
           aria-label="Search history"
           className="w-full pl-11 pr-4 py-3 border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow focus:ring-1 focus:ring-note-yellow text-ink-black font-medium placeholder:text-pencil-gray/70"

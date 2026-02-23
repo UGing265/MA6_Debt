@@ -1,8 +1,18 @@
 import { HistoryDto } from "@/features/history/types/history";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@/lib/authToken";
+import { getAuthToken } from "@lib/authToken";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
 
 const getAuthHeaders = () => {
   const token = getAuthToken();
@@ -13,13 +23,24 @@ const getAuthHeaders = () => {
   };
 };
 
-export const getHistory = async (params: { search?: string; walletId?: string | null }): Promise<HistoryDto[]> => {
+export const getHistory = async (params: {
+  search?: string;
+  walletId?: string | null;
+  page?: number;
+  pageSize?: number;
+}): Promise<PagedResult<HistoryDto>> => {
   const queryParts: string[] = [];
   if (params.search && params.search.trim().length > 0) {
     queryParts.push(`search=${encodeURIComponent(params.search)}`);
   }
   if (params.walletId && params.walletId.trim().length > 0) {
     queryParts.push(`walletId=${encodeURIComponent(params.walletId)}`);
+  }
+  if (params.page && params.page > 1) {
+    queryParts.push(`page=${params.page}`);
+  }
+  if (params.pageSize && params.pageSize !== 10) {
+    queryParts.push(`pageSize=${params.pageSize}`);
   }
   const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
   const response = await fetch(`${API_URL}/api/transactions${query}`, {
@@ -39,7 +60,7 @@ export const getHistory = async (params: { search?: string; walletId?: string | 
     throw { ...parsed, raw: errorData };
   }
 
-  return response.json() as Promise<HistoryDto[]>;
+  return response.json() as Promise<PagedResult<HistoryDto>>;
 };
 
 export const getHistoryItem = async (id: string): Promise<HistoryDto> => {
