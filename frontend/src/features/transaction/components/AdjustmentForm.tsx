@@ -4,23 +4,14 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useCashAdjustmentSubmit } from "../hooks/useTransactionSubmit";
 import { AdjustmentSchema, mapAdjustmentToPayload } from "../model";
 import { AdjustmentDirection } from "../types/transaction";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { formatVnd } from "@/lib/utils";
 
 type AdjustmentFormInput = z.infer<typeof AdjustmentSchema>;
 
@@ -29,6 +20,11 @@ const defaultValues: AdjustmentFormInput = {
   direction: AdjustmentDirection.Credit,
   amount: Number.NaN,
   note: "",
+};
+
+type GroupedWallets = {
+  parent: { id: string; name: string; balance: number } | null;
+  children: { id: string; name: string; balance: number; parentWalletId: string }[];
 };
 
 export const AdjustmentForm = () => {
@@ -44,17 +40,31 @@ export const AdjustmentForm = () => {
     [wallets]
   );
 
+  const groupedWallets = useMemo((): GroupedWallets[] => {
+    const parentWallets = wallets.filter((w) => !w.parentWalletId);
+    const groups: GroupedWallets[] = [];
+
+    for (const parent of parentWallets) {
+      const directChildren = wallets.filter((w) => w.parentWalletId === parent.id);
+      groups.push({ parent, children: directChildren });
+    }
+
+    return groups;
+  }, [wallets]);
+
   const form = useForm<AdjustmentFormInput>({
     resolver: zodResolver(AdjustmentSchema),
     defaultValues,
   });
+
+  const amountValue = form.watch("amount");
 
   const onSubmit = async (values: AdjustmentFormInput) => {
     setIsSubmitting(true);
     try {
       const payload = mapAdjustmentToPayload(values);
       await cashAdjustmentSubmit.mutateAsync(payload);
-      toast.success("Adjustment submitted successfully!");
+      toast.success("Adjustment submitted!");
       form.reset(defaultValues);
     } catch (error: unknown) {
       const parsedError = parseErrorResponse(error);
@@ -93,132 +103,146 @@ export const AdjustmentForm = () => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="walletId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Child Wallet</FormLabel>
-              <FormControl>
-                <select
-                  data-testid="adj-wallet"
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isSubmitting || walletsLoading || childWallets.length === 0}
-                  className="w-full h-10 rounded-md border border-[#1F2937]/10 bg-white px-3 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCD34D]"
-                >
-                  <option value="">
-                    {walletsLoading
-                      ? "Loading child wallets..."
-                      : childWallets.length === 0
-                      ? "No child wallets available"
-                      : "Select child wallet"}
-                  </option>
-                  {childWallets.map((wallet) => (
-                    <option key={wallet.id} value={wallet.id}>
-                      {wallet.name}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      {/* Amount - on top */}
+      <div className="space-y-1.5">
+        <label className="block text-center text-sm font-medium text-ink-black">
+          Amount
+        </label>
+        <div className="relative">
+          <input
+            data-testid="adj-amount"
+            disabled={isSubmitting}
+            inputMode="numeric"
+            placeholder="0"
+            type="text"
+            value={!Number.isNaN(amountValue) ? amountValue.toLocaleString("en-US") : ""}
+            onChange={(event) => {
+              const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
+              form.setValue("amount", raw === "" ? Number.NaN : Number(raw), { shouldValidate: true });
+            }}
+            className="h-14 w-full rounded-lg border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-semibold text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-amber-500 focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-pencil-gray">
+            vnd
+          </span>
+        </div>
+        {form.formState.errors.amount && (
+          <p className="text-center text-xs text-red-500">{form.formState.errors.amount.message}</p>
+        )}
+      </div>
 
-        <FormField
-          control={form.control}
-          name="direction"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Direction</FormLabel>
-              <FormControl>
-                <select
-                  data-testid="adj-direction"
-                  value={String(field.value)}
-                  onChange={(event) =>
-                    field.onChange(Number(event.target.value) as AdjustmentDirection)
-                  }
-                  disabled={isSubmitting}
-                  className="w-full h-10 rounded-md border border-[#1F2937]/10 bg-white px-3 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCD34D]"
-                >
-                  <option value={AdjustmentDirection.Credit}>Credit</option>
-                  <option value={AdjustmentDirection.Debit}>Debit</option>
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Direction - Add/Subtract Money */}
+      <div className="space-y-1.5">
+        <label className="block text-left text-xs font-medium text-pencil-gray">
+          Direction
+        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => form.setValue("direction", AdjustmentDirection.Credit, { shouldValidate: true })}
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              form.watch("direction") === AdjustmentDirection.Credit
+                ? "bg-note-yellow text-ink-black hover:bg-amber-400"
+                : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
+            }`}
+          >
+            Add Money
+          </button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => form.setValue("direction", AdjustmentDirection.Debit, { shouldValidate: true })}
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              form.watch("direction") === AdjustmentDirection.Debit
+                ? "bg-note-yellow text-ink-black hover:bg-amber-400"
+                : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
+            }`}
+          >
+            Subtract Money
+          </button>
+        </div>
+        {form.formState.errors.direction && (
+          <p className="text-xs text-red-500">{form.formState.errors.direction.message}</p>
+        )}
+      </div>
 
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Amount</FormLabel>
-              <FormControl>
-                <Input
-                  data-testid="adj-amount"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  placeholder="Enter amount"
-                  value={Number.isNaN(field.value) ? "" : field.value}
-                  onChange={(event) => {
-                    const nextValue = event.target.value;
-                    field.onChange(nextValue === "" ? Number.NaN : Number(nextValue));
-                  }}
-                  disabled={isSubmitting}
-                  className="bg-white border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="note"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Note</FormLabel>
-              <FormControl>
-                <Input
-                  data-testid="adj-note"
-                  placeholder="Reason for this adjustment"
-                  {...field}
-                  disabled={isSubmitting}
-                  className="bg-white border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {walletsError ? <p className="text-sm text-red-600">{walletsError}</p> : null}
-
-        <Button
-          data-testid="adj-submit"
-          type="submit"
+      {/* Child Wallet */}
+      <div className="space-y-1.5">
+        <label className="block text-left text-xs font-medium text-pencil-gray">
+          Child Wallet
+        </label>
+        <select
+          data-testid="adj-wallet"
+          value={form.watch("walletId") ?? ""}
+          onChange={(e) => form.setValue("walletId", e.target.value, { shouldValidate: true })}
           disabled={isSubmitting || walletsLoading || childWallets.length === 0}
-          className="w-full bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1F2937] font-bold"
+          className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Adjustment"
-          )}
-        </Button>
-      </form>
-    </Form>
+          <option value="">
+            {walletsLoading
+              ? "Loading..."
+              : childWallets.length === 0
+              ? "No child wallets"
+              : "Select wallet"}
+          </option>
+          {groupedWallets.map((group, idx) => (
+            <optgroup
+              key={group.parent?.id ?? `orphan-${idx}`}
+              label={group.parent?.name ?? "Other"}
+            >
+              {group.children.map((child) => (
+                <option key={child.id} value={child.id}>
+                  {child.name} ({formatVnd(child.balance)})
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        {form.formState.errors.walletId && (
+          <p className="text-xs text-red-500">{form.formState.errors.walletId.message}</p>
+        )}
+      </div>
+      {/* Note */}
+      <div className="space-y-1.5">
+        <label className="block text-left text-xs font-medium text-pencil-gray">
+          Note
+        </label>
+        <input
+          data-testid="adj-note"
+          disabled={isSubmitting}
+          placeholder="e.g. Cash adjustment"
+          value={form.watch("note") ?? ""}
+          onChange={(e) => form.setValue("note", e.target.value, { shouldValidate: true })}
+          className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        {form.formState.errors.note && (
+          <p className="text-xs text-red-500">{form.formState.errors.note.message}</p>
+        )}
+      </div>
+
+      {walletsError ? <p className="text-xs text-red-600">{walletsError}</p> : null}
+
+      <button
+        data-testid="adj-submit"
+        type="submit"
+        disabled={isSubmitting || walletsLoading || childWallets.length === 0}
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-note-yellow px-6 py-3 text-sm font-semibold text-ink-black transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <Settings2 className="h-4 w-4" />
+            Submit Adjustment
+          </>
+        )}
+      </button>
+    </form>
   );
 };
 
