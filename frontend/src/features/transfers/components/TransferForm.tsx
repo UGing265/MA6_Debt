@@ -101,8 +101,6 @@ export const TransferForm: React.FC = () => {
   const groupedWallets = useMemo((): GroupedWallets[] => {
     // Parent wallets: no parentWalletId
     const parentWallets = wallets.filter((w) => !w.parentWalletId);
-    // Get all parent IDs for lookup
-    const parentIds = new Set(parentWallets.map((p) => p.id));
 
     const groups: GroupedWallets[] = [];
 
@@ -124,34 +122,27 @@ export const TransferForm: React.FC = () => {
     return wallets.reduce((sum, w) => sum + w.balance, 0);
   }, [wallets]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadWallets = async () => {
-      setIsWalletsLoading(true);
-      try {
-        const data = await getTransferWallets();
-        if (!isMounted) return;
-        setWallets(data);
-      } catch (error: any) {
-        const general =
-          error && typeof error === "object" && typeof error.general === "string"
-            ? error.general
-            : parseErrorResponse(error).general;
-        toast.error(general);
-      } finally {
-        if (isMounted) {
-          setIsWalletsLoading(false);
-        }
-      }
-    };
-
-    loadWallets();
-
-    return () => {
-      isMounted = false;
-    };
+  // Load wallets function - reusable for refresh after transfer
+  const loadWallets = useCallback(async () => {
+    setIsWalletsLoading(true);
+    try {
+      const data = await getTransferWallets();
+      setWallets(data);
+    } catch (error: any) {
+      const general =
+        error && typeof error === "object" && typeof error.general === "string"
+          ? error.general
+          : parseErrorResponse(error).general;
+      toast.error(general);
+    } finally {
+      setIsWalletsLoading(false);
+    }
   }, []);
+
+  // Initial load on mount
+  useEffect(() => {
+    loadWallets();
+  }, [loadWallets]);
 
   useEffect(() => {
     form.setValue("sourceBalance", fromWallet?.balance ?? 0, {
@@ -207,13 +198,15 @@ export const TransferForm: React.FC = () => {
           sourceBalance: 0,
           note: "",
         });
+        // Refresh wallet list to show updated balances
+        await loadWallets();
       } catch (error: any) {
         applyServerErrors(error);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [applyServerErrors, form]
+    [applyServerErrors, form, loadWallets]
   );
 
   const walletSelectClassName =
