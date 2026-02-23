@@ -60,11 +60,9 @@ const isParsedLikeError = (value: unknown): value is ParsedLikeError => {
   return "general" in v || "fields" in v;
 };
 
+// Format balance with commas and VND suffix: 1,111,111 VND
 const formatBalance = (balance: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(balance);
+  return `${balance.toLocaleString("en-US")} VND`;
 };
 
 const getWalletLabel = (wallet: WalletDto, includeBalance = false): string => {
@@ -99,26 +97,24 @@ export const TransferForm: React.FC = () => {
     return wallets.find((w) => w.id === fromWalletId);
   }, [fromWalletId, wallets]);
 
-  // Group wallets by parent
+  // Group wallets by parent - only direct children, no grandchild
   const groupedWallets = useMemo((): GroupedWallets[] => {
+    // Parent wallets: no parentWalletId
     const parentWallets = wallets.filter((w) => !w.parentWalletId);
-    const childWallets = wallets.filter((w) => w.parentWalletId);
+    // Get all parent IDs for lookup
+    const parentIds = new Set(parentWallets.map((p) => p.id));
 
     const groups: GroupedWallets[] = [];
 
-    // Add parent wallets with their children
+    // Add parent wallets with their DIRECT children only
     for (const parent of parentWallets) {
-      const children = childWallets.filter((c) => c.parentWalletId === parent.id);
-      groups.push({ parent, children });
+      // Only direct children: parentWalletId === parent.id
+      const directChildren = wallets.filter((w) => w.parentWalletId === parent.id);
+      groups.push({ parent, children: directChildren });
     }
 
-    // Add orphan children (if any)
-    const orphans = childWallets.filter(
-      (c) => !parentWallets.some((p) => p.id === c.parentWalletId)
-    );
-    if (orphans.length > 0) {
-      groups.push({ parent: null, children: orphans });
-    }
+    // Note: We don't show orphan/grandchild wallets anymore
+    // Grandchild wallets (child of a child) are not displayed to avoid confusion
 
     return groups;
   }, [wallets]);
@@ -203,7 +199,7 @@ export const TransferForm: React.FC = () => {
           amount: values.amount!,
         });
 
-        toast.success("Chuyển tiền thành công");
+        toast.success("Transfer successful");
         form.reset({
           fromWalletId: "",
           toWalletId: "",
@@ -231,7 +227,7 @@ export const TransferForm: React.FC = () => {
           <div className="bg-gradient-to-r from-note-yellow/10 to-note-yellow/5 px-4 py-3 border-b border-note-yellow/20">
             <h3 className="font-semibold text-ink-black flex items-center gap-2">
               <Wallet2 className="h-4 w-4 text-note-yellow" />
-              Số dư ví
+              Wallet Balances
             </h3>
           </div>
 
@@ -244,7 +240,7 @@ export const TransferForm: React.FC = () => {
               <div className="space-y-4">
                 {/* Total Balance */}
                 <div className="bg-gradient-to-r from-note-yellow/20 to-note-yellow/5 rounded-lg p-3 mb-4">
-                  <p className="text-xs text-pencil-gray mb-1">Tổng số dư</p>
+                  <p className="text-xs text-pencil-gray mb-1">Total Balance</p>
                   <p className="text-xl font-bold text-ink-black">
                     {formatBalance(totalBalance)}
                   </p>
@@ -290,7 +286,7 @@ export const TransferForm: React.FC = () => {
                 ))}
 
                 {wallets.length === 0 && (
-                  <p className="text-center text-pencil-gray py-4">Không có ví nào</p>
+                  <p className="text-center text-pencil-gray py-4">No wallets available</p>
                 )}
               </div>
             )}
@@ -302,8 +298,8 @@ export const TransferForm: React.FC = () => {
       <div className="lg:col-span-2">
         <div className="bg-white rounded-xl border border-note-yellow/20 shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-note-yellow/10 to-note-yellow/5 px-4 py-3 border-b border-note-yellow/20">
-            <h3 className="font-semibold text-ink-black">Chuyển tiền nội bộ</h3>
-            <p className="text-xs text-pencil-gray mt-1">Chuyển giữa các ví con của bạn</p>
+            <h3 className="font-semibold text-ink-black">Internal Transfer</h3>
+            <p className="text-xs text-pencil-gray mt-1">Transfer between your wallets</p>
           </div>
 
           <div className="p-6">
@@ -316,7 +312,7 @@ export const TransferForm: React.FC = () => {
                     name="fromWalletId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Từ ví</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">From Wallet</FormLabel>
                         <FormControl>
                           <select
                             {...field}
@@ -324,17 +320,13 @@ export const TransferForm: React.FC = () => {
                             disabled={isDisabled}
                             className={walletSelectClassName}
                           >
-                            <option value="">Chọn ví nguồn</option>
+                            <option value="">Select source wallet</option>
                             {groupedWallets.map((group, idx) => (
                               <optgroup
                                 key={group.parent?.id ?? `orphan-${idx}`}
-                                label={group.parent?.name ?? "Ví khác"}
+                                label={group.parent?.name ?? "Other Wallets"}
                               >
-                                {group.parent && (
-                                  <option value={group.parent.id}>
-                                    {getWalletLabel(group.parent, true)}
-                                  </option>
-                                )}
+                                {/* Only children are selectable, parent is just optgroup label */}
                                 {group.children.map((child) => (
                                   <option key={child.id} value={child.id}>
                                     {getWalletLabel(child, true)}
@@ -359,7 +351,7 @@ export const TransferForm: React.FC = () => {
                       data-testid="transfer-swap"
                       className="h-10 w-10 p-0 rounded-full border-note-yellow/30 hover:bg-note-yellow/20 hover:border-note-yellow"
                       aria-label="Swap wallets"
-                      title="Đổi ví"
+                      title="Swap wallets"
                     >
                       <ArrowLeftRight className="h-4 w-4" />
                     </Button>
@@ -371,7 +363,7 @@ export const TransferForm: React.FC = () => {
                     name="toWalletId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Đến ví</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">To Wallet</FormLabel>
                         <FormControl>
                           <select
                             {...field}
@@ -379,17 +371,13 @@ export const TransferForm: React.FC = () => {
                             disabled={isDisabled}
                             className={walletSelectClassName}
                           >
-                            <option value="">Chọn ví đích</option>
+                            <option value="">Select destination wallet</option>
                             {groupedWallets.map((group, idx) => (
                               <optgroup
                                 key={group.parent?.id ?? `orphan-${idx}`}
-                                label={group.parent?.name ?? "Ví khác"}
+                                label={group.parent?.name ?? "Other Wallets"}
                               >
-                                {group.parent && (
-                                  <option value={group.parent.id}>
-                                    {getWalletLabel(group.parent, true)}
-                                  </option>
-                                )}
+                                {/* Only children are selectable, parent is just optgroup label */}
                                 {group.children.map((child) => (
                                   <option key={child.id} value={child.id}>
                                     {getWalletLabel(child, true)}
@@ -408,7 +396,7 @@ export const TransferForm: React.FC = () => {
                 {/* Selected Wallet Balance Info */}
                 {fromWallet && (
                   <div className="bg-gradient-to-r from-note-yellow/10 to-transparent rounded-lg p-3 flex items-center justify-between">
-                    <span className="text-sm text-pencil-gray">Số dư khả dụng</span>
+                    <span className="text-sm text-pencil-gray">Available Balance</span>
                     <span className="font-semibold text-ink-black">
                       {formatBalance(fromWallet.balance)}
                     </span>
@@ -421,43 +409,48 @@ export const TransferForm: React.FC = () => {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">Số tiền</FormLabel>
+                      <FormLabel className="text-gray-700 font-medium">Amount</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="decimal"
-                          placeholder="Nhập số tiền"
-                          data-testid="transfer-amount"
-                          disabled={isDisabled || !fromWalletId}
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const next = e.target.value;
-                            field.onChange(next === "" ? undefined : Number(next));
-                          }}
-                          className="h-10"
-                        />
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="0"
+                            data-testid="transfer-amount"
+                            disabled={isDisabled || !fromWalletId}
+                            value={field.value !== undefined ? field.value.toLocaleString("en-US") : ""}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
+                              field.onChange(raw === "" ? undefined : Number(raw));
+                            }}
+                            className="h-10 pr-16 text-right"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray">
+                            VND
+                          </span>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Note */}
+                {/* Note - Coming Soon */}
                 <FormField
                   control={form.control}
                   name="note"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">
-                        Ghi chú{" "}
-                        <span className="text-pencil-gray font-normal">(tuỳ chọn)</span>
+                      <FormLabel className="text-gray-400 font-medium">
+                        Note{" "}
+                        <span className="text-pencil-gray font-normal italic">(Coming soon)</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="VD: Chuyển tiết kiệm"
+                          placeholder="Coming soon..."
                           data-testid="transfer-note"
-                          disabled={isDisabled}
-                          className="h-10"
+                          disabled={true}
+                          className="h-10 bg-gray-100 cursor-not-allowed"
                           {...field}
                         />
                       </FormControl>
@@ -476,10 +469,10 @@ export const TransferForm: React.FC = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Đang chuyển...
+                      Transferring...
                     </>
                   ) : (
-                    "Chuyển tiền"
+                    "Transfer"
                   )}
                 </Button>
               </form>
