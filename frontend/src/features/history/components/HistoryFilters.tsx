@@ -42,7 +42,7 @@ export const HistoryFilters: React.FC = () => {
           <Wallet2 className="h-4 w-4 mr-1" />
           All Wallets
         </Button>
-        {allWallets.slice(0, 4).map((w) => (
+        {allWallets.slice(0, 2).map((w) => (
           <Button
             key={w.id}
             variant={currentWalletId === w.id ? "default" : "outline"}
@@ -53,7 +53,7 @@ export const HistoryFilters: React.FC = () => {
             {w.name}
           </Button>
         ))}
-        {allWallets.length > 4 && (
+        {allWallets.length > 2 && (
           <select
             value={currentWalletId ?? ""}
             onChange={(e) => setWalletId(e.target.value)}
@@ -61,7 +61,7 @@ export const HistoryFilters: React.FC = () => {
             aria-label="More wallets"
           >
             <option value="">More...</option>
-            {allWallets.slice(4).map((w) => (
+            {allWallets.slice(2).map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
               </option>

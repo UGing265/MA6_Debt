@@ -37,9 +37,6 @@ namespace Application.Features.Transfers.CreateTransfer
 
             When(x => x.UserId != Guid.Empty && x.FromWalletId != Guid.Empty && x.ToWalletId != Guid.Empty && x.FromWalletId != x.ToWalletId, () =>
             {
-                RuleFor(x => x)
-                    .CustomAsync(EnsureWalletsShareSameParent);
-
                 RuleFor(x => x.Amount)
                     .MustAsync(SourceWalletHasSufficientBalance)
                     .WithMessage("Insufficient balance in source wallet")
@@ -73,33 +70,7 @@ namespace Application.Features.Transfers.CreateTransfer
             {
                 throw new NotFoundException("Wallet", cmd.ToWalletId);
             }
-        }
-
-        private async Task EnsureWalletsShareSameParent(CreateTransferCommand cmd, ValidationContext<CreateTransferCommand> context, CancellationToken cancellationToken)
-        {
-            var wallets = await _context.Wallets
-                .Where(w => (w.Id == cmd.FromWalletId || w.Id == cmd.ToWalletId) && w.UserId == cmd.UserId)
-                .Select(w => new { w.Id, w.ParentWalletId })
-                .ToListAsync(cancellationToken);
-
-            if (!wallets.Any(w => w.Id == cmd.FromWalletId))
-            {
-                throw new NotFoundException("Wallet", cmd.FromWalletId);
-            }
-
-            if (!wallets.Any(w => w.Id == cmd.ToWalletId))
-            {
-                throw new NotFoundException("Wallet", cmd.ToWalletId);
-            }
-
-            var fromParentWalletId = wallets.First(w => w.Id == cmd.FromWalletId).ParentWalletId;
-            var toParentWalletId = wallets.First(w => w.Id == cmd.ToWalletId).ParentWalletId;
-
-            if (fromParentWalletId != toParentWalletId)
-            {
-                context.AddFailure(nameof(CreateTransferCommand.ToWalletId), "Both wallets must share the same parent wallet");
-            }
-        }
+        }  
 
         private async Task<bool> SourceWalletHasSufficientBalance(CreateTransferCommand cmd, decimal amount, CancellationToken cancellationToken)
         {

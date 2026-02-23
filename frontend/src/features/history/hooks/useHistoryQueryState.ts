@@ -4,17 +4,18 @@ import React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 // Minimal URL-driven query state hook for History feature
+// Uses URL as single source of truth for cross-component sync
 export function useHistoryQueryState() {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
 
-  // Initialize from URL
-  const initialSearch = searchParams.get("search") ?? "";
-  const initialWalletId = searchParams.get("walletId") ?? "";
+  // Read directly from URL - this ensures all components stay in sync
+  const currentSearch = searchParams.get("search") ?? "";
+  const currentWalletId = searchParams.get("walletId") ?? "";
 
-  const [currentSearch, setCurrentSearch] = React.useState<string>(initialSearch);
-  const [currentWalletId, setCurrentWalletId] = React.useState<string>(initialWalletId);
+  // Local state for debounced input (UI only)
+  const [inputValue, setInputValue] = React.useState<string>(currentSearch);
 
   // Reset token/counter that should update when wallet changes
   const [paginationResetKey, setPaginationResetKey] = React.useState<number>(0);
@@ -22,23 +23,24 @@ export function useHistoryQueryState() {
   // Debounced write to URL for search param
   React.useEffect(() => {
     const t = window.setTimeout(() => {
-      // mutate URL while preserving other params
       const url = new URL(window.location.href);
-      if (currentSearch) {
-        url.searchParams.set("search", currentSearch);
+      if (inputValue) {
+        url.searchParams.set("search", inputValue);
       } else {
         url.searchParams.delete("search");
       }
-      // perform replace navigation (no scroll)
       router.replace(`${pathname}${url.search}`, { scroll: false });
     }, 250);
     return () => window.clearTimeout(t);
-  }, [currentSearch, pathname, router]);
+  }, [inputValue, pathname, router]);
+
+  // Sync inputValue when URL changes externally (e.g., browser back/forward)
+  React.useEffect(() => {
+    setInputValue(currentSearch);
+  }, [currentSearch]);
 
   // Immediate walletId updates
   const setWalletId = React.useCallback((value: string) => {
-    if (value === currentWalletId) return;
-    setCurrentWalletId(value);
     const url = new URL(window.location.href);
     if (value) {
       url.searchParams.set("walletId", value);
@@ -47,16 +49,17 @@ export function useHistoryQueryState() {
     }
     router.replace(`${pathname}${url.search}`, { scroll: false });
     setPaginationResetKey((k) => k + 1);
-  }, [currentWalletId, pathname, router]);
+  }, [pathname, router]);
 
-  // Simple setter for search (debounced in effect)
+  // Setter for search input (debounced to URL in effect)
   const setSearch = React.useCallback((value: string) => {
-    setCurrentSearch(value);
+    setInputValue(value);
   }, []);
 
   return {
     currentSearch,
     currentWalletId,
+    inputValue,
     setSearch,
     setWalletId,
     paginationResetKey,

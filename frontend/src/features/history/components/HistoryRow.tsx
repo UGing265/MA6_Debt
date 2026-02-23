@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Edit2, Loader2, Lock, Trash2 } from "lucide-react";
-import { HistoryDto, TransferDirection } from "../types/history";
+import { HistoryDto, TransferDirection, formatWalletDisplay } from "../types/history";
 import { formatVnd } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +55,7 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
   const absAmount = Math.abs(amount);
   const isLocked = Boolean(item.isLocked);
   const lockReason = "This transaction is locked and can't be edited or deleted.";
+  const walletDisplay = formatWalletDisplay(item.walletName, item.parentWalletName);
 
   const [isEditOpen, setIsEditOpen] = React.useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState<boolean>(false);
@@ -169,7 +170,8 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
             ) : null}
           </div>
           <p className="text-xs text-pencil-gray truncate">
-            {item.partnerName ? `Partner: ${item.partnerName}` : ""}
+            <span className="text-gray-400">{walletDisplay}</span>
+            {item.partnerName ? ` • Partner: ${item.partnerName}` : ""}
             {item.debtAmount != null ? ` • Debt: ${formatVnd(Math.abs(item.debtAmount))}` : ""}
             {dateStr ? ` • ${new Date(dateStr).toLocaleDateString()}` : ""}
             {isLocked ? " • Locked (no changes)" : ""}
