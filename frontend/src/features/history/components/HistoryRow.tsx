@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, Edit2, Loader2, Lock, Trash2 } from "lucide-react";
 import { HistoryDto, TransferDirection } from "../types/history";
 import { formatVnd } from "@/lib/utils";
@@ -47,6 +48,7 @@ const isLockLikeMessage = (msg: string): boolean => {
 };
 
 export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
+  const router = useRouter();
   const amount = item.amount ?? 0;
   const isTransfer = item.transferId != null;
   const direction = item.transferDirection ?? null;
@@ -85,7 +87,12 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
     ? "text-green-600"
     : "text-red-600";
 
-  const handleOpenEdit = React.useCallback(() => {
+  const handleRowClick = React.useCallback(() => {
+    router.push(`/history/${item.id}`);
+  }, [router, item.id]);
+
+  const handleOpenEdit = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
     setNoteDraft(item.note ?? "");
     setIsEditOpen(true);
   }, [item.note]);
@@ -134,81 +141,91 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
     }
   }, [isLocked, item.id, onRefresh]);
 
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-md px-3 py-2 border border-dashed border-gray-200">
-      <div className="flex-1 min-w-0 pr-1">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="font-medium text-ink-black truncate">
-            {item.note ?? item.partnerName ?? "Transaction"}
-          </div>
-          {isLocked ? (
-            <span
-              className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
-              title={lockReason}
-              aria-label="locked"
-            >
-              <Lock className="h-3 w-3" />
-              Locked
-            </span>
-          ) : null}
-        </div>
-        <p className="text-xs text-pencil-gray truncate">
-          {item.partnerName ? `Partner: ${item.partnerName}` : ""}
-          {item.debtAmount != null ? ` • Debt: ${formatVnd(Math.abs(item.debtAmount))}` : ""}
-          {dateStr ? ` • ${new Date(dateStr).toLocaleDateString()}` : ""}
-          {isLocked ? " • Locked (no changes)" : ""}
-        </p>
-      </div>
+  const handleOpenDelete = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteOpen(true);
+  }, []);
 
-      <div className="flex items-center gap-3">
-        <div className="text-right whitespace-nowrap">
-          <div className="flex items-center justify-end gap-2">
-            <span className={`font-semibold ${amountColor}`} aria-label="amount">
-              {sign}
-              {formatVnd(absAmount)}
-            </span>
-            {isTransfer ? (
+  return (
+    <>
+      <div
+        className="flex items-center justify-between gap-3 rounded-md px-3 py-2 border border-dashed border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={handleRowClick}
+      >
+        <div className="flex-1 min-w-0 pr-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="font-medium text-ink-black truncate">
+              {item.note ?? item.partnerName ?? "Transaction"}
+            </div>
+            {isLocked ? (
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
-                  direction === TransferDirection.Incoming
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
+                className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+                title={lockReason}
+                aria-label="locked"
               >
-                {transferLabel}
+                <Lock className="h-3 w-3" />
+                Locked
               </span>
             ) : null}
           </div>
+          <p className="text-xs text-pencil-gray truncate">
+            {item.partnerName ? `Partner: ${item.partnerName}` : ""}
+            {item.debtAmount != null ? ` • Debt: ${formatVnd(Math.abs(item.debtAmount))}` : ""}
+            {dateStr ? ` • ${new Date(dateStr).toLocaleDateString()}` : ""}
+            {isLocked ? " • Locked (no changes)" : ""}
+          </p>
         </div>
 
-        <div className="flex items-center gap-1">
-          <span className={`inline-flex ${isLocked ? "cursor-not-allowed" : ""}`} title={isLocked ? lockReason : "Edit note"}>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              disabled={isLocked}
-              onClick={handleOpenEdit}
-              className="border-gray-200 bg-white hover:bg-gray-50"
-              aria-label="edit note"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="text-right whitespace-nowrap">
+            <div className="flex items-center justify-end gap-2">
+              <span className={`font-semibold ${amountColor}`} aria-label="amount">
+                {sign}
+                {formatVnd(absAmount)}
+              </span>
+              {isTransfer ? (
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
+                    direction === TransferDirection.Incoming
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {transferLabel}
+                </span>
+              ) : null}
+            </div>
+          </div>
 
-          <span className={`inline-flex ${isLocked ? "cursor-not-allowed" : ""}`} title={isLocked ? lockReason : "Delete transaction"}>
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon-sm"
-              disabled={isLocked}
-              onClick={() => setIsDeleteOpen(true)}
-              className="border border-red-700/40"
-              aria-label="delete transaction"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </span>
+          <div className="flex items-center gap-1">
+            <span className={`inline-flex ${isLocked ? "cursor-not-allowed" : ""}`} title={isLocked ? lockReason : "Edit note"}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                disabled={isLocked}
+                onClick={handleOpenEdit}
+                className="border-gray-200 bg-white hover:bg-gray-50"
+                aria-label="edit note"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            </span>
+
+            <span className={`inline-flex ${isLocked ? "cursor-not-allowed" : ""}`} title={isLocked ? lockReason : "Delete transaction"}>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon-sm"
+                disabled={isLocked}
+                onClick={handleOpenDelete}
+                className="border border-red-700/40"
+                aria-label="delete transaction"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </span>
+          </div>
         </div>
       </div>
 
@@ -304,7 +321,7 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item, onRefresh }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 

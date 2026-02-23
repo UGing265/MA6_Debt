@@ -56,6 +56,8 @@ namespace Application.Features.Transactions.GetTransactions
                 {
                     Id = t.Id,
                     WalletId = t.WalletId,
+                    WalletName = t.Wallet.Name,
+                    ParentWalletName = t.Wallet.ParentWallet != null ? t.Wallet.ParentWallet.Name : null,
                     PartnerId = t.PartnerId,
                     PartnerName = t.Partner != null ? t.Partner.Name : null,
                     Amount = t.Amount,
@@ -84,28 +86,47 @@ namespace Application.Features.Transactions.GetTransactions
                     })
                     .ToListAsync(cancellationToken);
 
-                var transferByTransactionId = new Dictionary<Guid, (Guid TransferId, Guid FromWalletId, Guid ToWalletId, TransferDirection Direction)>();
-                foreach (var transfer in transfers)
+                if (transfers.Count > 0)
                 {
-                    if (transfer.SourceTransactionId.HasValue)
+                    // Collect transfer wallet IDs
+                    var transferWalletIds = transfers
+                        .SelectMany(tr => new[] { tr.FromWalletId, tr.ToWalletId })
+                        .ToHashSet();
+
+                    var transferWalletNames = await _context.Wallets
+                        .AsNoTracking()
+                        .Where(w => transferWalletIds.Contains(w.Id))
+                        .Select(w => new { w.Id, w.Name })
+                        .ToDictionaryAsync(w => w.Id, w => w.Name, cancellationToken);
+
+                    var transferByTransactionId = new Dictionary<Guid, (Guid TransferId, Guid FromWalletId, Guid ToWalletId, string? FromWalletName, string? ToWalletName, TransferDirection Direction)>();
+                    foreach (var transfer in transfers)
                     {
-                        transferByTransactionId[transfer.SourceTransactionId.Value] = (transfer.Id, transfer.FromWalletId, transfer.ToWalletId, TransferDirection.Outgoing);
+                        transferWalletNames.TryGetValue(transfer.FromWalletId, out var fromWalletName);
+                        transferWalletNames.TryGetValue(transfer.ToWalletId, out var toWalletName);
+
+                        if (transfer.SourceTransactionId.HasValue)
+                        {
+                            transferByTransactionId[transfer.SourceTransactionId.Value] = (transfer.Id, transfer.FromWalletId, transfer.ToWalletId, fromWalletName, toWalletName, TransferDirection.Outgoing);
+                        }
+
+                        if (transfer.DestinationTransactionId.HasValue)
+                        {
+                            transferByTransactionId[transfer.DestinationTransactionId.Value] = (transfer.Id, transfer.FromWalletId, transfer.ToWalletId, fromWalletName, toWalletName, TransferDirection.Incoming);
+                        }
                     }
 
-                    if (transfer.DestinationTransactionId.HasValue)
+                    foreach (var transaction in transactions)
                     {
-                        transferByTransactionId[transfer.DestinationTransactionId.Value] = (transfer.Id, transfer.FromWalletId, transfer.ToWalletId, TransferDirection.Incoming);
-                    }
-                }
-
-                foreach (var transaction in transactions)
-                {
-                    if (transferByTransactionId.TryGetValue(transaction.Id, out var transferContext))
-                    {
-                        transaction.TransferId = transferContext.TransferId;
-                        transaction.TransferFromWalletId = transferContext.FromWalletId;
-                        transaction.TransferToWalletId = transferContext.ToWalletId;
-                        transaction.TransferDirection = transferContext.Direction;
+                        if (transferByTransactionId.TryGetValue(transaction.Id, out var transferContext))
+                        {
+                            transaction.TransferId = transferContext.TransferId;
+                            transaction.TransferFromWalletId = transferContext.FromWalletId;
+                            transaction.TransferToWalletId = transferContext.ToWalletId;
+                            transaction.TransferFromWalletName = transferContext.FromWalletName;
+                            transaction.TransferToWalletName = transferContext.ToWalletName;
+                            transaction.TransferDirection = transferContext.Direction;
+                        }
                     }
                 }
             }

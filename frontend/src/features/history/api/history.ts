@@ -13,7 +13,6 @@ const getAuthHeaders = () => {
   };
 };
 
- 
 export const getHistory = async (params: { search?: string; walletId?: string | null }): Promise<HistoryDto[]> => {
   const queryParts: string[] = [];
   if (params.search && params.search.trim().length > 0) {
@@ -43,27 +42,29 @@ export const getHistory = async (params: { search?: string; walletId?: string | 
   return response.json() as Promise<HistoryDto[]>;
 };
 
- 
-export const updateHistoryNote = async (id: string, note: string): Promise<HistoryDto> => {
-  // First fetch existing transaction to obtain required fields
-  const getRes = await fetch(`${API_URL}/api/transactions/${id}`, {
+export const getHistoryItem = async (id: string): Promise<HistoryDto> => {
+  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
     method: "GET",
     headers: getAuthHeaders(),
     credentials: "include",
   });
 
-  if (!getRes.ok) {
+  if (!response.ok) {
     let errorData;
     try {
-      errorData = await getRes.json();
+      errorData = await response.json();
     } catch {
-      throw { message: `Request failed with status ${getRes.status}` };
+      throw { message: `Request failed with status ${response.status}` };
     }
     const parsed = parseErrorResponse(errorData);
     throw { ...parsed, raw: errorData };
   }
 
-  const existing: HistoryDto = await getRes.json();
+  return response.json() as Promise<HistoryDto>;
+};
+
+export const updateHistoryNote = async (id: string, note: string): Promise<HistoryDto> => {
+  const existing = await getHistoryItem(id);
 
   interface UpdatePayload {
     PayerMode: number;
@@ -75,8 +76,8 @@ export const updateHistoryNote = async (id: string, note: string): Promise<Histo
 
   const payload: UpdatePayload = {
     PayerMode: existing.payerMode ?? 0,
-    Total: existing.total ?? existing.amount ?? 0,
-    DebtAmount: existing.debtAmount,
+    Total: existing.totalAmount ?? Math.abs(existing.amount) ?? 0,
+    DebtAmount: existing.debtAmount ?? undefined,
     Note: note,
     TransactionDate: existing.transactionDate,
   };
@@ -102,7 +103,6 @@ export const updateHistoryNote = async (id: string, note: string): Promise<Histo
   return putRes.json() as Promise<HistoryDto>;
 };
 
- 
 export const deleteHistoryItem = async (id: string): Promise<void> => {
   const response = await fetch(`${API_URL}/api/transactions/${id}`, {
     method: "DELETE",
