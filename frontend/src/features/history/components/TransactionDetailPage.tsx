@@ -142,7 +142,7 @@ export const TransactionDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 max-w-3xl">
+      <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Link href="/history">
             <Button variant="ghost" size="icon">
@@ -158,7 +158,7 @@ export const TransactionDetailPage: React.FC = () => {
 
   if (error || !transaction) {
     return (
-      <div className="space-y-6 max-w-3xl">
+      <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Link href="/history">
             <Button variant="ghost" size="icon">
@@ -214,7 +214,7 @@ export const TransactionDetailPage: React.FC = () => {
   const hasQuickDeduct = transaction.payerMode != null || transaction.totalAmount != null || transaction.debtAmount != null;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
