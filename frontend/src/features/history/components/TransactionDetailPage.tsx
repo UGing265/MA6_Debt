@@ -30,7 +30,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { getHistoryItem, updateHistoryNote, deleteHistoryItem } from "../api/history";
+import { getHistoryItem, updateHistoryNote, deleteHistoryItem, updateTransactionDebt } from "../api/history";
+import { getDebtPartners } from "@/features/debt/api/debtPartners";
 import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
 import { formatVnd } from "@/lib/utils";
 
@@ -81,6 +82,20 @@ export const TransactionDetailPage: React.FC = () => {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
+  // Debt dialog state
+  const [isDebtOpen, setIsDebtOpen] = React.useState(false);
+  const [debtPartnerId, setDebtPartnerId] = React.useState<string>("");
+  const [debtPayerMode, setDebtPayerMode] = React.useState<PayerMode>(PayerMode.ToiTra);
+  const [debtAmount, setDebtAmount] = React.useState<string>("");
+  const [partners, setPartners] = React.useState<{ id: string; name: string; balance: number }[]>([]);
+  const [isSavingDebt, setIsSavingDebt] = React.useState(false);
+
+  // Load partners when debt dialog opens
+  React.useEffect(() => {
+    if (isDebtOpen) {
+      getDebtPartners().then(setPartners).catch(() => setPartners([]));
+    }
+  }, [isDebtOpen]);
   const fetchTransaction = React.useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -88,12 +103,15 @@ export const TransactionDetailPage: React.FC = () => {
       const data = await getHistoryItem(transactionId);
       setTransaction(data);
       setNoteDraft(data.note ?? "");
+      // Set debt form values for editing
+      setDebtPartnerId(data.partnerId ?? "");
+      setDebtPayerMode(data.payerMode ?? PayerMode.ToiTra);
+      setDebtAmount(data.debtAmount != null ? String(data.debtAmount) : "");
     } catch (e: any) {
       setError(extractGeneralError(e));
     } finally {
       setIsLoading(false);
     }
-  }, [transactionId]);
 
   React.useEffect(() => {
     fetchTransaction();
@@ -119,6 +137,37 @@ export const TransactionDetailPage: React.FC = () => {
       setIsSaving(false);
     }
   }, [transaction, noteDraft, fetchTransaction]);
+
+  const handleSaveDebt = React.useCallback(async () => {
+    if (!transaction || transaction.isLocked) return;
+    setIsSavingDebt(true);
+    try {
+      const total = transaction.totalAmount ?? Math.abs(transaction.amount) ?? 0;
+      const parsedDebtAmount = debtAmount ? Number(debtAmount.replace(/,/g, "")) : undefined;
+
+      await updateTransactionDebt(transaction.id, {
+        partnerId: debtPartnerId || undefined,
+        payerMode: debtPayerMode,
+        total: total,
+        debtAmount: parsedDebtAmount,
+        note: transaction.note ?? undefined,
+        transactionDate: transaction.transactionDate,
+      });
+      toast.success("Debt info updated");
+      setIsDebtOpen(false);
+      await fetchTransaction();
+    } catch (e: any) {
+      const msg = extractGeneralError(e);
+      if (isLockLikeMessage(msg)) {
+        toast.error("This transaction is locked and can't be changed.");
+        await fetchTransaction();
+        return;
+      }
+      toast.error(msg || "Failed to update debt info");
+    } finally {
+      setIsSavingDebt(false);
+    }
+  }, [transaction, debtPartnerId, debtPayerMode, debtAmount, fetchTransaction]);
 
   const handleDelete = React.useCallback(async () => {
     if (!transaction || transaction.isLocked) return;
@@ -262,6 +311,18 @@ export const TransactionDetailPage: React.FC = () => {
               )}
             </div>
             <div className="flex gap-2">
+              {/* Add/Edit Debt button - only show for non-transfer transactions */}
+              {!isTransfer && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDebtOpen(true)}
+                  disabled={isLocked}
+                  title={isLocked ? lockReason : transaction.partnerId ? "Edit debt info" : "Add debt info"}
+                >
+                  <Banknote className="h-4 w-4 mr-2" />
+                  {transaction.partnerId ? "Edit Debt" : "Add Debt"}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={() => setIsEditOpen(true)}
@@ -280,7 +341,6 @@ export const TransactionDetailPage: React.FC = () => {
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -484,6 +544,106 @@ export const TransactionDetailPage: React.FC = () => {
                 </>
               ) : (
                 "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Debt Dialog */}
+      <Dialog open={isDebtOpen} onOpenChange={setIsDebtOpen}>
+        <DialogContent>
+          <DialogClose onClose={() => setIsDebtOpen(false)} />
+          <DialogHeader>
+            <DialogTitle>{transaction.partnerId ? "Edit Debt Info" : "Add Debt Info"}</DialogTitle>
+            <DialogDescription>
+              {transaction.partnerId
+                ? "Update debt information for this transaction."
+                : "Add debt information to track who owes whom."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Partner */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Partner</label>
+              <select
+                value={debtPartnerId}
+                onChange={(e) => setDebtPartnerId(e.target.value)}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              >
+                <option value="">Select partner</option>
+                {partners.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({formatVnd(p.balance)})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Payer Mode */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Who Paid?</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDebtPayerMode(PayerMode.ToiTra)}
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    debtPayerMode === PayerMode.ToiTra
+                      ? "bg-note-yellow text-ink-black"
+                      : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
+                  }`}
+                >
+                  I Paid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDebtPayerMode(PayerMode.PartnerTra)}
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    debtPayerMode === PayerMode.PartnerTra
+                      ? "bg-note-yellow text-ink-black"
+                      : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
+                  }`}
+                >
+                  Partner Paid
+                </button>
+              </div>
+            </div>
+
+            {/* Debt Amount */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">
+                {debtPayerMode === PayerMode.ToiTra ? "Partner Owes Me" : "I Owe Partner"}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={debtAmount ? Number(debtAmount.replace(/,/g, "")).toLocaleString("en-US") : ""}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
+                    setDebtAmount(raw);
+                  }}
+                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 pr-12 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pencil-gray">vnd</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button type="button" variant="outline" onClick={() => setIsDebtOpen(false)} disabled={isSavingDebt}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleSaveDebt} disabled={isSavingDebt}>
+              {isSavingDebt ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
               )}
             </Button>
           </DialogFooter>

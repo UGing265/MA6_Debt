@@ -142,3 +142,80 @@ export const deleteHistoryItem = async (id: string): Promise<void> => {
     throw { ...parsed, raw: errorData };
   }
 };
+
+export interface UpdateDebtRequest {
+  partnerId?: string;
+  payerMode: number;
+  total: number;
+  debtAmount?: number;
+  note?: string;
+  transactionDate?: string;
+}
+
+export const updateTransactionDebt = async (
+  id: string,
+  data: UpdateDebtRequest
+): Promise<HistoryDto> => {
+  const payload = {
+    PartnerId: data.partnerId ?? null,
+    PayerMode: data.payerMode,
+    Total: data.total,
+    DebtAmount: data.debtAmount ?? undefined,
+    Note: data.note ?? undefined,
+    TransactionDate: data.transactionDate,
+  };
+
+  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw { message: `Request failed with status ${response.status}` };
+    }
+    const parsed = parseErrorResponse(errorData);
+    throw { ...parsed, raw: errorData };
+  }
+
+  return response.json() as Promise<HistoryDto>;
+};
+
+export const getHistoryByPartner = async (params: {
+  partnerId: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<PagedResult<HistoryDto>> => {
+  const queryParts: string[] = [];
+  queryParts.push(`partnerId=${encodeURIComponent(params.partnerId)}`);
+  if (params.page && params.page > 1) {
+    queryParts.push(`page=${params.page}`);
+  }
+  if (params.pageSize && params.pageSize !== 10) {
+    queryParts.push(`pageSize=${params.pageSize}`);
+  }
+  const query = `?${queryParts.join('&')}`;
+  const response = await fetch(`${API_URL}/api/transactions${query}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw { message: `Request failed with status ${response.status}` };
+    }
+    const parsed = parseErrorResponse(errorData);
+    throw { ...parsed, raw: errorData };
+  }
+
+  return response.json() as Promise<PagedResult<HistoryDto>>;
+};
