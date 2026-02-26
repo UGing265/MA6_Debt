@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Domain.Entities;
 using MediatR;
 using Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Transfers.CreateTransfer
 {
@@ -18,6 +19,16 @@ namespace Application.Features.Transfers.CreateTransfer
 
         public async Task<TransferDto> Handle(CreateTransferCommand request, CancellationToken cancellationToken)
         {
+            // Get wallet names for the note
+            var walletIds = new[] { request.FromWalletId, request.ToWalletId };
+            var walletNames = await _context.Wallets
+                .AsNoTracking()
+                .Where(w => walletIds.Contains(w.Id))
+                .ToDictionaryAsync(w => w.Id, w => w.Name, cancellationToken);
+
+            var fromWalletName = walletNames.TryGetValue(request.FromWalletId, out var fn) ? fn : "Unknown";
+            var toWalletName = walletNames.TryGetValue(request.ToWalletId, out var tn) ? tn : "Unknown";
+
             // Build the Transfer and associated Transactions in a single SaveChanges transaction
             var now = DateTime.UtcNow;
 
@@ -35,7 +46,7 @@ namespace Application.Features.Transfers.CreateTransfer
                 WalletId = request.FromWalletId,
                 Amount = -request.Amount,
                 TransactionDate = now,
-                Note = $"Transfer to wallet {request.ToWalletId}"
+                Note = $"Transfer to {toWalletName}"
             };
 
             var creditTx = new Transaction
@@ -43,7 +54,7 @@ namespace Application.Features.Transfers.CreateTransfer
                 WalletId = request.ToWalletId,
                 Amount = request.Amount,
                 TransactionDate = now,
-                Note = $"Transfer from wallet {request.FromWalletId}"
+                Note = $"Transfer from {fromWalletName}"
             };
 
             transfer.SourceTransactionId = debitTx.Id;
