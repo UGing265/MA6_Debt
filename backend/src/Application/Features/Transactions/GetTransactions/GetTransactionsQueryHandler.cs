@@ -32,6 +32,11 @@ namespace Application.Features.Transactions.GetTransactions
                 query = query.Where(t => t.WalletId == request.WalletId.Value);
             }
 
+            // Filter by partner if specified
+            if (request.PartnerId.HasValue)
+            {
+                query = query.Where(t => t.PartnerId == request.PartnerId.Value);
+            }
             // Optional keyword search across Note and Partner.Name (case-insensitive).
             // DebtPartner has a global soft-delete filter; ignore it for search so deleted partners
             // don't prevent matching historical transactions.
