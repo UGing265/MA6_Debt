@@ -16,6 +16,7 @@ export function useHistoryQueryState() {
   // Read directly from URL - this ensures all components stay in sync
   const currentSearch = searchParams.get("search") ?? "";
   const currentWalletId = searchParams.get("walletId") ?? "";
+  const currentPartnerId = searchParams.get("partnerId") ?? "";
   const currentPage = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const currentPageSize = PAGE_SIZE_OPTIONS.includes(parseInt(searchParams.get("pageSize") ?? "10", 10) as PageSizeOption)
     ? (parseInt(searchParams.get("pageSize") ?? "10", 10) as PageSizeOption)
@@ -46,7 +47,7 @@ export function useHistoryQueryState() {
   }, [currentSearch]);
 
   // Update URL with all params
-  const updateUrl = React.useCallback((updates: { walletId?: string; page?: number; pageSize?: number }) => {
+  const updateUrl = React.useCallback((updates: { walletId?: string; partnerId?: string; page?: number; pageSize?: number }) => {
     const url = new URL(window.location.href);
     
     if (updates.walletId !== undefined) {
@@ -56,6 +57,16 @@ export function useHistoryQueryState() {
         url.searchParams.delete("walletId");
       }
       // Reset to page 1 when wallet changes
+      url.searchParams.delete("page");
+    }
+
+    if (updates.partnerId !== undefined) {
+      if (updates.partnerId) {
+        url.searchParams.set("partnerId", updates.partnerId);
+      } else {
+        url.searchParams.delete("partnerId");
+      }
+      // Reset to page 1 when partner changes
       url.searchParams.delete("page");
     }
     
@@ -85,6 +96,11 @@ export function useHistoryQueryState() {
     updateUrl({ walletId: value });
   }, [updateUrl]);
 
+  // Immediate partnerId updates
+  const setPartnerId = React.useCallback((value: string) => {
+    updateUrl({ partnerId: value });
+  }, [updateUrl]);
+
   // Setter for search input (debounced to URL in effect)
   const setSearch = React.useCallback((value: string) => {
     setInputValue(value);
@@ -103,11 +119,13 @@ export function useHistoryQueryState() {
   return {
     currentSearch,
     currentWalletId,
+    currentPartnerId,
     currentPage,
     currentPageSize,
     inputValue,
     setSearch,
     setWalletId,
+    setPartnerId,
     setPage,
     setPageSize,
   };

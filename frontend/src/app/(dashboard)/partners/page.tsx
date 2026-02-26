@@ -1,28 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star } from "lucide-react";
-import { formatVnd } from "@/lib/utils";
-import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
-import { PartnerNameDialog } from "@/features/debt/components/PartnerNameDialog";
-import { PartnerMoneyDialog } from "@/features/debt/components/PartnerMoneyDialog";
-import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import type { DebtPartner } from "@/features/debt/types/debtPartner";
+import { useRouter } from "next/navigation";
+import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star, History } from "lucide-react";
 
 // formatVnd centralized via '@/lib/utils'
 
 export default function PartnersPage() {
+  const router = useRouter();
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
@@ -155,6 +140,14 @@ export default function PartnersPage() {
                           aria-label={`Edit name for ${partner.name}`}
                         >
                           <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-2 inline-flex items-center justify-center rounded-md text-ink-black hover:bg-note-yellow/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
+                          onClick={() => router.push(`/history?partnerId=${partner.id}`)}
+                          aria-label={`View history for ${partner.name}`}
+                        >
+                          <History className="h-4 w-4" />
                         </button>
                         <button
                           type="button"

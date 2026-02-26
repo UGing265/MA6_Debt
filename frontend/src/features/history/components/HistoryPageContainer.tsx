@@ -8,7 +8,7 @@ import { HistoryDto } from "../types/history";
 import { useHistoryQueryState } from "../hooks/useHistoryQueryState";
 
 export const HistoryPageContainer: React.FC = () => {
-  const { currentSearch, currentWalletId, currentPage, currentPageSize } = useHistoryQueryState();
+  const { currentSearch, currentWalletId, currentPartnerId, currentPage, currentPageSize } = useHistoryQueryState();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   const [items, setItems] = React.useState<HistoryDto[]>([]);
@@ -32,6 +32,7 @@ export const HistoryPageContainer: React.FC = () => {
       const data: PagedResult<HistoryDto> = await getHistory({
         search: currentSearch,
         walletId: currentWalletId || null,
+        partnerId: currentPartnerId || null,
         page: currentPage,
         pageSize: currentPageSize,
       });
@@ -58,7 +59,7 @@ export const HistoryPageContainer: React.FC = () => {
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [currentSearch, currentWalletId, currentPage, currentPageSize, sortOrder]);
+  }, [currentSearch, currentWalletId, currentPartnerId, currentPage, currentPageSize, sortOrder]);
 
   // Fetch history when filters change
   React.useEffect(() => {

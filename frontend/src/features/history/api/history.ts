@@ -26,6 +26,7 @@ const getAuthHeaders = () => {
 export const getHistory = async (params: {
   search?: string;
   walletId?: string | null;
+  partnerId?: string | null;
   page?: number;
   pageSize?: number;
 }): Promise<PagedResult<HistoryDto>> => {
@@ -35,6 +36,9 @@ export const getHistory = async (params: {
   }
   if (params.walletId && params.walletId.trim().length > 0) {
     queryParts.push(`walletId=${encodeURIComponent(params.walletId)}`);
+  }
+  if (params.partnerId && params.partnerId.trim().length > 0) {
+    queryParts.push(`partnerId=${encodeURIComponent(params.partnerId)}`);
   }
   if (params.page && params.page > 1) {
     queryParts.push(`page=${params.page}`);
