@@ -100,10 +100,10 @@ namespace Application.Features.Transactions.QuickDeduct
                     break;
 
                 case PayerMode.PartnerTra:
-                    // Partner pays: wallet unchanged, partner decreases by (Total - DebtAmount)
-                    // Where DebtAmount in this case is what user consumed
+                    // Partner pays: wallet unchanged, user owes partner DebtAmount
+                    // DebtAmount = what user consumed, so user owes that to partner
                     walletDelta = 0;
-                    partnerDelta = -(request.Total - debtAmount.Value);
+                    partnerDelta = -debtAmount.Value;
                     break;
 
                 default:
