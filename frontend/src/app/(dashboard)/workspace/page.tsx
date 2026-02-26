@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeftRight, Clock3, LayoutDashboard, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const tabMap: Record<string, { title: string; description: string; icon: React.ReactNode }> = {
   "quick-deduct": {
@@ -26,6 +27,7 @@ const tabMap: Record<string, { title: string; description: string; icon: React.R
 };
 
 export default function WorkspacePage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "";
   const router = useRouter();
@@ -43,6 +45,12 @@ export default function WorkspacePage() {
   }
 
   const current = tabMap[tab];
+
+  // Legacy compatibility: redirect legacy history tab to the dedicated /history experience
+  if (tab === "history") {
+    router.replace("/history");
+    return null;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">

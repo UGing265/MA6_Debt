@@ -7,6 +7,8 @@ namespace Application.Features.Transactions
     {
         public Guid Id { get; set; }
         public Guid WalletId { get; set; }
+        public string? WalletName { get; set; }
+        public string? ParentWalletName { get; set; }
         public Guid? PartnerId { get; set; }
         public string? PartnerName { get; set; }
         public decimal Amount { get; set; }
@@ -21,9 +23,12 @@ namespace Application.Features.Transactions
         public decimal? TotalAmount { get; set; }
         public decimal? DebtAmount { get; set; }
 
+        // Transfer fields
         public Guid? TransferId { get; set; }
         public Guid? TransferFromWalletId { get; set; }
         public Guid? TransferToWalletId { get; set; }
+        public string? TransferFromWalletName { get; set; }
+        public string? TransferToWalletName { get; set; }
         public TransferDirection? TransferDirection { get; set; }
     }
     

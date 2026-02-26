@@ -72,6 +72,32 @@ namespace Application.Features.Transfers.CreateTransfer
             }
         }
 
+        private async Task EnsureWalletsShareSameParent(CreateTransferCommand cmd, ValidationContext<CreateTransferCommand> context, CancellationToken cancellationToken)
+        {
+            var wallets = await _context.Wallets
+                .Where(w => (w.Id == cmd.FromWalletId || w.Id == cmd.ToWalletId) && w.UserId == cmd.UserId)
+                .Select(w => new { w.Id, w.ParentWalletId })
+                .ToListAsync(cancellationToken);
+
+            if (!wallets.Any(w => w.Id == cmd.FromWalletId))
+            {
+                throw new NotFoundException("Wallet", cmd.FromWalletId);
+            }
+
+            if (!wallets.Any(w => w.Id == cmd.ToWalletId))
+            {
+                throw new NotFoundException("Wallet", cmd.ToWalletId);
+            }
+
+            var fromParentWalletId = wallets.First(w => w.Id == cmd.FromWalletId).ParentWalletId;
+            var toParentWalletId = wallets.First(w => w.Id == cmd.ToWalletId).ParentWalletId;
+
+            if (fromParentWalletId != toParentWalletId)
+            {
+                context.AddFailure(nameof(CreateTransferCommand.ToWalletId), "Both wallets must share the same parent wallet");
+            }
+        }
+
         private async Task<bool> SourceWalletHasSufficientBalance(CreateTransferCommand cmd, decimal amount, CancellationToken cancellationToken)
         {
             var sourceWalletExists = await _context.Wallets.AnyAsync(
