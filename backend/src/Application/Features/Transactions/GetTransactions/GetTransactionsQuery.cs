@@ -1,3 +1,4 @@
+using Application.Common;
 using MediatR;
 
 namespace Application.Features.Transactions.GetTransactions
@@ -5,7 +6,7 @@ namespace Application.Features.Transactions.GetTransactions
     /// <summary>
     /// Query to get all transactions for the current user, optionally filtered by wallet.
     /// </summary>
-    public class GetTransactionsQuery : IRequest<IReadOnlyList<TransactionDto>>
+    public class GetTransactionsQuery : IRequest<PagedResult<TransactionDto>>
     {
         public Guid UserId { get; set; }
         
@@ -18,5 +19,15 @@ namespace Application.Features.Transactions.GetTransactions
         /// Optional keyword search (case-insensitive). Filters by transaction note OR partner name.
         /// </summary>
         public string? SearchTerm { get; set; }
+
+        /// <summary>
+        /// Page number (1-based). Default is 1.
+        /// </summary>
+        public int Page { get; set; } = 1;
+
+        /// <summary>
+        /// Number of items per page. Default is 10.
+        /// </summary>
+        public int PageSize { get; set; } = 10;
     }
 }

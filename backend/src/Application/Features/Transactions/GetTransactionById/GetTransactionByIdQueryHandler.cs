@@ -29,6 +29,8 @@ namespace Application.Features.Transactions.GetTransactionById
                 {
                     Id = t.Id,
                     WalletId = t.WalletId,
+                    WalletName = t.Wallet.Name,
+                    ParentWalletName = t.Wallet.ParentWallet != null ? t.Wallet.ParentWallet.Name : null,
                     PartnerId = t.PartnerId,
                     PartnerName = t.Partner != null ? t.Partner.Name : null,
                     Amount = t.Amount,
@@ -44,6 +46,43 @@ namespace Application.Features.Transactions.GetTransactionById
             if (transaction == null)
             {
                 throw new NotFoundException("Transaction", request.Id);
+            }
+
+            // Check for transfer
+            var transfer = await _context.Transfers
+                .AsNoTracking()
+                .Where(tr => tr.UserId == request.UserId
+                             && (tr.SourceTransactionId == request.Id || tr.DestinationTransactionId == request.Id))
+                .Select(tr => new
+                {
+                    tr.Id,
+                    tr.FromWalletId,
+                    tr.ToWalletId,
+                    tr.SourceTransactionId,
+                    tr.DestinationTransactionId
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (transfer != null)
+            {
+                var transferWalletIds = new[] { transfer.FromWalletId, transfer.ToWalletId }.ToHashSet();
+                var transferWalletNames = await _context.Wallets
+                    .AsNoTracking()
+                    .Where(w => transferWalletIds.Contains(w.Id))
+                    .Select(w => new { w.Id, w.Name })
+                    .ToDictionaryAsync(w => w.Id, w => w.Name, cancellationToken);
+
+                transferWalletNames.TryGetValue(transfer.FromWalletId, out var fromWalletName);
+                transferWalletNames.TryGetValue(transfer.ToWalletId, out var toWalletName);
+
+                transaction.TransferId = transfer.Id;
+                transaction.TransferFromWalletId = transfer.FromWalletId;
+                transaction.TransferToWalletId = transfer.ToWalletId;
+                transaction.TransferFromWalletName = fromWalletName;
+                transaction.TransferToWalletName = toWalletName;
+                transaction.TransferDirection = transfer.SourceTransactionId == request.Id
+                    ? TransferDirection.Outgoing
+                    : TransferDirection.Incoming;
             }
 
             transaction.IsLocked = MonthLockPolicy.IsLocked(transaction.TransactionDate, nowUtc);

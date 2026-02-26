@@ -50,19 +50,19 @@ const navItems: NavItem[] = [
   },
   {
     label: "History",
-    href: "/workspace?tab=history",
+    href: "/history",
     icon: <Clock3 className="h-4 w-4" />,
     testId: "nav-history",
   },
   {
     label: "Transfer",
     href: "/transfer",
-    icon: <ArrowLeftRight className="h-4 w-4" />, 
+    icon: <ArrowLeftRight className="h-4 w-4" />,
     testId: "nav-transfer",
   },
 ];
 
-const placeholderTabs = new Set(["quick-deduct", "history"]);
+const placeholderTabs = new Set(["quick-deduct"]);
 
 function isPlaceholderNav(href: string) {
   if (!href.includes("/workspace?tab=")) return false;
