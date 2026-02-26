@@ -38,15 +38,17 @@ namespace Application.Features.Transactions.UpdateTransaction
             var originalDebtAmount = transaction.DebtAmount;
             var originalPartnerBalanceBefore = transaction.PartnerBalanceBefore;
             var originalPartnerBalanceAfter = transaction.PartnerBalanceAfter;
+            var originalPartnerId = transaction.PartnerId;
 
-            var partnerId = transaction.PartnerId;
-            var shouldRecomputePartnerBalance = partnerId.HasValue &&
-                                              (originalPayerMode != (int)request.PayerMode
-                                               || originalTotalAmount != request.Total
-                                               || originalDebtAmount != request.DebtAmount);
+            // Determine the effective partner ID (new or existing)
+            var effectivePartnerId = request.PartnerId ?? transaction.PartnerId;
+            var isAddingNewPartner = !transaction.PartnerId.HasValue && request.PartnerId.HasValue;
+            var isRemovingPartner = transaction.PartnerId.HasValue && !request.PartnerId.HasValue;
 
-            if (shouldRecomputePartnerBalance)
+            // Handle removing partner (clear debt info)
+            if (isRemovingPartner && originalPartnerId.HasValue)
             {
+                // Rollback original partner balance
                 var originalPartnerDelta = DeriveOriginalPartnerDelta(
                     payerMode: originalPayerMode,
                     totalAmount: originalTotalAmount,
@@ -54,29 +56,72 @@ namespace Application.Features.Transactions.UpdateTransaction
                     partnerBalanceBefore: originalPartnerBalanceBefore,
                     partnerBalanceAfter: originalPartnerBalanceAfter);
 
-                var partner = await _context.DebtPartners
+                var originalPartner = await _context.DebtPartners
                     .IgnoreQueryFilters()
-                    .FirstOrDefaultAsync(dp => dp.Id == partnerId!.Value && dp.UserId == request.UserId, cancellationToken);
+                    .FirstOrDefaultAsync(dp => dp.Id == originalPartnerId.Value && dp.UserId == request.UserId, cancellationToken);
 
-                if (partner is null)
+                if (originalPartner is not null && originalPartnerDelta != 0m)
                 {
-                    throw new InvalidOperationException("Cannot rollback partner balance: partner not found");
+                    originalPartner.Balance -= originalPartnerDelta;
                 }
 
-                if (originalPartnerDelta != 0m)
+                transaction.PartnerId = null;
+                transaction.PartnerBalanceBefore = null;
+                transaction.PartnerBalanceAfter = null;
+                transaction.DebtAmount = null;
+            }
+            // Handle adding new partner or updating existing partner debt
+            else if (effectivePartnerId.HasValue)
+            {
+                var shouldRecomputePartnerBalance = isAddingNewPartner
+                    || (originalPartnerId.HasValue &&
+                        (originalPayerMode != (int)request.PayerMode
+                         || originalTotalAmount != request.Total
+                         || originalDebtAmount != request.DebtAmount));
+
+                if (shouldRecomputePartnerBalance)
                 {
-                    partner.Balance -= originalPartnerDelta;
-                }
+                    // Rollback original partner balance if exists
+                    if (originalPartnerId.HasValue && !isAddingNewPartner)
+                    {
+                        var originalPartnerDelta = DeriveOriginalPartnerDelta(
+                            payerMode: originalPayerMode,
+                            totalAmount: originalTotalAmount,
+                            debtAmount: originalDebtAmount,
+                            partnerBalanceBefore: originalPartnerBalanceBefore,
+                            partnerBalanceAfter: originalPartnerBalanceAfter);
 
-                var newPartnerDelta = ComputePartnerDelta(request.PayerMode, request.Total, request.DebtAmount);
-                var partnerBalanceBefore = partner.Balance;
+                        var originalPartner = await _context.DebtPartners
+                            .IgnoreQueryFilters()
+                            .FirstOrDefaultAsync(dp => dp.Id == originalPartnerId.Value && dp.UserId == request.UserId, cancellationToken);
 
-                transaction.PartnerBalanceBefore = partnerBalanceBefore;
-                transaction.PartnerBalanceAfter = partnerBalanceBefore + newPartnerDelta;
+                        if (originalPartner is not null && originalPartnerDelta != 0m)
+                        {
+                            originalPartner.Balance -= originalPartnerDelta;
+                        }
+                    }
 
-                if (newPartnerDelta != 0m)
-                {
-                    partner.Balance += newPartnerDelta;
+                    // Get the effective partner (new or existing)
+                    var partner = await _context.DebtPartners
+                        .IgnoreQueryFilters()
+                        .FirstOrDefaultAsync(dp => dp.Id == effectivePartnerId.Value && dp.UserId == request.UserId, cancellationToken);
+
+                    if (partner is null)
+                    {
+                        throw new NotFoundException("DebtPartner", effectivePartnerId.Value);
+                    }
+
+                    var newPartnerDelta = ComputePartnerDelta(request.PayerMode, request.Total, request.DebtAmount);
+                    var partnerBalanceBefore = partner.Balance;
+
+                    transaction.PartnerId = effectivePartnerId;
+                    transaction.PartnerBalanceBefore = partnerBalanceBefore;
+                    transaction.PartnerBalanceAfter = partnerBalanceBefore + newPartnerDelta;
+
+                    if (newPartnerDelta != 0m)
+                    {
+                        partner.Balance += newPartnerDelta;
+                    }
                 }
             }
 
@@ -93,12 +138,11 @@ namespace Application.Features.Transactions.UpdateTransaction
                 transaction.TransactionDate = request.TransactionDate.Value;
             }
 
-            if (!partnerId.HasValue)
+            if (!effectivePartnerId.HasValue && !isRemovingPartner)
             {
                 transaction.PartnerBalanceBefore = null;
                 transaction.PartnerBalanceAfter = null;
             }
-
             await _context.SaveChangesAsync(cancellationToken);
 
             var dto = await _context.Transactions
@@ -152,7 +196,8 @@ namespace Application.Features.Transactions.UpdateTransaction
                         throw new InvalidOperationException("DebtAmount is missing. This should have been caught by validation.");
                     }
 
-                    return -(total - debtAmount.Value);
+                    // DebtAmount = what user consumed, so user owes that to partner
+                    return -debtAmount.Value;
 
                 default:
                     throw new InvalidOperationException($"Invalid PayerMode: {payerMode}");
@@ -195,11 +240,11 @@ namespace Application.Features.Transactions.UpdateTransaction
                         throw new InvalidOperationException("Cannot rollback partner balance: debt amount is missing");
                     }
 
-                    return -(total - debtAmount.Value);
+                    // DebtAmount = what user consumed, so user owed that to partner
+                    return -debtAmount.Value;
 
                 default:
                     throw new InvalidOperationException($"Cannot rollback partner balance: invalid payer mode '{payerMode}'");
             }
-        }
     }
 }

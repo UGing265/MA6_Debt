@@ -128,6 +128,7 @@ namespace API.Controllers
             {
                 Id = id,
                 UserId = GetCurrentUserId(),
+                PartnerId = request.PartnerId,
                 PayerMode = request.PayerMode,
                 Total = request.Total,
                 DebtAmount = request.DebtAmount,
