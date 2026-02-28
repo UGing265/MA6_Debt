@@ -28,6 +28,28 @@ type GroupedWallets = {
   children: Wallet[];
 };
 
+const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Allow: backspace, delete, tab, escape, enter, arrows
+  if (
+    e.key === "Backspace" ||
+    e.key === "Delete" ||
+    e.key === "Tab" ||
+    e.key === "Escape" ||
+    e.key === "Enter" ||
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown" ||
+    (e.ctrlKey && (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x"))
+  ) {
+    return;
+  }
+  // Block if not a number
+  if (!/^\d$/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 export const AdjustmentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
@@ -122,6 +144,7 @@ export const AdjustmentForm = () => {
               const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
               form.setValue("amount", raw === "" ? Number.NaN : Number(raw), { shouldValidate: true });
             }}
+            onKeyDown={handleNumericKeyDown}
             className="h-14 w-full rounded-lg border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-semibold text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-amber-500 focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-pencil-gray">

@@ -3,7 +3,7 @@
 import React from "react";
 import { HistoryFilters } from "./HistoryFilters";
 import { HistoryList } from "./HistoryList";
-import { getHistory, PagedResult } from "../api/history";
+import { getHistory, PagedResult, subscribeToHistoryRefresh } from "../api/history";
 import { HistoryDto } from "../types/history";
 import { useHistoryQueryState } from "../hooks/useHistoryQueryState";
 
@@ -64,6 +64,14 @@ export const HistoryPageContainer: React.FC = () => {
   // Fetch history when filters change
   React.useEffect(() => {
     void fetchHistory();
+  }, [fetchHistory]);
+
+  // Subscribe to history refresh events (triggered after transaction submission)
+  React.useEffect(() => {
+    const unsubscribe = subscribeToHistoryRefresh(() => {
+      void fetchHistory();
+    });
+    return unsubscribe;
   }, [fetchHistory]);
 
   const handleSortChange = React.useCallback((order: "newest" | "oldest") => {

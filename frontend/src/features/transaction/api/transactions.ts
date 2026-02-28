@@ -5,17 +5,7 @@ import {
   TransactionDto,
 } from "../types/transaction";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@/lib/authToken";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
-
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
+import { apiFetch } from "@/lib/apiClient";
 
 /**
  * Quick deduct transaction
@@ -24,11 +14,9 @@ const getAuthHeaders = () => {
 export const quickDeductTransaction = async (
   data: QuickDeductRequest
 ): Promise<QuickDeductResponse> => {
-  const response = await fetch(`${API_URL}/api/transactions/quick-deduct`, {
+  const response = await apiFetch(`/api/transactions/quick-deduct`, {
     method: "POST",
-    headers: getAuthHeaders(),
     body: JSON.stringify(data),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -52,11 +40,9 @@ export const quickDeductTransaction = async (
 export const createCashAdjustment = async (
   data: CashAdjustmentRequest
 ): Promise<TransactionDto> => {
-  const response = await fetch(`${API_URL}/api/transactions/adjustment`, {
+  const response = await apiFetch(`/api/transactions/adjustment`, {
     method: "POST",
-    headers: getAuthHeaders(),
     body: JSON.stringify(data),
-    credentials: "include",
   });
 
   if (!response.ok) {

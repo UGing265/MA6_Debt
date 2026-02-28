@@ -1,8 +1,22 @@
 import { HistoryDto } from "@/features/history/types/history";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@/lib/authToken";
+import { apiFetch } from "@/lib/apiClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
+// History refresh event system
+type HistoryListener = () => void;
+
+const historyListeners = new Set<HistoryListener>();
+
+export const subscribeToHistoryRefresh = (listener: () => void): (() => void) => {
+  historyListeners.add(listener);
+  return () => {
+    historyListeners.delete(listener);
+  };
+};
+
+export const triggerHistoryRefresh = () => {
+  historyListeners.forEach((listener) => listener());
+};
 
 export interface PagedResult<T> {
   items: T[];
@@ -13,15 +27,6 @@ export interface PagedResult<T> {
   hasPreviousPage: boolean;
   hasNextPage: boolean;
 }
-
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
 
 export const getHistory = async (params: {
   search?: string;
@@ -47,10 +52,8 @@ export const getHistory = async (params: {
     queryParts.push(`pageSize=${params.pageSize}`);
   }
   const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
-  const response = await fetch(`${API_URL}/api/transactions${query}`, {
+  const response = await apiFetch(`/api/transactions${query}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -68,10 +71,8 @@ export const getHistory = async (params: {
 };
 
 export const getHistoryItem = async (id: string): Promise<HistoryDto> => {
-  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const response = await apiFetch(`/api/transactions/${id}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -107,11 +108,9 @@ export const updateHistoryNote = async (id: string, note: string): Promise<Histo
     TransactionDate: existing.transactionDate,
   };
 
-  const putRes = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const putRes = await apiFetch(`/api/transactions/${id}`, {
     method: "PUT",
-    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!putRes.ok) {
@@ -129,10 +128,8 @@ export const updateHistoryNote = async (id: string, note: string): Promise<Histo
 };
 
 export const deleteHistoryItem = async (id: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const response = await apiFetch(`/api/transactions/${id}`, {
     method: "DELETE",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -169,11 +166,9 @@ export const updateTransactionDebt = async (
     TransactionDate: data.transactionDate,
   };
 
-  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const response = await apiFetch(`/api/transactions/${id}`, {
     method: "PUT",
-    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -204,10 +199,8 @@ export const getHistoryByPartner = async (params: {
     queryParts.push(`pageSize=${params.pageSize}`);
   }
   const query = `?${queryParts.join('&')}`;
-  const response = await fetch(`${API_URL}/api/transactions${query}`, {
+  const response = await apiFetch(`/api/transactions${query}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {

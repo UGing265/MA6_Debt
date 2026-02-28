@@ -42,13 +42,6 @@ export default function WalletDetailPage() {
   const [selectedChildWallet, setSelectedChildWallet] = useState<Wallet | null>(null);
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
-  // Adjust balance modal state (feature not fully implemented)
-  const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
-  const [adjustingChildWallet, setAdjustingChildWallet] = useState<Wallet | null>(null);
-  const [adjustAmount, setAdjustAmount] = useState<string>("");
-  const [inlineErrorAdjust, setInlineErrorAdjust] = useState<string | null>(null);
-  const [isAdjustSubmitting, setIsAdjustSubmitting] = useState(false);
-
   // Load default wallet from localStorage
   React.useEffect(() => {
     const stored = localStorage.getItem("defaultWalletId") || "";
@@ -133,8 +126,6 @@ export default function WalletDetailPage() {
       </div>
     );
   }
-
-  
 
   return (
     <div className="space-y-6">
@@ -224,21 +215,7 @@ export default function WalletDetailPage() {
                 <p className="text-3xl font-bold text-ink-black">
                   {formatVnd(parentWallet.balance || 0)}
                 </p>
-                {parentWallet.parentWalletId ? (
-                  <Button
-                    variant="outline"
-                    className="mt-3 border-note-yellow hover:bg-note-yellow/10"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setIsAdjustBalanceModalOpen(true);
-                    }}
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Adjust Balance
-                  </Button>
-                ) : null}
+                
               </div>
               {parentWallet.description && (
                 <div>
@@ -385,20 +362,6 @@ export default function WalletDetailPage() {
                           aria-label={isDefault ? "Unset as default" : `Set as default for ${child.name}`}
                         >
                             <Star className="h-4 w-4" fill={isDefault ? "currentColor" : "none"} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-ink-black hover:bg-note-yellow/10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            setAdjustingChildWallet(child);
-                            setIsAdjustBalanceModalOpen(true);
-                          }}
-                          aria-label={`Adjust balance for ${child.name}`}
-                        >
-                          <DollarSign className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"

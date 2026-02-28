@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { triggerWalletsRefresh } from "@/features/wallet/hooks/useWallets";
 import { triggerDebtPartnersRefresh } from "@/features/debt/hooks/useDebtPartners";
+import { triggerHistoryRefresh } from "@/features/history/api/history";
 import { createCashAdjustment, quickDeductTransaction } from "../api/transactions";
 import type {
   CashAdjustmentRequest,
@@ -20,6 +21,7 @@ interface SubmitToastOptions {
 const notifyCrossFeatureRefresh = () => {
   triggerWalletsRefresh();
   triggerDebtPartnersRefresh();
+  triggerHistoryRefresh();
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {

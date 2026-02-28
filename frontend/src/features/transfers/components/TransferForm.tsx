@@ -68,6 +68,28 @@ const getWalletLabel = (wallet: WalletDto, includeBalance = false): string => {
   return wallet.name;
 };
 
+const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Allow: backspace, delete, tab, escape, enter, arrows
+  if (
+    e.key === "Backspace" ||
+    e.key === "Delete" ||
+    e.key === "Tab" ||
+    e.key === "Escape" ||
+    e.key === "Enter" ||
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown" ||
+    (e.ctrlKey && (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x"))
+  ) {
+    return;
+  }
+  // Block if not a number
+  if (!/^\d$/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 export const TransferForm: React.FC = () => {
   const [wallets, setWallets] = useState<WalletDto[]>([]);
   const [isWalletsLoading, setIsWalletsLoading] = useState<boolean>(true);
@@ -412,6 +434,7 @@ export const TransferForm: React.FC = () => {
                               const raw = e.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
                               field.onChange(raw === "" ? undefined : Number(raw));
                             }}
+                            onKeyDown={handleNumericKeyDown}
                             className="h-10 pr-16 text-right"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray">

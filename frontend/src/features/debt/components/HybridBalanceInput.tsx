@@ -8,6 +8,32 @@ import { cn, formatVnd } from "@/lib/utils";
 
 export type BalanceDirection = "receivable" | "payable";
 
+const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, allowNegative: boolean = false) => {
+  // Allow: backspace, delete, tab, escape, enter, arrows
+  if (
+    e.key === "Backspace" ||
+    e.key === "Delete" ||
+    e.key === "Tab" ||
+    e.key === "Escape" ||
+    e.key === "Enter" ||
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown" ||
+    (e.ctrlKey && (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x"))
+  ) {
+    return;
+  }
+  // Allow minus sign for negative values in Set mode
+  if (allowNegative && e.key === "-") {
+    return;
+  }
+  // Block if not a number
+  if (!/^\d$/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 interface HybridBalanceInputProps {
   value: number;
   onChange: (value: number) => void;
@@ -255,6 +281,7 @@ export function HybridBalanceInput({
                 placeholder="0"
                 value={amount}
                 onChange={handleAmountChange}
+                onKeyDown={(e) => handleNumericKeyDown(e, false)}
                 disabled={disabled}
                 className={cn(
                   "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow pr-12",
@@ -308,6 +335,7 @@ export function HybridBalanceInput({
               placeholder="0 (positive = receivable, negative = payable)"
               value={directValue}
               onChange={handleDirectValueChange}
+              onKeyDown={(e) => handleNumericKeyDown(e, true)}
               disabled={disabled}
               className={cn(
                 "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow pr-12",

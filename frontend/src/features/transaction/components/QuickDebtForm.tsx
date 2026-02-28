@@ -31,6 +31,28 @@ type GroupedWallets = {
   children: Wallet[];
 };
 
+const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Allow: backspace, delete, tab, escape, enter, arrows
+  if (
+    e.key === "Backspace" ||
+    e.key === "Delete" ||
+    e.key === "Tab" ||
+    e.key === "Escape" ||
+    e.key === "Enter" ||
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown" ||
+    (e.ctrlKey && (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x"))
+  ) {
+    return;
+  }
+  // Block if not a number
+  if (!/^\d$/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 export function QuickDebtForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
@@ -183,6 +205,7 @@ export function QuickDebtForm() {
               const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
               form.setValue("total", raw === "" ? 0 : Number(raw), { shouldValidate: true });
             }}
+            onKeyDown={handleNumericKeyDown}
             className="h-14 w-full rounded-lg border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-semibold text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-amber-500 focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-pencil-gray">
@@ -299,6 +322,7 @@ export function QuickDebtForm() {
               const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
               form.setValue("debtAmount", raw === "" ? 0 : Number(raw), { shouldValidate: true });
             }}
+            onKeyDown={handleNumericKeyDown}
             className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 pr-10 text-sm text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pencil-gray">

@@ -73,6 +73,28 @@ const payerModeLabel = (mode?: PayerMode | null): string => {
   return "-";
 };
 
+const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Allow: backspace, delete, tab, escape, enter, arrows
+  if (
+    e.key === "Backspace" ||
+    e.key === "Delete" ||
+    e.key === "Tab" ||
+    e.key === "Escape" ||
+    e.key === "Enter" ||
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown" ||
+    (e.ctrlKey && (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x"))
+  ) {
+    return;
+  }
+  // Block if not a number
+  if (!/^\d$/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 export const TransactionDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
@@ -633,6 +655,7 @@ export const TransactionDetailPage: React.FC = () => {
                     const raw = e.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
                     setDebtAmount(raw);
                   }}
+                  onKeyDown={handleNumericKeyDown}
                   className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 pr-12 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pencil-gray">vnd</span>
