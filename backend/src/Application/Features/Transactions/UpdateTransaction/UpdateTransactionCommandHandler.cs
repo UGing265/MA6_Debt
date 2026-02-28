@@ -246,5 +246,6 @@ namespace Application.Features.Transactions.UpdateTransaction
                 default:
                     throw new InvalidOperationException($"Cannot rollback partner balance: invalid payer mode '{payerMode}'");
             }
+        }
     }
 }

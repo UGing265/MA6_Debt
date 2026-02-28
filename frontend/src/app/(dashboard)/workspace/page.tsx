@@ -6,7 +6,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeftRight, Clock3, LayoutDashboard, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 
 const tabMap: Record<string, { title: string; description: string; icon: React.ReactNode }> = {
   "quick-deduct": {
@@ -30,7 +29,6 @@ export default function WorkspacePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "";
-  const router = useRouter();
 
   // Hand off to dedicated route for quick deductions to avoid placeholder UI on workspace
   useEffect(() => {

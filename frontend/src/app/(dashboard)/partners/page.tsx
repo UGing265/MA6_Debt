@@ -3,9 +3,23 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star, History } from "lucide-react";
-
-// formatVnd centralized via '@/lib/utils'
-
+import { formatVnd } from "@/lib/utils";
+import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
+import { PartnerNameDialog } from "@/features/debt/components/PartnerNameDialog";
+import { PartnerMoneyDialog } from "@/features/debt/components/PartnerMoneyDialog";
+import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type { DebtPartner } from "@/features/debt/types/debtPartner";
 export default function PartnersPage() {
   const router = useRouter();
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
@@ -37,22 +51,22 @@ export default function PartnersPage() {
     return a.name.localeCompare(b.name);
   });
 
-  const handleCreate = async (data: { name: string; balance: number }) => {
-    await createPartner(data);
+  const handleCreate = async (data: { name: string; balance?: number }) => {
+    await createPartner({ name: data.name, balance: data.balance ?? 0 });
     setIsCreateOpen(false);
   };
 
-  const handleNameSubmit = async (id: string, data: { name: string; balance: number }) => {
+  const handleNameSubmit = async (id: string, data: { name: string; balance?: number }) => {
     const existing = partners.find((p) => p.id === id);
     if (!existing) return;
     await updatePartner(id, { name: data.name, balance: existing.balance });
     setNameDialogPartner(null);
   };
 
-  const handleMoneySubmit = async (id: string, data: { name: string; balance: number }) => {
+  const handleMoneySubmit = async (id: string, data: { name: string; balance?: number }) => {
     const existing = partners.find((p) => p.id === id);
     if (!existing) return;
-    await updatePartner(id, { name: existing.name, balance: data.balance });
+    await updatePartner(id, { name: existing.name, balance: data.balance ?? 0 });
     setMoneyDialogPartner(null);
   };
 

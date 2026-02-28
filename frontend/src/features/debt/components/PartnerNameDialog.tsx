@@ -16,7 +16,7 @@ interface PartnerNameDialogProps {
   open: boolean;
   partner: DebtPartner | null;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (partnerId: string, data: { name: string; balance: number }) => Promise<void>;
+  onSubmit: (partnerId: string, data: { name: string; balance?: number }) => Promise<void>;
 }
 
 export function PartnerNameDialog({
@@ -25,7 +25,7 @@ export function PartnerNameDialog({
   onOpenChange,
   onSubmit,
 }: PartnerNameDialogProps) {
-  const handleSubmit = async (data: { name: string; balance: number }) => {
+  const handleSubmit = async (data: { name: string; balance?: number }) => {
     if (!partner) {
       return;
     }

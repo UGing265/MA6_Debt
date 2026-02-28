@@ -20,7 +20,7 @@ import { cn, formatVnd } from "@/lib/utils";
 
 interface DebtPartnerListProps {
   partners: DebtPartner[];
-  onUpdate: (id: string, data: { name: string; balance: number }) => Promise<void>;
+  onUpdate: (id: string, data: { name: string; balance?: number }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
 
@@ -66,14 +66,14 @@ export function DebtPartnerList({
     }
   };
 
-  const handleNameSubmit = async (id: string, data: { name: string; balance: number }) => {
+  const handleNameSubmit = async (id: string, data: { name: string; balance?: number }) => {
     if (!nameDialogPartner) return;
     await onUpdate(nameDialogPartner.id, { name: data.name, balance: nameDialogPartner.balance });
     setNameDialogPartner(null);
   };
-  const handleMoneySubmit = async (id: string, data: { name: string; balance: number }) => {
+  const handleMoneySubmit = async (id: string, data: { name: string; balance?: number }) => {
     if (!moneyDialogPartner) return;
-    await onUpdate(moneyDialogPartner.id, { name: moneyDialogPartner.name, balance: data.balance });
+    await onUpdate(moneyDialogPartner.id, { name: moneyDialogPartner.name, balance: data.balance ?? 0 });
     setMoneyDialogPartner(null);
   };
 

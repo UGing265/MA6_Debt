@@ -35,12 +35,18 @@ import { getDebtPartners } from "@/features/debt/api/debtPartners";
 import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
 import { formatVnd } from "@/lib/utils";
 
-const extractGeneralError = (e: any): string => {
+const extractGeneralError = (e: unknown): string => {
   if (!e) return "An error occurred. Please try again.";
   if (typeof e === "string") return e;
-  if (typeof e.general === "string" && e.general.trim().length > 0) return e.general;
-  if (typeof e.message === "string" && e.message.trim().length > 0) return e.message;
-  if (typeof e.raw?.message === "string" && e.raw.message.trim().length > 0) return e.raw.message;
+  if (typeof e === "object" && e !== null) {
+    const obj = e as Record<string, unknown>;
+    if (typeof obj.general === "string" && obj.general.trim().length > 0) return obj.general;
+    if (typeof obj.message === "string" && obj.message.trim().length > 0) return obj.message;
+    if (typeof obj.raw === "object" && obj.raw !== null) {
+      const raw = obj.raw as Record<string, unknown>;
+      if (typeof raw.message === "string" && raw.message.trim().length > 0) return raw.message;
+    }
+  }
   return "An error occurred. Please try again.";
 };
 
@@ -62,8 +68,8 @@ const formatDateTime = (dateStr: string): string => {
 };
 
 const payerModeLabel = (mode?: PayerMode | null): string => {
-  if (mode === PayerMode.ToiTra) return "Tôi trả";
-  if (mode === PayerMode.PartnerTra) return "Partner trả";
+  if (mode === PayerMode.ToiTra) return "Toi tra";
+  if (mode === PayerMode.PartnerTra) return "Partner tra";
   return "-";
 };
 
@@ -96,6 +102,7 @@ export const TransactionDetailPage: React.FC = () => {
       getDebtPartners().then(setPartners).catch(() => setPartners([]));
     }
   }, [isDebtOpen]);
+
   const fetchTransaction = React.useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -103,15 +110,15 @@ export const TransactionDetailPage: React.FC = () => {
       const data = await getHistoryItem(transactionId);
       setTransaction(data);
       setNoteDraft(data.note ?? "");
-      // Set debt form values for editing
       setDebtPartnerId(data.partnerId ?? "");
       setDebtPayerMode(data.payerMode ?? PayerMode.ToiTra);
       setDebtAmount(data.debtAmount != null ? String(data.debtAmount) : "");
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(extractGeneralError(e));
     } finally {
       setIsLoading(false);
     }
+  }, [transactionId]);
 
   React.useEffect(() => {
     fetchTransaction();
@@ -125,7 +132,7 @@ export const TransactionDetailPage: React.FC = () => {
       toast.success("Note updated");
       setIsEditOpen(false);
       await fetchTransaction();
-    } catch (e: any) {
+    } catch (e: unknown) {
       const msg = extractGeneralError(e);
       if (isLockLikeMessage(msg)) {
         toast.error("This transaction is locked and can't be changed.");
@@ -156,7 +163,7 @@ export const TransactionDetailPage: React.FC = () => {
       toast.success("Debt info updated");
       setIsDebtOpen(false);
       await fetchTransaction();
-    } catch (e: any) {
+    } catch (e: unknown) {
       const msg = extractGeneralError(e);
       if (isLockLikeMessage(msg)) {
         toast.error("This transaction is locked and can't be changed.");
@@ -176,7 +183,7 @@ export const TransactionDetailPage: React.FC = () => {
       await deleteHistoryItem(transaction.id);
       toast.success("Transaction deleted");
       router.push("/history");
-    } catch (e: any) {
+    } catch (e: unknown) {
       const msg = extractGeneralError(e);
       if (isLockLikeMessage(msg)) {
         toast.error("This transaction is locked and can't be changed.");
@@ -341,6 +348,7 @@ export const TransactionDetailPage: React.FC = () => {
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

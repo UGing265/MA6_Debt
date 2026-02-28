@@ -12,6 +12,7 @@ import { useCashAdjustmentSubmit } from "../hooks/useTransactionSubmit";
 import { AdjustmentSchema, mapAdjustmentToPayload } from "../model";
 import { AdjustmentDirection } from "../types/transaction";
 import { formatVnd } from "@/lib/utils";
+import type { Wallet } from "@/features/wallet/types/wallet";
 
 type AdjustmentFormInput = z.infer<typeof AdjustmentSchema>;
 
@@ -23,8 +24,8 @@ const defaultValues: AdjustmentFormInput = {
 };
 
 type GroupedWallets = {
-  parent: { id: string; name: string; balance: number } | null;
-  children: { id: string; name: string; balance: number; parentWalletId: string }[];
+  parent: Wallet | null;
+  children: Wallet[];
 };
 
 export const AdjustmentForm = () => {

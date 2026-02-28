@@ -34,7 +34,7 @@ const DebtPartnerFormSchemaDefault = z.object({
     .string()
     .min(1, "Partner name is required")
     .max(100, "Name must be less than 100 characters"),
-  balance: z.number(),
+  balance: z.number().optional(),
 });
 
 interface DebtPartnerFormProps {
@@ -145,7 +145,7 @@ export function DebtPartnerForm({
                 </FormLabel>
                 <FormControl>
                   <HybridBalanceInput
-                    value={field.value}
+                    value={field.value ?? 0}
                     onChange={field.onChange}
                     disabled={isLoading}
                     error={form.formState.errors.balance?.message}

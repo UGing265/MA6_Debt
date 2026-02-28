@@ -38,13 +38,13 @@ export function DebtPartnersTabContent() {
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const handleCreate = async (data: { name: string; balance: number }) => {
-    await createPartner(data);
+  const handleCreate = async (data: { name: string; balance?: number }) => {
+    await createPartner({ name: data.name, balance: data.balance ?? 0 });
     setIsCreateDialogOpen(false);
   };
 
-  const handleUpdate = async (id: string, data: { name: string; balance: number }) => {
-    await updatePartner(id, data);
+  const handleUpdate = async (id: string, data: { name: string; balance?: number }) => {
+    await updatePartner(id, { name: data.name, balance: data.balance ?? 0 });
   };
 
   const handleDelete = async (id: string) => {

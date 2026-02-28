@@ -4,65 +4,31 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Zap, Tag } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { useQuickDeductSubmit } from "../hooks/useTransactionSubmit";
-import {
-  QuickDebtSchema,
-  mapQuickDebtToPayload,
-  mapQuickDebtToPayloadOff,
-} from "../model";
+import { mapQuickDebtToPayload } from "../model";
 import { PayerMode } from "../types/transaction";
 import { formatVnd } from "@/lib/utils";
+import type { Wallet } from "@/features/wallet/types/wallet";
 
-const quickDebtFormSchema = z
-  .object({
-    walletId: z.string().min(1, "Please select a wallet"),
-    total: z.preprocess(
-      (value) => (value === "" || value == null ? undefined : Number(value)),
-      z.number({ invalid_type_error: "Please enter amount" }).positive("Amount must be greater than 0")
-    ),
-    debtTag: z.boolean().default(false),
-    payerMode: z.nativeEnum(PayerMode).optional(),
-    partnerId: z.string().optional(),
-    debtAmount: z.preprocess(
-      (value) => (value === "" || value == null ? undefined : Number(value)),
-      z.number().positive("Debt amount must be greater than 0").optional()
-    ),
-    note: z.string().trim().max(300, "Note max 300 characters").optional(),
-  })
-  .superRefine((data, ctx) => {
-    const modelValidation = QuickDebtSchema.safeParse(data);
-    if (!modelValidation.success) {
-      modelValidation.error.issues.forEach((issue) => {
-        ctx.addIssue(issue);
-      });
-    }
-
-    if (data.debtTag && data.payerMode === undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please select payer",
-        path: ["payerMode"],
-      });
-    }
-  });
+const quickDebtFormSchema = z.object({
+  walletId: z.string().min(1, "Please select a wallet"),
+  total: z.number().positive("Amount must be greater than 0"),
+  payerMode: z.nativeEnum(PayerMode),
+  partnerId: z.string().min(1, "Please select a partner"),
+  debtAmount: z.number().min(0, "Debt amount cannot be negative"),
+  note: z.string().trim().max(300, "Note max 300 characters").optional(),
+});
 
 type QuickDebtFormValues = z.infer<typeof quickDebtFormSchema>;
 
-const initialValues: Partial<QuickDebtFormValues> = {
-  walletId: "",
-  debtTag: false,
-  payerMode: PayerMode.ToiTra,
-  note: "",
-};
-
 type GroupedWallets = {
-  parent: { id: string; name: string; balance: number } | null;
-  children: { id: string; name: string; balance: number; parentWalletId: string }[];
+  parent: Wallet | null;
+  children: Wallet[];
 };
 
 export function QuickDebtForm() {
@@ -92,21 +58,34 @@ export function QuickDebtForm() {
     return groups;
   }, [wallets]);
 
+  const getDefaultPartnerId = (): string => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("defaultPartnerId") || "";
+  };
+
   const form = useForm<QuickDebtFormValues>({
     resolver: zodResolver(quickDebtFormSchema),
-    defaultValues: initialValues,
+    defaultValues: {
+      walletId: "",
+      total: 0,
+      payerMode: PayerMode.ToiTra,
+      partnerId: getDefaultPartnerId(),
+      debtAmount: 0,
+      note: "",
+    },
   });
 
-  const debtTag = form.watch("debtTag") ?? false;
   const totalValue = form.watch("total");
+  const debtAmountValue = form.watch("debtAmount");
+  const payerMode = form.watch("payerMode");
 
+  // Auto-select default partner on mount
   useEffect(() => {
-    if (!debtTag) {
-      form.setValue("payerMode", PayerMode.ToiTra, { shouldValidate: true });
-      form.setValue("partnerId", undefined, { shouldValidate: true });
-      form.setValue("debtAmount", undefined, { shouldValidate: true });
+    const defaultPartnerId = getDefaultPartnerId();
+    if (defaultPartnerId && !form.getValues("partnerId")) {
+      form.setValue("partnerId", defaultPartnerId);
     }
-  }, [debtTag, form]);
+  }, [form]);
 
   const onSubmit = async (values: QuickDebtFormValues) => {
     if (isSubmitting) {
@@ -117,27 +96,36 @@ export function QuickDebtForm() {
     setNotificationMessage(null);
 
     try {
+      // Partner is required. Only send debt info if debtAmount > 0
+      const hasDebt = values.debtAmount > 0;
+
       const input = {
         walletId: values.walletId,
         total: values.total,
-        debtTag: values.debtTag,
-        payerMode: values.debtTag ? values.payerMode : undefined,
-        partnerId: values.debtTag ? values.partnerId : undefined,
-        debtAmount: values.debtTag ? values.debtAmount : undefined,
+        debtTag: hasDebt,
+        payerMode: values.payerMode,
+        partnerId: hasDebt ? values.partnerId : undefined,
+        debtAmount: hasDebt ? values.debtAmount : undefined,
       };
 
-      const mappedPayload = values.debtTag
-        ? mapQuickDebtToPayload(input)
-        : mapQuickDeductToPayloadOff(input);
+      const mappedPayload = mapQuickDebtToPayload(input);
 
       const response = await quickDeductSubmit.mutateAsync({
         ...mappedPayload,
+        payerMode: mappedPayload.payerMode ?? PayerMode.ToiTra,
         note: values.note?.trim() || undefined,
       });
 
       toast.success("Transaction recorded");
       setNotificationMessage(response.notification?.message ?? null);
-      form.reset(initialValues);
+      form.reset({
+        walletId: "",
+        total: 0,
+        payerMode: PayerMode.ToiTra,
+        partnerId: getDefaultPartnerId(),
+        debtAmount: 0,
+        note: "",
+      });
     } catch (error: unknown) {
       const parsedError = parseErrorResponse(error);
       const normalizeFieldKey = (field: string) => field.replace(/[^a-z0-9]/gi, "").toLowerCase();
@@ -178,6 +166,7 @@ export function QuickDebtForm() {
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      {/* Total Amount */}
       <div className="space-y-1.5">
         <label className="block text-center text-sm font-medium text-ink-black">
           Total
@@ -189,10 +178,10 @@ export function QuickDebtForm() {
             inputMode="numeric"
             placeholder="0"
             type="text"
-            value={totalValue !== undefined ? totalValue.toLocaleString("en-US") : ""}
+            value={totalValue ? Number(totalValue).toLocaleString("en-US") : ""}
             onChange={(event) => {
               const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
-              form.setValue("total", raw === "" ? undefined : Number(raw), { shouldValidate: true });
+              form.setValue("total", raw === "" ? 0 : Number(raw), { shouldValidate: true });
             }}
             className="h-14 w-full rounded-lg border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-semibold text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-amber-500 focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
           />
@@ -205,6 +194,7 @@ export function QuickDebtForm() {
         )}
       </div>
 
+      {/* Child Wallet */}
       <div className="space-y-1.5">
         <label className="block text-left text-xs font-medium text-pencil-gray">
           Child Wallet
@@ -235,6 +225,92 @@ export function QuickDebtForm() {
         )}
       </div>
 
+      {/* Partner (Required) */}
+      <div className="space-y-1.5">
+        <label className="block text-left text-xs font-medium text-pencil-gray">
+          Partner
+        </label>
+        <select
+          data-testid="qd-partner"
+          disabled={isSubmitting || isPartnersLoading}
+          value={form.watch("partnerId") ?? ""}
+          onChange={(event) => form.setValue("partnerId", event.target.value, { shouldValidate: true })}
+          className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">{isPartnersLoading ? "Loading..." : "Select partner"}</option>
+          {partners.map((partner) => (
+            <option key={partner.id} value={partner.id}>
+              {partner.name} ({formatVnd(partner.balance)})
+            </option>
+          ))}
+        </select>
+        {form.formState.errors.partnerId && (
+          <p className="text-xs text-red-500">{form.formState.errors.partnerId.message}</p>
+        )}
+      </div>
+
+      {/* Payer Mode (Always visible) */}
+      <div className="space-y-1.5">
+        <label className="block text-left text-xs font-medium text-pencil-gray">
+          Who Paid?
+        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => form.setValue("payerMode", PayerMode.ToiTra, { shouldValidate: true })}
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              payerMode === PayerMode.ToiTra
+                ? "bg-note-yellow text-ink-black hover:bg-amber-400"
+                : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
+            }`}
+          >
+            I Pay
+          </button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => form.setValue("payerMode", PayerMode.PartnerTra, { shouldValidate: true })}
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              payerMode === PayerMode.PartnerTra
+                ? "bg-note-yellow text-ink-black hover:bg-amber-400"
+                : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
+            }`}
+          >
+            Partner Pays
+          </button>
+        </div>
+      </div>
+
+      {/* Debt Amount (optional, default 0) */}
+      <div className="space-y-1.5">
+        <label className="block text-left text-xs font-medium text-pencil-gray">
+          Debt Amount
+        </label>
+        <div className="relative">
+          <input
+            data-testid="qd-debt-amount"
+            disabled={isSubmitting}
+            inputMode="numeric"
+            placeholder="0"
+            type="text"
+            value={debtAmountValue ? debtAmountValue.toLocaleString("en-US") : ""}
+            onChange={(event) => {
+              const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
+              form.setValue("debtAmount", raw === "" ? 0 : Number(raw), { shouldValidate: true });
+            }}
+            className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 pr-10 text-sm text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pencil-gray">
+            vnd
+          </span>
+        </div>
+        {form.formState.errors.debtAmount && (
+          <p className="text-xs text-red-500">{form.formState.errors.debtAmount.message}</p>
+        )}
+      </div>
+
+      {/* Note */}
       <div className="space-y-1.5">
         <label className="block text-left text-xs font-medium text-pencil-gray">
           Note
@@ -251,117 +327,14 @@ export function QuickDebtForm() {
         )}
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={isSubmitting}
-          onClick={() => form.setValue("payerMode", PayerMode.ToiTra, { shouldValidate: true })}
-          className={`h-9 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-            form.watch("payerMode") === PayerMode.ToiTra
-              ? "bg-note-yellow text-ink-black hover:bg-amber-400"
-              : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-          }`}
-        >
-          I Pay
-        </button>
-        <button
-          type="button"
-          disabled={isSubmitting}
-          onClick={() => form.setValue("payerMode", PayerMode.PartnerTra, { shouldValidate: true })}
-          className={`h-9 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-            form.watch("payerMode") === PayerMode.PartnerTra
-              ? "bg-note-yellow text-ink-black hover:bg-amber-400"
-              : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-          }`}
-        >
-          Partner Pays
-        </button>
-      </div>
-
-      <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2.5">
-        <div className="flex items-center gap-2">
-          <Tag className="h-4 w-4 text-pencil-gray" />
-          <span className="text-xs text-pencil-gray">Tag as debt</span>
-        </div>
-        <button
-          type="button"
-          data-testid="qd-debt-toggle"
-          role="switch"
-          aria-checked={debtTag}
-          disabled={isSubmitting}
-          onClick={() => form.setValue("debtTag", !debtTag, { shouldValidate: true })}
-          className={`relative h-5 w-9 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-            debtTag ? "bg-note-yellow" : "bg-gray-300"
-          }`}
-        >
-          <span
-            className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-              debtTag ? "translate-x-4" : "translate-x-0"
-            }`}
-          />
-        </button>
-      </div>
-
-      {debtTag ? (
-        <div className="space-y-3 rounded-lg border border-note-yellow/30 bg-gray-50 p-3">
-          <div className="space-y-1.5">
-            <label className="block text-left text-xs font-medium text-pencil-gray">
-              Debt Partner
-            </label>
-            <select
-              data-testid="qd-partner"
-              disabled={isSubmitting || isPartnersLoading}
-              value={form.watch("partnerId") ?? ""}
-              onChange={(event) => form.setValue("partnerId", event.target.value, { shouldValidate: true })}
-              className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="">{isPartnersLoading ? "Loading..." : "Select partner"}</option>
-              {partners.map((partner) => (
-                <option key={partner.id} value={partner.id}>
-                  {partner.name} ({formatVnd(partner.balance)})
-                </option>
-              ))}
-            </select>
-            {form.formState.errors.partnerId && (
-              <p className="text-xs text-red-500">{form.formState.errors.partnerId.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-left text-xs font-medium text-pencil-gray">
-              Debt Amount
-            </label>
-            <div className="relative">
-              <input
-                data-testid="qd-debt-amount"
-                disabled={isSubmitting}
-                inputMode="numeric"
-                placeholder="0"
-                type="text"
-                value={form.watch("debtAmount") !== undefined ? form.watch("debtAmount")?.toLocaleString("en-US") : ""}
-                onChange={(event) => {
-                  const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
-                  form.setValue("debtAmount", raw === "" ? undefined : Number(raw), { shouldValidate: true });
-                }}
-                className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 pr-10 text-sm text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pencil-gray">
-                vnd
-              </span>
-            </div>
-            {form.formState.errors.debtAmount && (
-              <p className="text-xs text-red-500">{form.formState.errors.debtAmount.message}</p>
-            )}
-          </div>
-        </div>
-      ) : null}
-
+      {/* Notification */}
       {notificationMessage ? (
         <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
           {notificationMessage}
         </div>
       ) : null}
 
+      {/* Submit Button */}
       <button
         data-testid="qd-submit"
         disabled={isSubmitting || isWalletsLoading || childWallets.length === 0}

@@ -31,10 +31,6 @@ type ParsedLikeError = {
   fields?: Record<string, string[]>;
 };
 
-type TransferFormInput = Omit<TransferFormValues, "amount"> & {
-  amount?: number;
-};
-
 type GroupedWallets = {
   parent: WalletDto | null;
   children: WalletDto[];
@@ -79,12 +75,12 @@ export const TransferForm: React.FC = () => {
 
   const isDisabled = isWalletsLoading || isSubmitting;
 
-  const form = useForm<TransferFormInput>({
+  const form = useForm<TransferFormValues>({
     resolver: zodResolver(TransferFormSchema),
     defaultValues: {
       fromWalletId: "",
       toWalletId: "",
-      amount: undefined,
+      amount: Number.NaN,
       sourceBalance: 0,
       note: "",
     },
@@ -181,20 +177,20 @@ export const TransferForm: React.FC = () => {
   );
 
   const onSubmit = useCallback(
-    async (values: TransferFormInput) => {
+    async (values: TransferFormValues) => {
       setIsSubmitting(true);
       try {
         await createTransfer({
           fromWalletId: values.fromWalletId,
           toWalletId: values.toWalletId,
-          amount: values.amount!,
+          amount: values.amount,
         });
 
         toast.success("Transfer successful");
         form.reset({
           fromWalletId: "",
           toWalletId: "",
-          amount: undefined,
+          amount: Number.NaN,
           sourceBalance: 0,
           note: "",
         });

@@ -41,12 +41,13 @@ export default function WalletDetailPage() {
   const [editingChildWallet, setEditingChildWallet] = useState<Wallet | null>(null);
   const [selectedChildWallet, setSelectedChildWallet] = useState<Wallet | null>(null);
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
-  const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
-  const [adjustAmount, setAdjustAmount] = useState("");
-  const [isAdjustSubmitting, setIsAdjustSubmitting] = useState(false);
-  const [inlineErrorAdjust, setInlineErrorAdjust] = useState<string | null>(null);
-  const [adjustingChildWallet, setAdjustingChildWallet] = useState<Wallet | null>(null);
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
+  // Adjust balance modal state (feature not fully implemented)
+  const [isAdjustBalanceModalOpen, setIsAdjustBalanceModalOpen] = useState(false);
+  const [adjustingChildWallet, setAdjustingChildWallet] = useState<Wallet | null>(null);
+  const [adjustAmount, setAdjustAmount] = useState<string>("");
+  const [inlineErrorAdjust, setInlineErrorAdjust] = useState<string | null>(null);
+  const [isAdjustSubmitting, setIsAdjustSubmitting] = useState(false);
 
   // Load default wallet from localStorage
   React.useEffect(() => {
@@ -133,20 +134,7 @@ export default function WalletDetailPage() {
     );
   }
 
-  // Local tolerant money parser for wallet quick-deduct inputs
-  function parseMoneyInputFromWallet(input: string): { valid: boolean; value: number } {
-    const raw = input.trim();
-    if (raw === "") return { valid: true, value: 0 };
-    let s = raw.replace(/\s*vnd$/i, "");
-    const hasMinus = /^-/.test(s);
-    if (hasMinus) return { valid: false, value: 0 };
-    s = s.replace(/[,.\s]/g, "");
-    // try parse as integer
-    if (s.length === 0) return { valid: false, value: 0 };
-    const v = parseInt(s, 10);
-    if (isNaN(v)) return { valid: false, value: 0 };
-    return { valid: true, value: v };
-  }
+  
 
   return (
     <div className="space-y-6">
@@ -304,116 +292,6 @@ export default function WalletDetailPage() {
               onCancel={() => setIsEditParentModalOpen(false)}
             />
           ) : null}
-        </DialogContent>
-      </Dialog>
-
-      {/* Adjust Balance Dialog (Mock for Quick Deduct feature) */}
-      <Dialog
-        open={isAdjustBalanceModalOpen}
-        onOpenChange={(open) => {
-          setIsAdjustBalanceModalOpen(open);
-          if (!open) setAdjustAmount("");
-        }}
-      >
-        <DialogContent>
-          <DialogClose
-            onClose={() => {
-              setIsAdjustBalanceModalOpen(false);
-              setAdjustAmount("");
-            }}
-          />
-          <DialogHeader>
-            <DialogTitle>
-              Adjust Sub-wallet Balance
-            </DialogTitle>
-            <DialogDescription>
-              Quickly add or subtract amount from &quot;{adjustingChildWallet?.name || parentWallet?.name}&quot;. 
-              (This is a preview for Quick Deduct feature)
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-5 gap-2">
-              {[100000, 500000, 1000000, 2000000, 5000000].map((amount) => (
-                <Button
-                  key={amount}
-                  variant="outline"
-                  className="text-xs border-note-yellow hover:bg-note-yellow/20"
-                  onClick={() => {
-                    const amountStr = amount.toString();
-                    setAdjustAmount(amountStr.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                  }}
-                >
-                  {amount >= 1000000 ? `${(amount / 1000000).toFixed(0)}M` : `${(amount / 1000).toFixed(0)}k`}
-                </Button>
-              ))}
-            </div>
-              <div className="relative">
-              <input
-                aria-label="Adjust amount"
-                type="text"
-                placeholder="Or enter custom amount"
-                value={adjustAmount}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  const cleaned = v.replace(/[^0-9.-]/g, "");
-                  
-                  // Format with commas
-                  const hasMinus = cleaned.startsWith("-");
-                  const sign = hasMinus ? "-" : "";
-                  const digits = cleaned.replace(/-/g, "");
-                  
-                  setAdjustAmount(sign + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                  const parsed = parseMoneyInputFromWallet(cleaned);
-                  if (cleaned.trim() === "" || parsed.valid) {
-                    setInlineErrorAdjust(null);
-                  } else {
-                    setInlineErrorAdjust("Invalid amount format");
-                  }
-                }}
-                className="w-full pl-3 pr-12 py-2 border border-note-yellow/30 rounded-lg focus:outline-none focus:border-note-yellow"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray select-none" aria-hidden="true" >
-                vnd
-              </span>
-            </div>
-            {inlineErrorAdjust ? (
-              <p className="text-sm text-red-500">{inlineErrorAdjust}</p>
-            ) : null}
-            {/* Preview block removed per T5 plan */}
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setIsAdjustBalanceModalOpen(false);
-                  setAdjustAmount("");
-                  setAdjustingChildWallet(null);
-                  setInlineErrorAdjust(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-                disabled={!adjustAmount.trim() || !!inlineErrorAdjust || isAdjustSubmitting}
-                onClick={() => {
-                  if (!adjustAmount.trim() || !!inlineErrorAdjust) return;
-                  setIsAdjustSubmitting(true);
-                  // Mock async submit
-                  setTimeout(() => {
-                    console.log(`[MOCK] Adjusting ${adjustingChildWallet?.name || parentWallet?.name} by ${adjustAmount} vnd`);
-                    setIsAdjustBalanceModalOpen(false);
-                    setAdjustAmount("");
-                    setAdjustingChildWallet(null);
-                    setInlineErrorAdjust(null);
-                    setIsAdjustSubmitting(false);
-                  }, 300);
-                }}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
 
