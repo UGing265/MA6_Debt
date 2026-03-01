@@ -4,7 +4,7 @@ import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
-import { HistoryDto } from "@/features/history/types/history";
+import { HistoryDto, PayerMode } from "@/features/history/types/history";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
@@ -46,7 +46,24 @@ const formatHistoryDate = (dateInput: string): string => {
   if (Number.isNaN(date.getTime())) {
     return "-";
   }
-  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const getPayerModeTag = (item: HistoryDto): string | null => {
+  if (!item.partnerName) {
+    return null;
+  }
+  if (item.payerMode === PayerMode.ToiTra) {
+    return "Toi tra";
+  }
+  if (item.payerMode === PayerMode.PartnerTra) {
+    return "Partner tra";
+  }
+  return null;
 };
 
 export default function WalletDashboardPage() {
@@ -333,11 +350,12 @@ export default function WalletDashboardPage() {
                   ? `${item.walletName ?? "Unknown Wallet"} (${item.parentWalletName})`
                   : item.walletName ?? "Unknown Wallet";
                 const dateLabel = formatHistoryDate(item.transactionDate || item.createdAt);
+                const payerModeTag = getPayerModeTag(item);
 
                 return (
                   <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-2">
                     <div>
-                      <p className="font-medium text-ink-black">{title}</p>
+                      <p className="text-base font-semibold text-ink-black">{title}</p>
                       <p className="text-xs text-pencil-gray">{walletLabel} - {dateLabel}</p>
                     </div>
                     <div className="text-right">
@@ -345,7 +363,16 @@ export default function WalletDashboardPage() {
                         {positive ? "+" : ""}
                         {formatVnd(item.amount)}
                       </p>
-                      {item.partnerName ? <p className="text-xs text-pencil-gray">{item.partnerName}</p> : null}
+                      {item.partnerName ? (
+                        <div className="mt-0.5 flex items-center justify-end gap-1">
+                          <p className="text-xs text-pencil-gray">{item.partnerName}</p>
+                          {payerModeTag ? (
+                            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[11px] font-medium text-purple-700">
+                              {payerModeTag}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 );

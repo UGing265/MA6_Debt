@@ -140,6 +140,12 @@ export const TransferForm: React.FC = () => {
     return wallets.reduce((sum, w) => sum + w.balance, 0);
   }, [wallets]);
 
+  // Calculate parent wallet total (parent balance + sum of children balances)
+  const getParentTotalBalance = useCallback((parent: WalletDto, children: WalletDto[]): number => {
+    const childrenSum = children.reduce((sum, child) => sum + child.balance, 0);
+    return parent.balance + childrenSum;
+  }, []);
+
   // Load wallets function - reusable for refresh after transfer
   const loadWallets = useCallback(async () => {
     setIsWalletsLoading(true);
@@ -269,7 +275,7 @@ export const TransferForm: React.FC = () => {
                           </span>
                         </div>
                         <span className="text-sm font-semibold text-ink-black">
-                          {formatBalance(group.parent.balance)}
+                          {formatBalance(getParentTotalBalance(group.parent, group.children))}
                         </span>
                       </div>
                     )}

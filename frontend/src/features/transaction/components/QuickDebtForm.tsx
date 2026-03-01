@@ -118,15 +118,16 @@ export function QuickDebtForm() {
     setNotificationMessage(null);
 
     try {
-      // Partner is required. Only send debt info if debtAmount > 0
+      // Partner is required for PartnerTra mode OR when debtAmount > 0
       const hasDebt = values.debtAmount > 0;
+      const needsPartner = hasDebt || values.payerMode === PayerMode.PartnerTra;
 
       const input = {
         walletId: values.walletId,
         total: values.total,
         debtTag: hasDebt,
         payerMode: values.payerMode,
-        partnerId: hasDebt ? values.partnerId : undefined,
+        partnerId: needsPartner ? values.partnerId : undefined,
         debtAmount: hasDebt ? values.debtAmount : undefined,
       };
 
@@ -281,7 +282,7 @@ export function QuickDebtForm() {
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={() => form.setValue("payerMode", PayerMode.ToiTra, { shouldValidate: true })}
+            onClick={() => form.setValue("payerMode", PayerMode.ToiTra)}
             className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               payerMode === PayerMode.ToiTra
                 ? "bg-note-yellow text-ink-black hover:bg-amber-400"
@@ -293,7 +294,7 @@ export function QuickDebtForm() {
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={() => form.setValue("payerMode", PayerMode.PartnerTra, { shouldValidate: true })}
+            onClick={() => form.setValue("payerMode", PayerMode.PartnerTra)}
             className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               payerMode === PayerMode.PartnerTra
                 ? "bg-note-yellow text-ink-black hover:bg-amber-400"

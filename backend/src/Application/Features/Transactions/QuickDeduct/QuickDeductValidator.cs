@@ -62,12 +62,6 @@ namespace Application.Features.Transactions.QuickDeduct
             RuleFor(x => x.DebtAmount)
                 .Must(debtAmount => debtAmount == null || debtAmount >= 0)
                 .WithMessage("DebtAmount cannot be negative");
-
-            // Rule: Reject no-effect state (PartnerTra with no debt impact)
-            RuleFor(x => x)
-                .Must(cmd => cmd.DebtAmount.HasValue && cmd.DebtAmount.Value >= 0)
-                .When(x => x.PayerMode == PayerMode.PartnerTra)
-                .WithMessage("PartnerTra mode requires a valid DebtAmount to track the split");
         }
 
         private bool HasDefaultPartner(QuickDeductCommand cmd)

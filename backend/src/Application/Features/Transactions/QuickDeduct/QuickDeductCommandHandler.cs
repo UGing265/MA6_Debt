@@ -27,9 +27,10 @@ namespace Application.Features.Transactions.QuickDeduct
                 throw new NotFoundException("DefaultWallet", "User has no default wallet configured");
             }
 
-            // Resolve partner ID (use default if not provided and debt amount is specified)
+            // Resolve partner ID (use default if not provided and debt amount is specified OR PartnerTra mode)
             Guid? partnerId = request.PartnerId;
-            if (request.DebtAmount.HasValue && request.DebtAmount.Value > 0 && !partnerId.HasValue)
+            bool needsPartner = (request.DebtAmount.HasValue && request.DebtAmount.Value > 0) || request.PayerMode == PayerMode.PartnerTra;
+            if (needsPartner && !partnerId.HasValue)
             {
                 partnerId = await GetDefaultPartnerId(request.UserId, cancellationToken);
             }
@@ -78,12 +79,6 @@ namespace Application.Features.Transactions.QuickDeduct
             if (request.DebtAmount.HasValue && request.DebtAmount.Value > request.Total)
             {
                 throw new InvalidOperationException("DebtAmount cannot exceed Total. This should have been caught by validation.");
-            }
-
-            // Invariant 4: PartnerTra requires valid DebtAmount for split tracking
-            if (request.PayerMode == PayerMode.PartnerTra && (!request.DebtAmount.HasValue || request.DebtAmount.Value < 0))
-            {
-                throw new InvalidOperationException("PartnerTra mode requires a valid DebtAmount to track the bill split.");
             }
 
             // Calculate amounts based on payer mode (US-03.3 formulas)
