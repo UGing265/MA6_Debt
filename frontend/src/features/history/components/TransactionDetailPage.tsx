@@ -426,7 +426,11 @@ export const TransactionDetailPage: React.FC = () => {
                   )}
                   {transaction.debtAmount != null && transaction.debtAmount !== 0 ? (
                     <div className="p-2 rounded-lg bg-purple-100 border border-purple-200">
-                      <p className="text-xs text-purple-600">Debt Amount</p>
+                      <p className="text-xs text-purple-600">
+                        {transaction.payerMode === PayerMode.ToiTra
+                          ? `${transaction.partnerName} owes you`
+                          : `You owe ${transaction.partnerName}`}
+                      </p>
                       <p className="text-lg font-bold text-purple-700">{formatVnd(transaction.debtAmount)}</p>
                     </div>
                   ) : (

@@ -6,9 +6,10 @@ import { HistoryList } from "./HistoryList";
 import { getHistory, PagedResult, subscribeToHistoryRefresh } from "../api/history";
 import { HistoryDto } from "../types/history";
 import { useHistoryQueryState } from "../hooks/useHistoryQueryState";
+import { getHistoryKind, HistoryKindTag } from "../utils/historyKind";
 
 export const HistoryPageContainer: React.FC = () => {
-  const { currentSearch, currentWalletId, currentPartnerId, currentPage, currentPageSize } = useHistoryQueryState();
+  const { currentSearch, currentWalletId, currentPartnerId, currentKind, currentPage, currentPageSize } = useHistoryQueryState();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   const [items, setItems] = React.useState<HistoryDto[]>([]);
@@ -29,24 +30,36 @@ export const HistoryPageContainer: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      // When tag filter is active, fetch more data to filter from
+      // Use a larger page size to get more results
+      const effectivePageSize = currentKind ? 100 : currentPageSize;
+
       const data: PagedResult<HistoryDto> = await getHistory({
         search: currentSearch,
         walletId: currentWalletId || null,
         partnerId: currentPartnerId || null,
-        page: currentPage,
-        pageSize: currentPageSize,
+        page: currentKind ? 1 : currentPage, // Reset to page 1 when filtering
+        pageSize: effectivePageSize,
       });
       if (mountedRef.current) {
         // Sort items based on sortOrder
-        const sortedItems = [...(data.items ?? [])].sort((a, b) => {
+        let processedItems = [...(data.items ?? [])].sort((a, b) => {
           const dateA = new Date(a.transactionDate ?? a.createdAt).getTime();
           const dateB = new Date(b.transactionDate ?? b.createdAt).getTime();
           return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
         });
-        
-        setItems(sortedItems);
-        setTotalCount(data.totalCount ?? 0);
-        setTotalPages(data.totalPages ?? 0);
+
+        // Apply client-side kind filter
+        if (currentKind) {
+          processedItems = processedItems.filter((item) => {
+            const kind = getHistoryKind(item);
+            return kind === currentKind;
+          });
+        }
+
+        setItems(processedItems);
+        setTotalCount(currentKind ? processedItems.length : (data.totalCount ?? 0));
+        setTotalPages(currentKind ? 1 : (data.totalPages ?? 0));
       }
     } catch (e: any) {
       const msg =
@@ -59,7 +72,7 @@ export const HistoryPageContainer: React.FC = () => {
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [currentSearch, currentWalletId, currentPartnerId, currentPage, currentPageSize, sortOrder]);
+  }, [currentSearch, currentWalletId, currentPartnerId, currentKind, currentPage, currentPageSize, sortOrder]);
 
   // Fetch history when filters change
   React.useEffect(() => {
@@ -87,7 +100,7 @@ export const HistoryPageContainer: React.FC = () => {
         error={error}
         totalCount={totalCount}
         totalPages={totalPages}
-        currentPage={currentPage}
+        currentPage={currentKind ? 1 : currentPage}
         currentPageSize={currentPageSize}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}

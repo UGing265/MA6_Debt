@@ -130,6 +130,7 @@ export default function DashboardLayout({
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab");
   const [displayName, setDisplayName] = React.useState("User");
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   React.useEffect(() => {
     const token = getAuthToken();
@@ -138,7 +139,11 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#FFFBEB]">
-      <aside className="fixed inset-y-0 left-0 z-30 w-[225px] border-r border-note-yellow/20 bg-white/90 flex flex-col overflow-y-auto">
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 w-[225px] border-r border-note-yellow/20 bg-white/90 flex flex-col overflow-y-auto transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="px-4 py-5 border-b border-note-yellow/20">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold">
@@ -194,9 +199,16 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <div className="ml-[225px] min-h-screen">
+      <div className={`min-h-screen transition-all duration-300 ${isSidebarOpen ? "ml-[225px]" : "ml-0"}`}>
         <header className="sticky top-0 z-20 h-12 border-b border-note-yellow/20 bg-[#FFFBEB]/95 backdrop-blur flex items-center px-6">
-          <PanelLeft className="h-4 w-4 text-ink-black" />
+          <button
+            type="button"
+            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+            className="rounded-md p-1 text-ink-black transition-colors hover:bg-note-yellow/20"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </button>
         </header>
         <main className="p-6">{children}</main>
       </div>

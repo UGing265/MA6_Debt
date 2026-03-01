@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Lock, AlertCircle } from "lucide-react";
 import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
-import { getHistoryKindTag, stripRepayMarker } from "../utils/historyKind";
+import { getHistoryKindTag, getHistoryKindTagClasses, stripRepayMarker } from "../utils/historyKind";
 import { formatVnd } from "@/lib/utils";
 
 type HistoryRowProps = {
@@ -92,11 +92,7 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
               ) : null}
               {historyKindTag ? (
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0 ${
-                    historyKindTag === "repay"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-sky-100 text-sky-700"
-                  }`}
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0 ${getHistoryKindTagClasses(historyKindTag)}`}
                 >
                   {historyKindTag}
                 </span>
@@ -144,11 +140,7 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
           ) : null}
           {historyKindTag ? (
             <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                historyKindTag === "repay"
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-sky-100 text-sky-700"
-              }`}
+              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${getHistoryKindTagClasses(historyKindTag)}`}
             >
               {historyKindTag}
             </span>

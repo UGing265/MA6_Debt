@@ -71,10 +71,10 @@ namespace Application.Features.Transactions.GetTransactions
                 {
                     Id = t.Id,
                     WalletId = t.WalletId,
-                    WalletName = t.Wallet.Name,
+                    WalletName = t.WalletName ?? t.Wallet.Name,
                     ParentWalletName = t.Wallet.ParentWallet != null ? t.Wallet.ParentWallet.Name : null,
                     PartnerId = t.PartnerId,
-                    PartnerName = t.Partner != null ? t.Partner.Name : null,
+                    PartnerName = t.PartnerName ?? (t.Partner != null ? t.Partner.Name : null),
                     Amount = t.Amount,
                     Note = t.Note,
                     TransactionDate = t.TransactionDate,

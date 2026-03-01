@@ -2,9 +2,10 @@ import type { HistoryDto } from "../types/history";
 
 export const REPAY_NOTE_MARKER = "[repay]";
 
-type HistoryKindInput = Pick<HistoryDto, "partnerId" | "note">;
+type HistoryKindInput = Pick<HistoryDto, "partnerId" | "note" | "transferId" | "amount">;
 
-export type HistoryKind = "repay" | "bill" | "other";
+export type HistoryKind = "repay" | "bill" | "consume" | "salary" | "other";
+export type HistoryKindTag = "repay" | "bill" | "consume" | "salary";
 
 export const isRepayNote = (note?: string | null): boolean => {
   if (!note) {
@@ -29,19 +30,45 @@ export const withRepayMarker = (note?: string): string => {
 };
 
 export const getHistoryKind = (item: HistoryKindInput): HistoryKind => {
-  if (!item.partnerId) {
+  if (item.partnerId) {
+    if (isRepayNote(item.note)) {
+      return "repay";
+    }
+    return "bill";
+  }
+
+  if (item.transferId) {
     return "other";
   }
-  if (isRepayNote(item.note)) {
-    return "repay";
+
+  if (item.amount < 0) {
+    return "consume";
   }
-  return "bill";
+
+  if (item.amount > 0) {
+    return "salary";
+  }
+
+  return "other";
 };
 
-export const getHistoryKindTag = (item: HistoryKindInput): "repay" | "bill" | null => {
+export const getHistoryKindTag = (item: HistoryKindInput): HistoryKindTag | null => {
   const kind = getHistoryKind(item);
   if (kind === "other") {
     return null;
   }
   return kind;
+};
+
+export const getHistoryKindTagClasses = (tag: HistoryKindTag): string => {
+  if (tag === "repay") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+  if (tag === "bill") {
+    return "bg-sky-100 text-sky-700";
+  }
+  if (tag === "consume") {
+    return "bg-orange-100 text-orange-700";
+  }
+  return "bg-green-100 text-green-700";
 };

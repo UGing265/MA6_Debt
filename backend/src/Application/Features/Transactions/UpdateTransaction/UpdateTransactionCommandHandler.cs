@@ -115,6 +115,7 @@ namespace Application.Features.Transactions.UpdateTransaction
                     var partnerBalanceBefore = partner.Balance;
 
                     transaction.PartnerId = effectivePartnerId;
+                    transaction.PartnerName = partner.Name; // Store partner name
                     transaction.PartnerBalanceBefore = partnerBalanceBefore;
                     transaction.PartnerBalanceAfter = partnerBalanceBefore + newPartnerDelta;
 
@@ -152,8 +153,9 @@ namespace Application.Features.Transactions.UpdateTransaction
                 {
                     Id = t.Id,
                     WalletId = t.WalletId,
+                    WalletName = t.WalletName ?? t.Wallet.Name,
                     PartnerId = t.PartnerId,
-                    PartnerName = t.Partner != null ? t.Partner.Name : null,
+                    PartnerName = t.PartnerName ?? (t.Partner != null ? t.Partner.Name : null),
                     Amount = t.Amount,
                     Note = t.Note,
                     TransactionDate = t.TransactionDate,

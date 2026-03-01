@@ -5,7 +5,7 @@ import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
 import { HistoryDto, PayerMode } from "@/features/history/types/history";
-import { getHistoryKindTag, stripRepayMarker } from "@/features/history/utils/historyKind";
+import { getHistoryKindTag, getHistoryKindTagClasses, stripRepayMarker } from "@/features/history/utils/historyKind";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
@@ -365,16 +365,12 @@ export default function WalletDashboardPage() {
                         {positive ? "+" : ""}
                         {formatVnd(item.amount)}
                       </p>
-                      {item.partnerName ? (
+                      {item.partnerName || historyKindTag || payerModeTag ? (
                         <div className="mt-0.5 flex items-center justify-end gap-1">
-                          <p className="text-xs text-pencil-gray">{item.partnerName}</p>
+                          {item.partnerName ? <p className="text-xs text-pencil-gray">{item.partnerName}</p> : null}
                           {historyKindTag ? (
                             <span
-                              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                                historyKindTag === "repay"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-sky-100 text-sky-700"
-                              }`}
+                              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${getHistoryKindTagClasses(historyKindTag)}`}
                             >
                               {historyKindTag}
                             </span>

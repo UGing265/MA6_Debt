@@ -10,8 +10,20 @@ namespace Domain.Entities
         public Guid WalletId { get; set; }
         public Wallet Wallet { get; set; } = null!;
 
+        /// <summary>
+        /// Wallet name at the time of transaction creation.
+        /// Stored to preserve name even if wallet is deleted.
+        /// </summary>
+        public string? WalletName { get; set; }
+
         public Guid? PartnerId { get; set; }
         public DebtPartner? Partner { get; set; }
+
+        /// <summary>
+        /// Partner name at the time of transaction creation.
+        /// Stored to preserve name even if partner is deleted.
+        /// </summary>
+        public string? PartnerName { get; set; }
 
         /// <summary>
         /// Final signed amount applied to wallet.
@@ -27,7 +39,7 @@ namespace Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // US-03 specific fields for auditability and reconstructing debt impact
-        
+
         /// <summary>
         /// Payer mode: 0 = ToiTra (user pays), 1 = PartnerTra (partner pays).
         /// Nullable for backward compatibility with existing transactions.
