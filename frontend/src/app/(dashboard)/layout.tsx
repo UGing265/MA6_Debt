@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   PanelLeft,
+  Settings,
   Users,
   Wallet2,
   Zap,
@@ -59,6 +60,12 @@ const navItems: NavItem[] = [
     href: "/transfer",
     icon: <ArrowLeftRight className="h-4 w-4" />,
     testId: "nav-transfer",
+  },
+  {
+    label: "Profile",
+    href: "/profile",
+    icon: <Settings className="h-4 w-4" />,
+    testId: "nav-profile",
   },
 ];
 
