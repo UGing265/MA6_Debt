@@ -277,6 +277,7 @@ export const TransactionDetailPage: React.FC = () => {
   const absAmount = Math.abs(amount);
   const isLocked = Boolean(transaction.isLocked);
   const lockReason = "This transaction is locked and can't be edited or deleted.";
+  const isRepay = isRepayNote(transaction.note);
 
   const sign = isTransfer
     ? direction === TransferDirection.Incoming
@@ -391,28 +392,37 @@ export const TransactionDetailPage: React.FC = () => {
         {transaction.partnerId ? (
           <>
             {/* LEFT: Debt Info */}
-            <Card className="border-purple-200 bg-purple-50/30">
+            <Card className={`border-purple-200 ${isRepay ? "bg-emerald-50/30" : "bg-purple-50/30"}`}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2 text-purple-700">
+                <CardTitle className={`text-lg flex items-center gap-2 ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>
                   <Users className="h-5 w-5" />
-                  Debt Info
+                  {isRepay ? "Repayment" : "Debt Info"}
+                  {isRepay && (
+                    <span className="ml-auto text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded-full">
+                      Repaid
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Who owes whom */}
-                <div className="p-3 rounded-lg bg-white border border-purple-200">
+                <div className={`p-3 rounded-lg bg-white border ${isRepay ? "border-emerald-200" : "border-purple-200"}`}>
                   {transaction.payerMode === PayerMode.ToiTra ? (
                     <div>
-                      <p className="text-xs text-pencil-gray mb-1">Partner owes you</p>
-                      <p className="text-xl font-bold text-purple-700">{transaction.partnerName}</p>
+                      <p className="text-xs text-pencil-gray mb-1">
+                        {isRepay ? "You repaid debt to" : "Partner owes you"}
+                      </p>
+                      <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{transaction.partnerName}</p>
                     </div>
                   ) : transaction.payerMode === PayerMode.PartnerTra ? (
                     <div>
-                      <p className="text-xs text-pencil-gray mb-1">You owe partner</p>
-                      <p className="text-xl font-bold text-purple-700">{transaction.partnerName}</p>
+                      <p className="text-xs text-pencil-gray mb-1">
+                        {isRepay ? "Partner repaid debt to you" : "You owe partner"}
+                      </p>
+                      <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{transaction.partnerName}</p>
                     </div>
                   ) : (
-                    <p className="text-xl font-bold text-purple-700">{transaction.partnerName}</p>
+                    <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{transaction.partnerName}</p>
                   )}
                 </div>
 
@@ -425,13 +435,15 @@ export const TransactionDetailPage: React.FC = () => {
                     </div>
                   )}
                   {transaction.debtAmount != null && transaction.debtAmount !== 0 ? (
-                    <div className="p-2 rounded-lg bg-purple-100 border border-purple-200">
-                      <p className="text-xs text-purple-600">
-                        {transaction.payerMode === PayerMode.ToiTra
-                          ? `${transaction.partnerName} owes you`
-                          : `You owe ${transaction.partnerName}`}
+                    <div className={`p-2 rounded-lg ${isRepay ? "bg-emerald-100 border-emerald-200" : "bg-purple-100 border-purple-200"} border`}>
+                      <p className={`text-xs ${isRepay ? "text-emerald-600" : "text-purple-600"}`}>
+                        {isRepay
+                          ? "Amount Repaid"
+                          : transaction.payerMode === PayerMode.ToiTra
+                            ? `${transaction.partnerName} owes you`
+                            : `You owe ${transaction.partnerName}`}
                       </p>
-                      <p className="text-lg font-bold text-purple-700">{formatVnd(transaction.debtAmount)}</p>
+                      <p className={`text-lg font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{formatVnd(transaction.debtAmount)}</p>
                     </div>
                   ) : (
                     <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
@@ -444,7 +456,9 @@ export const TransactionDetailPage: React.FC = () => {
                 {/* Payer Mode */}
                 {transaction.payerMode != null && (
                   <div className="text-sm">
-                    <span className="text-pencil-gray">Who paid: </span>
+                    <span className="text-pencil-gray">
+                      {isRepay ? "Who repaid: " : "Who paid: "}
+                    </span>
                     <span className="font-semibold text-ink-black">
                       {transaction.payerMode === PayerMode.ToiTra ? "You" : transaction.partnerName}
                     </span>

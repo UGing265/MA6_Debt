@@ -89,15 +89,15 @@ namespace Application.Features.Transactions.QuickDeduct
             switch (request.PayerMode)
             {
                 case PayerMode.ToiTra:
-                    // User pays: wallet decreases by Total, partner increases by DebtAmount
+                    // User pays: wallet decreases by Total, partner owes user by DebtAmount
                     walletDelta = -request.Total;
                     partnerDelta = debtAmount.Value;
                     break;
 
                 case PayerMode.PartnerTra:
-                    // Partner pays: wallet unchanged, user owes partner DebtAmount
-                    // DebtAmount = what user consumed, so user owes that to partner
-                    walletDelta = 0;
+                    // Partner pays: wallet increases by Total (partner gives money to wallet),
+                    // user owes partner by DebtAmount
+                    walletDelta = request.Total;
                     partnerDelta = -debtAmount.Value;
                     break;
 
