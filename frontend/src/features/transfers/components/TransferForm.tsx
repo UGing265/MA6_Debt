@@ -435,7 +435,7 @@ export const TransferForm: React.FC = () => {
                             placeholder="0"
                             data-testid="transfer-amount"
                             disabled={isDisabled || !fromWalletId}
-                            value={field.value !== undefined ? field.value.toLocaleString("en-US") : ""}
+                            value={field.value != null && !Number.isNaN(field.value) ? field.value.toLocaleString("en-US") : ""}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
                               field.onChange(raw === "" ? undefined : Number(raw));

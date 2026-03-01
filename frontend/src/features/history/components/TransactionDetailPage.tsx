@@ -450,6 +450,9 @@ export const TransactionDetailPage: React.FC = () => {
                 <div>
                   <p className="text-sm text-pencil-gray">Wallet</p>
                   <p className="font-semibold text-ink-black">{walletDisplay}</p>
+                  {transaction.parentWalletName && (
+                    <p className="text-xs text-pencil-gray">Parent: {transaction.parentWalletName}</p>
+                  )}
                 </div>
               </div>
             </CardContent>

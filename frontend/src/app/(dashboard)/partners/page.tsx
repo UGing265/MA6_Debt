@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star, HandCoins } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { PartnerNameDialog } from "@/features/debt/components/PartnerNameDialog";
 import { PartnerMoneyDialog } from "@/features/debt/components/PartnerMoneyDialog";
+import { PartnerRepaymentDialog } from "@/features/debt/components/PartnerRepaymentDialog";
 import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export default function PartnersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
   const [moneyDialogPartner, setMoneyDialogPartner] = useState<DebtPartner | null>(null);
+  const [repaymentPartner, setRepaymentPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
   const [defaultPartnerId, setDefaultPartnerId] = useState<string>("");
 
@@ -181,6 +183,19 @@ export default function PartnersPage() {
                         {neutral ? "No debt" : null}
                       </span>
                     </div>
+
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+                        onClick={() => setRepaymentPartner(partner)}
+                        disabled={neutral}
+                      >
+                        <HandCoins className="mr-1 h-4 w-4" />
+                        Repay Debt
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -222,6 +237,13 @@ export default function PartnersPage() {
           if (!open) setMoneyDialogPartner(null);
         }}
         onSubmit={handleMoneySubmit}
+      />
+      <PartnerRepaymentDialog
+        open={repaymentPartner !== null}
+        partner={repaymentPartner}
+        onOpenChange={(open) => {
+          if (!open) setRepaymentPartner(null);
+        }}
       />
 
       <Dialog open={deletingPartner !== null} onOpenChange={(open) => !open && setDeletingPartner(null)}>

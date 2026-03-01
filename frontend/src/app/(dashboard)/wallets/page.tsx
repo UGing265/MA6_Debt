@@ -25,7 +25,7 @@ export default function WalletsPage() {
   const [deletingWallet, setDeletingWallet] = React.useState<Wallet | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [sortBy, setSortBy] = React.useState<"name" | "balance" | "children">("name");
+  const [sortBy, setSortBy] = React.useState<"name-asc" | "name-desc" | "balance-high" | "balance-low">("name-asc");
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
   const isMountedRef = React.useRef(true);
   const deleteInFlightRef = React.useRef(false);
@@ -66,9 +66,6 @@ export default function WalletsPage() {
 
   // Sort based on selected criteria
   const sortedParentWallets = [...filteredParentWallets].sort((a, b) => {
-    const childrenA = allWallets.filter((w) => w.parentWalletId === a.id).length;
-    const childrenB = allWallets.filter((w) => w.parentWalletId === b.id).length;
-    
     const balanceA = (a.balance || 0) + allWallets
       .filter((w) => w.parentWalletId === a.id)
       .reduce((sum, w) => sum + (w.balance || 0), 0);
@@ -76,14 +73,18 @@ export default function WalletsPage() {
       .filter((w) => w.parentWalletId === b.id)
       .reduce((sum, w) => sum + (w.balance || 0), 0);
 
-    if (sortBy === "name") {
-      return a.name.localeCompare(b.name);
-    } else if (sortBy === "balance") {
-      return balanceB - balanceA;
-    } else if (sortBy === "children") {
-      return childrenB - childrenA;
+    switch (sortBy) {
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "balance-high":
+        return balanceB - balanceA;
+      case "balance-low":
+        return balanceA - balanceB;
+      default:
+        return 0;
     }
-    return 0;
   });
 
   const deletingChildCount = deletingWallet
@@ -216,32 +217,17 @@ export default function WalletsPage() {
           />
         </div>
 
-        <div className="flex gap-2">
-          <Button
-            variant={sortBy === "name" ? "default" : "outline"}
-            className={sortBy === "name" ? "bg-note-yellow text-ink-black hover:bg-note-yellow/90" : "border-note-yellow"}
-            onClick={() => setSortBy("name")}
-            size="sm"
-          >
-            Name
-          </Button>
-          <Button
-            variant={sortBy === "balance" ? "default" : "outline"}
-            className={sortBy === "balance" ? "bg-note-yellow text-ink-black hover:bg-note-yellow/90" : "border-note-yellow"}
-            onClick={() => setSortBy("balance")}
-            size="sm"
-          >
-            Balance
-          </Button>
-          <Button
-            variant={sortBy === "children" ? "default" : "outline"}
-            className={sortBy === "children" ? "bg-note-yellow text-ink-black hover:bg-note-yellow/90" : "border-note-yellow"}
-            onClick={() => setSortBy("children")}
-            size="sm"
-          >
-            Sub-wallets
-          </Button>
-        </div>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          className="px-4 py-2.5 text-sm border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow text-ink-black font-medium cursor-pointer min-w-[180px]"
+          aria-label="Sort wallets"
+        >
+          <option value="name-asc">Name A → Z</option>
+          <option value="name-desc">Name Z → A</option>
+          <option value="balance-high">Balance: High to Low</option>
+          <option value="balance-low">Balance: Low to High</option>
+        </select>
       </div>
 
       {filteredParentWallets.length === 0 && searchQuery ? (
