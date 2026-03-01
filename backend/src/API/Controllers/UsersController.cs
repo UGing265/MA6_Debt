@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace API.Controllers;
@@ -66,12 +67,12 @@ public class UsersController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim))
+        var value = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        if (!Guid.TryParse(value, out var userId))
         {
-            throw new UnauthorizedAccessException("User ID not found in token");
+            throw new UnauthorizedAccessException("Invalid user token.");
         }
-        return Guid.Parse(userIdClaim);
+        return userId;
     }
 }
 
