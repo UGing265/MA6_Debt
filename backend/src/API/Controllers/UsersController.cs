@@ -1,7 +1,10 @@
 using API.Middleware;
+using Application.Features.Users.GetProfile;
 using Application.Features.Users.GetUserPreferences;
 using Application.Features.Users.UpdateDefaultWallet;
 using Application.Features.Users.UpdateDefaultPartner;
+using Application.Features.Users.UpdateProfile;
+using Application.Features.Users.ChangePassword;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +24,48 @@ public class UsersController : ControllerBase
     public UsersController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet("profile")]
+    [ProducesResponseType(typeof(ProfileDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetProfile()
+    {
+        var result = await _mediator.Send(new GetProfileQuery
+        {
+            UserId = GetCurrentUserId()
+        });
+        return Ok(result);
+    }
+
+    [HttpPut("profile")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        await _mediator.Send(new UpdateProfileCommand
+        {
+            UserId = GetCurrentUserId(),
+            Username = request.Username,
+            Email = request.Email
+        });
+        return NoContent();
+    }
+
+    [HttpPut("password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        await _mediator.Send(new ChangePasswordCommand
+        {
+            UserId = GetCurrentUserId(),
+            CurrentPassword = request.CurrentPassword,
+            NewPassword = request.NewPassword
+        });
+        return NoContent();
     }
 
     [HttpGet("preferences")]
@@ -78,3 +123,5 @@ public class UsersController : ControllerBase
 
 public record UpdateDefaultWalletRequest(Guid? WalletId);
 public record UpdateDefaultPartnerRequest(Guid? PartnerId);
+public record UpdateProfileRequest(string Username, string? Email);
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);

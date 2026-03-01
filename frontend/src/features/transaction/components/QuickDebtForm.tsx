@@ -85,10 +85,15 @@ export function QuickDebtForm() {
     return localStorage.getItem("defaultPartnerId") || "";
   };
 
+  const getDefaultWalletId = (): string => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("defaultWalletId") || "";
+  };
+
   const form = useForm<QuickDebtFormValues>({
     resolver: zodResolver(quickDebtFormSchema),
     defaultValues: {
-      walletId: "",
+      walletId: getDefaultWalletId(),
       total: 0,
       payerMode: PayerMode.ToiTra,
       partnerId: getDefaultPartnerId(),
@@ -101,13 +106,21 @@ export function QuickDebtForm() {
   const debtAmountValue = form.watch("debtAmount");
   const payerMode = form.watch("payerMode");
 
-  // Auto-select default partner on mount
+  // Auto-select default partner and wallet on mount
   useEffect(() => {
     const defaultPartnerId = getDefaultPartnerId();
+    const defaultWalletId = getDefaultWalletId();
     if (defaultPartnerId && !form.getValues("partnerId")) {
       form.setValue("partnerId", defaultPartnerId);
     }
-  }, [form]);
+    if (defaultWalletId && !form.getValues("walletId")) {
+      // Only set if the wallet exists in childWallets
+      const exists = childWallets.some(w => w.id === defaultWalletId);
+      if (exists) {
+        form.setValue("walletId", defaultWalletId);
+      }
+    }
+  }, [form, childWallets]);
 
   const onSubmit = async (values: QuickDebtFormValues) => {
     if (isSubmitting) {
@@ -143,7 +156,7 @@ export function QuickDebtForm() {
       toast.success("Transaction recorded");
       setNotificationMessage(response.notification?.message ?? null);
       form.reset({
-        walletId: "",
+        walletId: getDefaultWalletId(),
         total: 0,
         payerMode: PayerMode.ToiTra,
         partnerId: getDefaultPartnerId(),

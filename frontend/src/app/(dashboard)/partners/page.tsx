@@ -142,16 +142,20 @@ export default function PartnersPage() {
               const receivable = partner.balance > 0;
               const payable = partner.balance < 0;
               const neutral = partner.balance === 0;
+              const isDefault = defaultPartnerId === partner.id;
               return (
-                <Card key={partner.id} className="border-note-yellow/25">
+                <Card key={partner.id} className={`border-note-yellow/25 transition-all duration-200 ${isDefault ? "border-yellow-400 bg-yellow-50/50 shadow-md ring-1 ring-yellow-300" : ""}`}>
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="h-12 w-12 rounded-full bg-note-yellow/25 text-note-yellow flex items-center justify-center font-bold text-xl">
+                        <div className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-xl ${isDefault ? "bg-yellow-400 text-yellow-900" : "bg-note-yellow/25 text-note-yellow"}`}>
                           {partner.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="flex items-center gap-2">
                           <p className="text-3xl font-semibold text-ink-black">{partner.name}</p>
+                          {isDefault && (
+                            <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                          )}
                         </div>
                       </div>
 
