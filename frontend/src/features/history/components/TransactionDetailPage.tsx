@@ -436,7 +436,7 @@ export const TransactionDetailPage: React.FC = () => {
                   ) : (
                     <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
                       <p className="text-xs text-amber-600">Debt Amount</p>
-                      <p className="text-sm font-medium text-amber-700">⚠️ Not set</p>
+                      <p className="text-sm font-medium text-amber-700">/!\ Not set</p>
                     </div>
                   )}
                 </div>

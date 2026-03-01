@@ -30,6 +30,9 @@ import {
 } from "lucide-react";
 
 import { formatVnd } from "@/lib/utils";
+import { getUserPreferences, updateDefaultWallet } from "@/features/user/api/userApi";
+
+const isMountedRef = { current: true };
 
 export default function WalletDetailPage() {
   const params = useParams();
@@ -42,21 +45,44 @@ export default function WalletDetailPage() {
   const [selectedChildWallet, setSelectedChildWallet] = useState<Wallet | null>(null);
   const [isEditParentModalOpen, setIsEditParentModalOpen] = useState(false);
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
-  // Load default wallet from localStorage
+  // Load default wallet from API
   React.useEffect(() => {
-    const stored = localStorage.getItem("defaultWalletId") || "";
-    setDefaultWalletId(stored);
+    const loadPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences();
+        if (isMountedRef.current) {
+          setDefaultWalletId(prefs.defaultWalletId || "");
+        }
+      } catch {
+        // Fallback to localStorage if API fails
+        const stored = localStorage.getItem("defaultWalletId") || "";
+        if (isMountedRef.current) {
+          setDefaultWalletId(stored);
+        }
+      }
+    };
+    loadPreferences();
   }, []);
 
-  // Save default wallet to localStorage
-  const setAsDefault = (walletId: string) => {
+  // Save default wallet to DB via API (also update localStorage for other components)
+  const setAsDefault = async (walletId: string) => {
     setDefaultWalletId(walletId);
     localStorage.setItem("defaultWalletId", walletId);
+    try {
+      await updateDefaultWallet(walletId);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
-  const clearDefault = () => {
+  const clearDefault = async () => {
     setDefaultWalletId("");
     localStorage.removeItem("defaultWalletId");
+    try {
+      await updateDefaultWallet(null);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
   const parentWallet = wallets?.find((w) => w.id === walletId);

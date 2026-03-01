@@ -20,6 +20,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { DebtPartner } from "@/features/debt/types/debtPartner";
+import { getUserPreferences, updateDefaultPartner } from "@/features/user/api/userApi";
+
+const isMountedRef = { current: true };
+
 export default function PartnersPage() {
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -29,21 +33,44 @@ export default function PartnersPage() {
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
   const [defaultPartnerId, setDefaultPartnerId] = useState<string>("");
 
-  // Load default partner from localStorage
+  // Load default partner from API
   React.useEffect(() => {
-    const stored = localStorage.getItem("defaultPartnerId") || "";
-    setDefaultPartnerId(stored);
+    const loadPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences();
+        if (isMountedRef.current) {
+          setDefaultPartnerId(prefs.defaultPartnerId || "");
+        }
+      } catch {
+        // Fallback to localStorage if API fails
+        const stored = localStorage.getItem("defaultPartnerId") || "";
+        if (isMountedRef.current) {
+          setDefaultPartnerId(stored);
+        }
+      }
+    };
+    loadPreferences();
   }, []);
 
-  // Save/clear default partner
-  const setAsDefault = (partnerId: string) => {
+  // Save/clear default partner via API (also update localStorage for other components)
+  const setAsDefault = async (partnerId: string) => {
     setDefaultPartnerId(partnerId);
     localStorage.setItem("defaultPartnerId", partnerId);
+    try {
+      await updateDefaultPartner(partnerId);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
-  const clearDefault = () => {
+  const clearDefault = async () => {
     setDefaultPartnerId("");
     localStorage.removeItem("defaultPartnerId");
+    try {
+      await updateDefaultPartner(null);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
   const sortedPartners = [...partners].sort((a, b) => {

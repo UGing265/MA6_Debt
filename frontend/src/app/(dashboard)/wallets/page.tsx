@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { formatVnd } from "@/lib/utils";
 import { Wallet2, Plus, Pencil, Trash2, Search, Star } from "lucide-react";
+import { getUserPreferences, updateDefaultWallet } from "@/features/user/api/userApi";
 
 
 export default function WalletsPage() {
@@ -32,21 +33,44 @@ export default function WalletsPage() {
   const { data: wallets, isLoading, error, refetch } = useWallets();
   const deleteWalletMutation = useDeleteWallet();
 
-  // Load default wallet from localStorage
+  // Load default wallet from API
   React.useEffect(() => {
-    const stored = localStorage.getItem("defaultWalletId") || "";
-    setDefaultWalletId(stored);
+    const loadPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences();
+        if (isMountedRef.current) {
+          setDefaultWalletId(prefs.defaultWalletId || "");
+        }
+      } catch {
+        // Fallback to localStorage if API fails
+        const stored = localStorage.getItem("defaultWalletId") || "";
+        if (isMountedRef.current) {
+          setDefaultWalletId(stored);
+        }
+      }
+    };
+    loadPreferences();
   }, []);
 
-  // Save default wallet to localStorage
-  const setAsDefault = (walletId: string) => {
+  // Save default wallet to DB via API (also update localStorage for other components)
+  const setAsDefault = async (walletId: string) => {
     setDefaultWalletId(walletId);
     localStorage.setItem("defaultWalletId", walletId);
+    try {
+      await updateDefaultWallet(walletId);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
-  const clearDefault = () => {
+  const clearDefault = async () => {
     setDefaultWalletId("");
     localStorage.removeItem("defaultWalletId");
+    try {
+      await updateDefaultWallet(null);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
   const allWallets = wallets ?? [];

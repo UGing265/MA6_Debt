@@ -118,16 +118,17 @@ export function QuickDebtForm() {
     setNotificationMessage(null);
 
     try {
-      // Partner is required for PartnerTra mode OR when debtAmount > 0
+      // Always send partnerId if user has selected one
+      // This ensures transaction is tagged as "bill" in history
       const hasDebt = values.debtAmount > 0;
-      const needsPartner = hasDebt || values.payerMode === PayerMode.PartnerTra;
+      const selectedPartner = values.partnerId;
 
       const input = {
         walletId: values.walletId,
         total: values.total,
         debtTag: hasDebt,
         payerMode: values.payerMode,
-        partnerId: needsPartner ? values.partnerId : undefined,
+        partnerId: selectedPartner || undefined,
         debtAmount: hasDebt ? values.debtAmount : undefined,
       };
 

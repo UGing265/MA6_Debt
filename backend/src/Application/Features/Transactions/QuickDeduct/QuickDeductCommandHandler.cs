@@ -191,9 +191,9 @@ namespace Application.Features.Transactions.QuickDeduct
 
             var message = balance switch
             {
-                > 0 => $"{partner.Name} đang nợ bạn {balance:N0} đ",
-                < 0 => $"Bạn đang nợ {partner.Name} {Math.Abs(balance):N0} đ",
-                _ => $"Bạn và {partner.Name} đã hết nợ"
+                > 0 => $"{partner.Name} owes you {balance:N0} đ",
+                < 0 => $"You owe {partner.Name} {Math.Abs(balance):N0} đ",
+                _ => $"Settled with {partner.Name}"
             };
 
             return new DebtNotification
