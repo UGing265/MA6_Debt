@@ -375,142 +375,157 @@ export const TransactionDetailPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Details Grid */}
+      {/* Two Column Layout: Debt Info | Wallet Info */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Wallet */}
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-note-yellow/20 text-note-yellow flex items-center justify-center">
-                <Wallet2 className="h-5 w-5" />
+        {/* LEFT COLUMN: Debt/Partner Info */}
+        {transaction.partnerId && (
+          <Card className="border-purple-200 bg-purple-50/30 md:row-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2 text-purple-700">
+                <Users className="h-5 w-5" />
+                Debt Info
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Who owes whom - PROMINENT */}
+              <div className="p-3 rounded-lg bg-white border border-purple-200">
+                {transaction.payerMode === PayerMode.ToiTra ? (
+                  <div>
+                    <p className="text-xs text-pencil-gray mb-1">Partner owes you</p>
+                    <p className="text-xl font-bold text-purple-700">{transaction.partnerName}</p>
+                  </div>
+                ) : transaction.payerMode === PayerMode.PartnerTra ? (
+                  <div>
+                    <p className="text-xs text-pencil-gray mb-1">You owe partner</p>
+                    <p className="text-xl font-bold text-purple-700">{transaction.partnerName}</p>
+                  </div>
+                ) : (
+                  <p className="text-xl font-bold text-purple-700">{transaction.partnerName}</p>
+                )}
               </div>
-              <div>
-                <p className="text-sm text-pencil-gray">Wallet</p>
-                <p className="font-semibold text-ink-black">{walletDisplay}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Partner */}
-        {transaction.partnerName && (
+              {/* Bill amounts */}
+              <div className="grid grid-cols-2 gap-3">
+                {transaction.totalAmount != null && (
+                  <div className="p-2 rounded-lg bg-white border border-gray-200">
+                    <p className="text-xs text-pencil-gray">Total Bill</p>
+                    <p className="text-lg font-bold text-ink-black">{formatVnd(transaction.totalAmount)}</p>
+                  </div>
+                )}
+                {transaction.debtAmount != null && transaction.debtAmount !== 0 ? (
+                  <div className="p-2 rounded-lg bg-purple-100 border border-purple-200">
+                    <p className="text-xs text-purple-600">Debt Amount</p>
+                    <p className="text-lg font-bold text-purple-700">{formatVnd(transaction.debtAmount)}</p>
+                  </div>
+                ) : (
+                  <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
+                    <p className="text-xs text-amber-600">Debt Amount</p>
+                    <p className="text-sm font-medium text-amber-700">⚠️ Not set</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Payer Mode */}
+              {transaction.payerMode != null && (
+                <div className="text-sm">
+                  <span className="text-pencil-gray">Who paid: </span>
+                  <span className="font-semibold text-ink-black">
+                    {transaction.payerMode === PayerMode.ToiTra ? "You" : transaction.partnerName}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* RIGHT COLUMN: Wallet Info */}
+        <div className="space-y-4">
+          {/* Wallet */}
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-xl bg-note-yellow/20 text-note-yellow flex items-center justify-center">
+                  <Wallet2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-pencil-gray">Partner</p>
-                  <p className="font-semibold text-ink-black">{transaction.partnerName}</p>
+                  <p className="text-sm text-pencil-gray">Wallet</p>
+                  <p className="font-semibold text-ink-black">{walletDisplay}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Transaction Date */}
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-pencil-gray">Date</p>
+                  <p className="font-semibold text-ink-black">{formatDateTime(transaction.transactionDate)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Created At */}
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-pencil-gray">Created</p>
+                  <p className="font-semibold text-ink-black">{formatDateTime(transaction.createdAt)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Note - Full width below */}
+        {transaction.note && (
+          <Card className="md:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Note
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-ink-black whitespace-pre-wrap">{transaction.note}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Transfer Details */}
+        {isTransfer && (
+          <Card className="border-blue-200 bg-blue-50/30 md:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ArrowLeftRight className="h-5 w-5 text-blue-600" />
+                Transfer Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <p className="text-sm text-pencil-gray">From</p>
+                  <p className="font-bold text-ink-black">{transaction.transferFromWalletName || "Unknown"}</p>
+                </div>
+                <ArrowLeftRight className="h-6 w-6 text-blue-600" />
+                <div className="text-center">
+                  <p className="text-sm text-pencil-gray">To</p>
+                  <p className="font-bold text-ink-black">{transaction.transferToWalletName || "Unknown"}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
-
-        {/* Transaction Date */}
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
-                <Calendar className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-pencil-gray">Transaction Date</p>
-                <p className="font-semibold text-ink-black">{formatDateTime(transaction.transactionDate)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Created At */}
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center">
-                <Clock className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-pencil-gray">Created At</p>
-                <p className="font-semibold text-ink-black">{formatDateTime(transaction.createdAt)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Note */}
-      {transaction.note && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Note
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-ink-black whitespace-pre-wrap">{transaction.note}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Transfer Details */}
-      {isTransfer && (
-        <Card className="border-blue-200 bg-blue-50/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <ArrowLeftRight className="h-5 w-5 text-blue-600" />
-              Transfer Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-center">
-                <p className="text-sm text-pencil-gray">From</p>
-                <p className="font-bold text-ink-black">{transaction.transferFromWalletName || "Unknown"}</p>
-              </div>
-              <ArrowLeftRight className="h-6 w-6 text-blue-600" />
-              <div className="text-center">
-                <p className="text-sm text-pencil-gray">To</p>
-                <p className="font-bold text-ink-black">{transaction.transferToWalletName || "Unknown"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* QuickDeduct Details */}
-      {hasQuickDeduct && (
-        <Card className="border-purple-200 bg-purple-50/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Banknote className="h-5 w-5 text-purple-600" />
-              Bill Split Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div>
-                <p className="text-sm text-pencil-gray">Payer Mode</p>
-                <p className="font-semibold text-ink-black">{payerModeLabel(transaction.payerMode)}</p>
-              </div>
-              {transaction.totalAmount != null && (
-                <div>
-                  <p className="text-sm text-pencil-gray">Total Bill</p>
-                  <p className="font-semibold text-ink-black">{formatVnd(transaction.totalAmount)}</p>
-                </div>
-              )}
-              {transaction.debtAmount != null && (
-                <div>
-                  <p className="text-sm text-pencil-gray">Debt Amount</p>
-                  <p className="font-semibold text-ink-black">{formatVnd(transaction.debtAmount)}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Users } from "lucide-react";
+import { Lock, Users, AlertCircle } from "lucide-react";
 import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
 import { formatVnd } from "@/lib/utils";
 
@@ -18,11 +18,11 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
   const absAmount = Math.abs(amount);
   const isLocked = Boolean(item.isLocked);
   const lockReason = "This transaction is locked and can't be edited or deleted.";
-  const walletDisplay = item.walletName ?? "";
 
   // Check if this is a debt transaction with partner
-  const isDebtTransaction = item.partnerId != null && item.debtAmount != null;
+  const hasPartner = item.partnerId != null;
   const hasDebt = item.debtAmount != null && item.debtAmount !== 0;
+  const missingDebtAmount = hasPartner && !hasDebt; // Partner selected but no debt amount
 
   // Determine debt relationship based on payerMode
   const payerMode = item.payerMode ?? null;
@@ -37,8 +37,6 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
     ? direction === TransferDirection.Incoming ? "Transfer In" : "Transfer Out"
     : "";
 
-  const dateStr = item.transactionDate ?? item.createdAt ?? "";
-
   const amountColor = isTransfer
     ? direction === TransferDirection.Incoming ? "text-green-600" : "text-red-600"
     : amount >= 0 ? "text-green-600" : "text-red-600";
@@ -47,39 +45,30 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
     router.push(`/history/${item.id}`);
   }, [router, item.id]);
 
-  // For debt transactions, show enhanced layout
-  if (isDebtTransaction && item.partnerName) {
-    const totalAmount = item.totalAmount ?? amount;
+  // For debt transactions (with partner), show compact layout
+  if (hasPartner && item.partnerName) {
+    const totalAmount = item.totalAmount ?? absAmount;
     const debtAbsAmount = Math.abs(item.debtAmount ?? 0);
 
     return (
       <div
-        className="rounded-md px-3 py-2 border border-purple-200 bg-purple-50/30 cursor-pointer hover:bg-purple-100/50 transition-colors"
+        className={`rounded-md px-3 py-2 border cursor-pointer transition-colors ${
+          missingDebtAmount
+            ? "border-amber-300 bg-amber-50 hover:bg-amber-100"
+            : "border-purple-200 bg-purple-50/30 hover:bg-purple-100/50"
+        }`}
         onClick={handleRowClick}
       >
         <div className="flex items-center justify-between gap-3">
-          {/* Left side: Debt info */}
+          {/* Left side: Info */}
           <div className="flex-1 min-w-0">
-            {/* Header row: Partner icon + debt relationship */}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-medium">
-                <Users className="h-3 w-3" />
-                Debt
-              </span>
-              {isLocked ? (
-                <span
-                  className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
-                  title={lockReason}
-                  aria-label="locked"
-                >
-                  <Lock className="h-3 w-3" />
-                  Locked
-                </span>
-              ) : null}
-            </div>
+            {/* Note at top */}
+            {item.note && (
+              <p className="text-sm text-ink-black truncate mb-0.5">{item.note}</p>
+            )}
 
-            {/* Partner relationship - clear "who owes whom" */}
-            <div className="font-medium text-ink-black mb-1">
+            {/* Debt relationship line */}
+            <div className="flex items-center gap-2 text-sm">
               {isUserPaying ? (
                 <span>
                   <span className="text-purple-700 font-semibold">{item.partnerName}</span>
@@ -93,40 +82,34 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
               ) : (
                 <span className="text-purple-700 font-semibold">{item.partnerName}</span>
               )}
-            </div>
 
-            {/* Note if present */}
-            {item.note && (
-              <p className="text-sm text-gray-600 truncate mb-1">{item.note}</p>
-            )}
-
-            {/* Amount breakdown */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pencil-gray">
-              <span>
-                Total: <span className="font-semibold text-ink-black">{formatVnd(totalAmount)}</span>
-              </span>
               {hasDebt && (
-                <span>
-                  Debt: <span className="font-semibold text-purple-700">{formatVnd(debtAbsAmount)}</span>
+                <span className="text-xs text-pencil-gray">
+                  • {formatVnd(debtAbsAmount)}
                 </span>
               )}
-              <span>
-                Wallet: <span className="font-medium text-ink-black">{walletDisplay}</span>
-              </span>
-              {dateStr && (
-                <span>{new Date(dateStr).toLocaleDateString()}</span>
+
+              {isLocked && (
+                <span title={lockReason}>
+                  <Lock className="h-3 w-3 text-gray-400" />
+                </span>
               )}
             </div>
+
+            {/* Missing debt warning */}
+            {missingDebtAmount && (
+              <div className="flex items-center gap-1 mt-1 text-xs text-amber-700">
+                <AlertCircle className="h-3 w-3" />
+                <span>Missing debt amount - Click to add</span>
+              </div>
+            )}
           </div>
 
-          {/* Right side: Net amount */}
+          {/* Right side: Amount */}
           <div className="text-right whitespace-nowrap">
-            <div className="flex items-center justify-end gap-2">
-              <span className={`font-semibold ${amountColor}`} aria-label="amount">
-                {sign}
-                {formatVnd(absAmount)}
-              </span>
-            </div>
+            <span className={`font-semibold ${amountColor}`} aria-label="amount">
+              {sign}{formatVnd(absAmount)}
+            </span>
           </div>
         </div>
       </div>
@@ -142,47 +125,28 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
       <div className="flex-1 min-w-0 pr-1">
         <div className="flex items-center gap-2 min-w-0">
           <div className="font-medium text-ink-black truncate">
-            {item.note ?? item.partnerName ?? "Transaction"}
+            {item.note ?? "Transaction"}
           </div>
-          {isLocked ? (
-            <span
-              className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
-              title={lockReason}
-              aria-label="locked"
-            >
-              <Lock className="h-3 w-3" />
-              Locked
+          {isLocked && (
+            <span title={lockReason}>
+              <Lock className="h-3 w-3 text-gray-400" />
             </span>
-          ) : null}
+          )}
         </div>
         <p className="text-xs text-pencil-gray truncate">
-          <span className="font-semibold text-ink-black">{walletDisplay}</span>
-          {item.partnerName ? ` • Partner: ${item.partnerName}` : ""}
-          {item.debtAmount != null ? ` • Debt: ${formatVnd(Math.abs(item.debtAmount))}` : ""}
-          {dateStr ? ` • ${new Date(dateStr).toLocaleDateString()}` : ""}
+          {item.walletName ?? "Wallet"}
+          {isTransfer && (
+            <span className={`ml-2 ${direction === TransferDirection.Incoming ? "text-green-600" : "text-red-600"}`}>
+              • {transferLabel}
+            </span>
+          )}
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="text-right whitespace-nowrap">
-          <div className="flex items-center justify-end gap-2">
-            <span className={`font-semibold ${amountColor}`} aria-label="amount">
-              {sign}
-              {formatVnd(absAmount)}
-            </span>
-            {isTransfer ? (
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
-                  direction === TransferDirection.Incoming
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {transferLabel}
-              </span>
-            ) : null}
-          </div>
-        </div>
+      <div className="text-right whitespace-nowrap">
+        <span className={`font-semibold ${amountColor}`} aria-label="amount">
+          {sign}{formatVnd(absAmount)}
+        </span>
       </div>
     </div>
   );

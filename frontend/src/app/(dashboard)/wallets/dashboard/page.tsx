@@ -3,31 +3,86 @@
 import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
+import { getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
+import { HistoryDto } from "@/features/history/types/history";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
 
-const mockRecentHistory = [
-  { id: "t1", title: "Team Lunch", wallet: "Main Wallet", date: "16 Feb", amount: -150000, actor: "Minh" },
-  { id: "t2", title: "Monthly Salary", wallet: "Savings", date: "15 Feb", amount: 5000000, actor: "" },
-  { id: "t3", title: "Coffee", wallet: "Main Wallet", date: "14 Feb", amount: -80000, actor: "" },
-  { id: "t4", title: "Books", wallet: "Daily Wallet", date: "13 Feb", amount: -300000, actor: "Lan" },
-  { id: "t5", title: "Savings Transfer", wallet: "Main Wallet", date: "11 Feb", amount: -1000000, actor: "" },
-];
-
 // formatVnd centralized via '@/lib/utils'
+
+const extractHistoryError = (error: unknown): string => {
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error && typeof error === "object") {
+    const maybeError = error as { general?: unknown; message?: unknown };
+    if (typeof maybeError.general === "string" && maybeError.general.trim().length > 0) {
+      return maybeError.general;
+    }
+    if (typeof maybeError.message === "string" && maybeError.message.trim().length > 0) {
+      return maybeError.message;
+    }
+  }
+  return "Failed to load recent history";
+};
+
+const getHistoryTitle = (item: HistoryDto): string => {
+  const note = item.note?.trim();
+  if (note) {
+    return note;
+  }
+  if (item.transferId) {
+    return "Wallet Transfer";
+  }
+  if (item.partnerName) {
+    return `With ${item.partnerName}`;
+  }
+  return "Transaction";
+};
+
+const formatHistoryDate = (dateInput: string): string => {
+  const date = new Date(dateInput);
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+};
 
 export default function WalletDashboardPage() {
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
   const { partners, isLoading: partnersLoading, error: partnersError } = useDebtPartners();
   const [defaultWalletId, setDefaultWalletId] = React.useState<string>("");
-  const [defaultPartnerId, setDefaultPartnerId] = React.useState<string>("");
+  const [recentHistory, setRecentHistory] = React.useState<HistoryDto[]>([]);
+  const [recentHistoryLoading, setRecentHistoryLoading] = React.useState<boolean>(true);
+  const [recentHistoryError, setRecentHistoryError] = React.useState<string | null>(null);
 
   // Load defaults from localStorage
   React.useEffect(() => {
     setDefaultWalletId(localStorage.getItem("defaultWalletId") || "");
-    setDefaultPartnerId(localStorage.getItem("defaultPartnerId") || "");
   }, []);
+
+  const fetchRecentHistory = React.useCallback(async () => {
+    setRecentHistoryLoading(true);
+    setRecentHistoryError(null);
+    try {
+      const result = await getHistory({ page: 1, pageSize: 5 });
+      setRecentHistory(result.items ?? []);
+    } catch (error) {
+      setRecentHistoryError(extractHistoryError(error));
+      setRecentHistory([]);
+    } finally {
+      setRecentHistoryLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void fetchRecentHistory();
+    const unsubscribe = subscribeToHistoryRefresh(() => {
+      void fetchRecentHistory();
+    });
+    return unsubscribe;
+  }, [fetchRecentHistory]);
 
   const isLoading = walletsLoading || partnersLoading;
   const error = walletsError || partnersError;
@@ -250,28 +305,53 @@ export default function WalletDashboardPage() {
             <Clock3 className="h-6 w-6 text-note-yellow" />
             Recent History
           </CardTitle>
-          <p className="text-sm text-pencil-gray">Mock entries for current redesign phase</p>
+          <p className="text-sm text-pencil-gray">Latest transactions from your account</p>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {mockRecentHistory.map((item) => {
-              const positive = item.amount > 0;
-              return (
-                <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-2">
-                  <div>
-                    <p className="font-medium text-ink-black">{item.title}</p>
-                    <p className="text-xs text-pencil-gray">{item.wallet} - {item.date}</p>
+          {recentHistoryLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={`recent-loading-${index}`} className="flex items-center justify-between rounded-md px-2 py-2">
+                  <div className="space-y-2">
+                    <div className="h-4 w-36 rounded bg-gray-200" />
+                    <div className="h-3 w-28 rounded bg-gray-100" />
                   </div>
-                  <div className="text-right">
-                    <p className={`font-semibold ${positive ? "text-green-600" : "text-red-600"}`}>
-                      {positive ? "+" : ""}{formatVnd(item.amount)}
-                    </p>
-                    {item.actor ? <p className="text-xs text-pencil-gray">{item.actor}</p> : null}
-                  </div>
+                  <div className="h-4 w-24 rounded bg-gray-200" />
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : recentHistoryError ? (
+            <p className="text-sm text-red-600">{recentHistoryError}</p>
+          ) : recentHistory.length === 0 ? (
+            <p className="text-sm text-pencil-gray">No transactions yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {recentHistory.map((item) => {
+                const positive = item.amount > 0;
+                const title = getHistoryTitle(item);
+                const walletLabel = item.parentWalletName
+                  ? `${item.walletName ?? "Unknown Wallet"} (${item.parentWalletName})`
+                  : item.walletName ?? "Unknown Wallet";
+                const dateLabel = formatHistoryDate(item.transactionDate || item.createdAt);
+
+                return (
+                  <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-2">
+                    <div>
+                      <p className="font-medium text-ink-black">{title}</p>
+                      <p className="text-xs text-pencil-gray">{walletLabel} - {dateLabel}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-semibold ${positive ? "text-green-600" : "text-red-600"}`}>
+                        {positive ? "+" : ""}
+                        {formatVnd(item.amount)}
+                      </p>
+                      {item.partnerName ? <p className="text-xs text-pencil-gray">{item.partnerName}</p> : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
