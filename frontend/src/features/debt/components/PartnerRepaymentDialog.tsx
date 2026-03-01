@@ -16,6 +16,7 @@ import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useQuickDeductSubmit } from "@/features/transaction/hooks/useTransactionSubmit";
 import { PayerMode } from "@/features/transaction/types/transaction";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { withRepayMarker } from "@/features/history/utils/historyKind";
 import type { DebtPartner } from "../types/debtPartner";
 
 type PartnerRepaymentDialogProps = {
@@ -140,7 +141,7 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
         payerMode,
         total: amount,
         debtAmount: amount,
-        note: note.trim() ? note.trim() : undefined,
+        note: withRepayMarker(note),
       });
       onOpenChange(false);
     } catch (error) {

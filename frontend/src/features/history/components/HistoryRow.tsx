@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Lock, AlertCircle } from "lucide-react";
 import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
+import { getHistoryKindTag, stripRepayMarker } from "../utils/historyKind";
 import { formatVnd } from "@/lib/utils";
 
 type HistoryRowProps = {
@@ -49,10 +50,9 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
   const missingDebtAmount = hasPartner && !hasDebt;
 
   const payerMode = item.payerMode ?? null;
-  const isUserPaying = payerMode === PayerMode.ToiTra;
-  const isPartnerPaying = payerMode === PayerMode.PartnerTra;
   const payerModeTag = getPayerModeTag(payerMode);
-  const title = item.note?.trim() || "Transaction";
+  const historyKindTag = getHistoryKindTag(item);
+  const title = stripRepayMarker(item.note) || "Transaction";
   const dateLabel = formatHistoryDate(item.transactionDate || item.createdAt);
 
   const sign = isTransfer
@@ -88,6 +88,17 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
               {payerModeTag ? (
                 <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[11px] font-medium text-purple-700 shrink-0">
                   {payerModeTag}
+                </span>
+              ) : null}
+              {historyKindTag ? (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0 ${
+                    historyKindTag === "repay"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-sky-100 text-sky-700"
+                  }`}
+                >
+                  {historyKindTag}
                 </span>
               ) : null}
               {isLocked ? (
@@ -129,6 +140,17 @@ export const HistoryRow: React.FC<HistoryRowProps> = ({ item }) => {
           {hasPartner && payerModeTag ? (
             <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[11px] font-medium text-purple-700">
               {payerModeTag}
+            </span>
+          ) : null}
+          {historyKindTag ? (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                historyKindTag === "repay"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-sky-100 text-sky-700"
+              }`}
+            >
+              {historyKindTag}
             </span>
           ) : null}
           {isLocked ? (

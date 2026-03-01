@@ -5,6 +5,7 @@ import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
 import { HistoryDto, PayerMode } from "@/features/history/types/history";
+import { getHistoryKindTag, stripRepayMarker } from "@/features/history/utils/historyKind";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
@@ -28,7 +29,7 @@ const extractHistoryError = (error: unknown): string => {
 };
 
 const getHistoryTitle = (item: HistoryDto): string => {
-  const note = item.note?.trim();
+  const note = stripRepayMarker(item.note);
   if (note) {
     return note;
   }
@@ -351,6 +352,7 @@ export default function WalletDashboardPage() {
                   : item.walletName ?? "Unknown Wallet";
                 const dateLabel = formatHistoryDate(item.transactionDate || item.createdAt);
                 const payerModeTag = getPayerModeTag(item);
+                const historyKindTag = getHistoryKindTag(item);
 
                 return (
                   <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-2">
@@ -366,6 +368,17 @@ export default function WalletDashboardPage() {
                       {item.partnerName ? (
                         <div className="mt-0.5 flex items-center justify-end gap-1">
                           <p className="text-xs text-pencil-gray">{item.partnerName}</p>
+                          {historyKindTag ? (
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                                historyKindTag === "repay"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-sky-100 text-sky-700"
+                              }`}
+                            >
+                              {historyKindTag}
+                            </span>
+                          ) : null}
                           {payerModeTag ? (
                             <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[11px] font-medium text-purple-700">
                               {payerModeTag}
