@@ -50,9 +50,7 @@ namespace Application.Features.Transactions.CashAdjustment
             {
                 Id = Guid.NewGuid(),
                 WalletId = request.WalletId,
-                WalletName = wallet.Name,
                 PartnerId = null, // Personal-only: no partner
-                PartnerName = null,
                 Amount = signedAmount,
                 Note = request.Note,
                 TransactionDate = request.TransactionDate ?? DateTime.UtcNow,
@@ -73,7 +71,6 @@ namespace Application.Features.Transactions.CashAdjustment
             {
                 Id = transaction.Id,
                 WalletId = transaction.WalletId,
-                WalletName = transaction.WalletName,
                 PartnerId = null,
                 PartnerName = null,
                 Amount = transaction.Amount,

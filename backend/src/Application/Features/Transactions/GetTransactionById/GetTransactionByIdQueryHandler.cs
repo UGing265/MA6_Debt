@@ -22,31 +22,81 @@ namespace Application.Features.Transactions.GetTransactionById
         {
             var nowUtc = DateTimeOffset.UtcNow;
 
-            var transaction = await _context.Transactions
+            // Fetch raw transaction data
+            var rawData = await _context.Transactions
                 .AsNoTracking()
                 .Where(t => t.Id == request.Id && t.Wallet.UserId == request.UserId)
-                .Select(t => new TransactionDto
+                .Select(t => new
                 {
-                    Id = t.Id,
-                    WalletId = t.WalletId,
-                    WalletName = t.WalletName ?? t.Wallet.Name,
-                    ParentWalletName = t.Wallet.ParentWallet != null ? t.Wallet.ParentWallet.Name : null,
-                    PartnerId = t.PartnerId,
-                    PartnerName = t.PartnerName ?? (t.Partner != null ? t.Partner.Name : null),
-                    Amount = t.Amount,
-                    Note = t.Note,
-                    TransactionDate = t.TransactionDate,
-                    CreatedAt = t.CreatedAt,
-                    PayerMode = (PayerMode?)t.PayerMode,
-                    TotalAmount = t.TotalAmount,
-                    DebtAmount = t.DebtAmount
+                    t.Id,
+                    t.WalletId,
+                    t.PartnerId,
+                    t.Amount,
+                    t.Note,
+                    t.TransactionDate,
+                    t.CreatedAt,
+                    t.PayerMode,
+                    t.TotalAmount,
+                    t.DebtAmount
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (transaction == null)
+            if (rawData == null)
             {
                 throw new NotFoundException("Transaction", request.Id);
             }
+
+            // Fetch wallet info (including soft-deleted)
+            var wallet = await _context.Wallets
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(w => w.Id == rawData.WalletId)
+                .Select(w => new { w.Id, w.Name, w.ParentWalletId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Fetch parent wallet name if exists
+            string? parentWalletName = null;
+            if (wallet?.ParentWalletId.HasValue == true)
+            {
+                var parentWallet = await _context.Wallets
+                    .IgnoreQueryFilters()
+                    .AsNoTracking()
+                    .Where(w => w.Id == wallet.ParentWalletId.Value)
+                    .Select(w => w.Name)
+                    .FirstOrDefaultAsync(cancellationToken);
+                parentWalletName = parentWallet;
+            }
+
+            // Fetch partner name (including soft-deleted)
+            string? partnerName = null;
+            if (rawData.PartnerId.HasValue)
+            {
+                var partner = await _context.DebtPartners
+                    .IgnoreQueryFilters()
+                    .AsNoTracking()
+                    .Where(p => p.Id == rawData.PartnerId.Value)
+                    .Select(p => p.Name)
+                    .FirstOrDefaultAsync(cancellationToken);
+                partnerName = partner;
+            }
+
+            // Build DTO
+            var transaction = new TransactionDto
+            {
+                Id = rawData.Id,
+                WalletId = rawData.WalletId,
+                WalletName = wallet?.Name,
+                ParentWalletName = parentWalletName,
+                PartnerId = rawData.PartnerId,
+                PartnerName = partnerName,
+                Amount = rawData.Amount,
+                Note = rawData.Note,
+                TransactionDate = rawData.TransactionDate,
+                CreatedAt = rawData.CreatedAt,
+                PayerMode = (PayerMode?)rawData.PayerMode,
+                TotalAmount = rawData.TotalAmount,
+                DebtAmount = rawData.DebtAmount
+            };
 
             // Check for transfer
             var transfer = await _context.Transfers
@@ -66,7 +116,9 @@ namespace Application.Features.Transactions.GetTransactionById
             if (transfer != null)
             {
                 var transferWalletIds = new[] { transfer.FromWalletId, transfer.ToWalletId }.ToHashSet();
+                // Use IgnoreQueryFilters to include soft-deleted wallets
                 var transferWalletNames = await _context.Wallets
+                    .IgnoreQueryFilters()
                     .AsNoTracking()
                     .Where(w => transferWalletIds.Contains(w.Id))
                     .Select(w => new { w.Id, w.Name })

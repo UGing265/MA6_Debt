@@ -44,7 +44,6 @@ namespace Application.Features.Transfers.CreateTransfer
             var debitTx = new Transaction
             {
                 WalletId = request.FromWalletId,
-                WalletName = fromWalletName,
                 Amount = -request.Amount,
                 TransactionDate = now,
                 Note = $"Transfer to {toWalletName}"
@@ -53,7 +52,6 @@ namespace Application.Features.Transfers.CreateTransfer
             var creditTx = new Transaction
             {
                 WalletId = request.ToWalletId,
-                WalletName = toWalletName,
                 Amount = request.Amount,
                 TransactionDate = now,
                 Note = $"Transfer from {fromWalletName}"

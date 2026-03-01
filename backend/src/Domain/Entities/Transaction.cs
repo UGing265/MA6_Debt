@@ -10,20 +10,8 @@ namespace Domain.Entities
         public Guid WalletId { get; set; }
         public Wallet Wallet { get; set; } = null!;
 
-        /// <summary>
-        /// Wallet name at the time of transaction creation.
-        /// Stored to preserve name even if wallet is deleted.
-        /// </summary>
-        public string? WalletName { get; set; }
-
         public Guid? PartnerId { get; set; }
         public DebtPartner? Partner { get; set; }
-
-        /// <summary>
-        /// Partner name at the time of transaction creation.
-        /// Stored to preserve name even if partner is deleted.
-        /// </summary>
-        public string? PartnerName { get; set; }
 
         /// <summary>
         /// Final signed amount applied to wallet.

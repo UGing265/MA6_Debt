@@ -110,9 +110,7 @@ namespace Application.Features.Transactions.QuickDeduct
             {
                 Id = Guid.NewGuid(),
                 WalletId = walletId,
-                WalletName = wallet.Name,
                 PartnerId = partnerId,
-                PartnerName = partner?.Name,
                 Amount = walletDelta,
                 Note = request.Note,
                 TransactionDate = request.TransactionDate ?? DateTime.UtcNow,

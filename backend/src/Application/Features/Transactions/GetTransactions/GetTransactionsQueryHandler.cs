@@ -62,19 +62,82 @@ namespace Application.Features.Transactions.GetTransactions
             var page = Math.Max(1, request.Page);
             var pageSize = Math.Max(1, Math.Min(100, request.PageSize)); // Max 100 items per page
 
-            var transactions = await query
+            // Fetch raw transaction data
+            var rawTransactions = await query
                 .OrderByDescending(t => t.TransactionDate)
                 .ThenByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(t => new TransactionDto
+                .Select(t => new
+                {
+                    t.Id,
+                    t.WalletId,
+                    t.PartnerId,
+                    t.Amount,
+                    t.Note,
+                    t.TransactionDate,
+                    t.CreatedAt,
+                    t.PayerMode,
+                    t.TotalAmount,
+                    t.DebtAmount
+                })
+                .ToListAsync(cancellationToken);
+
+            // Collect wallet and partner IDs
+            var walletIds = rawTransactions.Select(t => t.WalletId).ToHashSet();
+            var partnerIds = rawTransactions.Where(t => t.PartnerId.HasValue).Select(t => t.PartnerId!.Value).ToHashSet();
+
+            // Fetch wallet names (including soft-deleted)
+            var walletData = await _context.Wallets
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(w => walletIds.Contains(w.Id))
+                .Select(w => new { w.Id, w.Name, w.ParentWalletId })
+                .ToDictionaryAsync(w => w.Id, cancellationToken);
+
+            // Get parent wallet IDs
+            var parentWalletIds = walletData.Values.Where(w => w.ParentWalletId.HasValue).Select(w => w.ParentWalletId!.Value).ToHashSet();
+            var parentWalletNames = await _context.Wallets
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(w => parentWalletIds.Contains(w.Id))
+                .Select(w => new { w.Id, w.Name })
+                .ToDictionaryAsync(w => w.Id, cancellationToken);
+
+            // Fetch partner names (including soft-deleted)
+            var partnerNames = await _context.DebtPartners
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(p => partnerIds.Contains(p.Id))
+                .Select(p => new { p.Id, p.Name })
+                .ToDictionaryAsync(p => p.Id, cancellationToken);
+
+            // Build DTOs
+            var transactions = rawTransactions.Select(t =>
+            {
+                walletData.TryGetValue(t.WalletId, out var wallet);
+                string? parentWalletName = null;
+                if (wallet?.ParentWalletId.HasValue == true)
+                {
+                    parentWalletNames.TryGetValue(wallet.ParentWalletId.Value, out var parent);
+                    parentWalletName = parent?.Name;
+                }
+
+                string? partnerName = null;
+                if (t.PartnerId.HasValue)
+                {
+                    partnerNames.TryGetValue(t.PartnerId.Value, out var partner);
+                    partnerName = partner?.Name;
+                }
+
+                return new TransactionDto
                 {
                     Id = t.Id,
                     WalletId = t.WalletId,
-                    WalletName = t.WalletName ?? t.Wallet.Name,
-                    ParentWalletName = t.Wallet.ParentWallet != null ? t.Wallet.ParentWallet.Name : null,
+                    WalletName = wallet?.Name,
+                    ParentWalletName = parentWalletName,
                     PartnerId = t.PartnerId,
-                    PartnerName = t.PartnerName ?? (t.Partner != null ? t.Partner.Name : null),
+                    PartnerName = partnerName,
                     Amount = t.Amount,
                     Note = t.Note,
                     TransactionDate = t.TransactionDate,
@@ -82,8 +145,8 @@ namespace Application.Features.Transactions.GetTransactions
                     PayerMode = (PayerMode?)t.PayerMode,
                     TotalAmount = t.TotalAmount,
                     DebtAmount = t.DebtAmount
-                })
-                .ToListAsync(cancellationToken);
+                };
+            }).ToList();
 
             if (transactions.Count > 0)
             {
@@ -108,7 +171,9 @@ namespace Application.Features.Transactions.GetTransactions
                         .SelectMany(tr => new[] { tr.FromWalletId, tr.ToWalletId })
                         .ToHashSet();
 
+                    // Use IgnoreQueryFilters to include soft-deleted wallets
                     var transferWalletNames = await _context.Wallets
+                        .IgnoreQueryFilters()
                         .AsNoTracking()
                         .Where(w => transferWalletIds.Contains(w.Id))
                         .Select(w => new { w.Id, w.Name })
