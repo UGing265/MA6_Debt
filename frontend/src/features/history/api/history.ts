@@ -28,6 +28,34 @@ export interface PagedResult<T> {
   hasNextPage: boolean;
 }
 
+export interface MonthlyStatsDto {
+  month: string;
+  monthLabel: string;
+  expense: number;
+  income: number;
+  debtIncrease: number;
+  debtDecrease: number;
+}
+
+export const getMonthlyStats = async (months: number = 6): Promise<MonthlyStatsDto[]> => {
+  const response = await apiFetch(`/api/transactions/monthly-stats?months=${months}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw new Error(`Failed to get monthly stats (status ${response.status})`);
+    }
+    console.error("Monthly stats error:", errorData);
+    throw new Error(`Failed to get monthly stats: ${JSON.stringify(errorData)}`);
+  }
+
+  return response.json();
+};
+
 export const getHistory = async (params: {
   search?: string;
   walletId?: string | null;

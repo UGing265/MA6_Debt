@@ -4,6 +4,7 @@ using Application.Common;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.DeleteTransaction;
+using Application.Features.Transactions.GetMonthlyStats;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
 using Application.Features.Transactions.QuickDeduct;
@@ -174,6 +175,24 @@ namespace API.Controllers
             {
                 Id = id,
                 UserId = GetCurrentUserId()
+            });
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get monthly statistics for dashboard chart.
+        /// </summary>
+        [HttpGet("monthly-stats")]
+        [ProducesResponseType(typeof(List<MonthlyStatsDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<MonthlyStatsDto>>> GetMonthlyStats([FromQuery] int months = 6)
+        {
+            var result = await _mediator.Send(new GetMonthlyStatsQuery
+            {
+                UserId = GetCurrentUserId(),
+                Months = Math.Min(Math.Max(months, 1), 12)  // Clamp between 1-12
             });
 
             return Ok(result);

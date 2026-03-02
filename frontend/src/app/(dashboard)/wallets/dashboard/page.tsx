@@ -3,12 +3,13 @@
 import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
-import { getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
+import { getHistory, subscribeToHistoryRefresh, getMonthlyStats, MonthlyStatsDto } from "@/features/history/api/history";
 import { HistoryDto, PayerMode } from "@/features/history/types/history";
 import { getHistoryKindTag, getHistoryKindTagClasses, stripRepayMarker } from "@/features/history/utils/historyKind";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Wallet2, TrendingUp, TrendingDown, Clock3, Users, Star } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 // formatVnd centralized via '@/lib/utils'
 
@@ -74,6 +75,8 @@ export default function WalletDashboardPage() {
   const [recentHistory, setRecentHistory] = React.useState<HistoryDto[]>([]);
   const [recentHistoryLoading, setRecentHistoryLoading] = React.useState<boolean>(true);
   const [recentHistoryError, setRecentHistoryError] = React.useState<string | null>(null);
+  const [monthlyStats, setMonthlyStats] = React.useState<MonthlyStatsDto[]>([]);
+  const [monthlyStatsLoading, setMonthlyStatsLoading] = React.useState<boolean>(true);
 
   // Load defaults from localStorage
   React.useEffect(() => {
@@ -94,13 +97,29 @@ export default function WalletDashboardPage() {
     }
   }, []);
 
+  const fetchMonthlyStats = React.useCallback(async () => {
+    setMonthlyStatsLoading(true);
+    try {
+      const result = await getMonthlyStats(6);
+      console.log("Monthly stats:", result);
+      setMonthlyStats(result);
+    } catch (error) {
+      console.error("Failed to fetch monthly stats:", error);
+      setMonthlyStats([]);
+    } finally {
+      setMonthlyStatsLoading(false);
+    }
+  }, []);
+
   React.useEffect(() => {
     void fetchRecentHistory();
+    void fetchMonthlyStats();
     const unsubscribe = subscribeToHistoryRefresh(() => {
       void fetchRecentHistory();
+      void fetchMonthlyStats();
     });
     return unsubscribe;
-  }, [fetchRecentHistory]);
+  }, [fetchRecentHistory, fetchMonthlyStats]);
 
   const isLoading = walletsLoading || partnersLoading;
   const error = walletsError || partnersError;
@@ -253,25 +272,38 @@ export default function WalletDashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="xl:col-span-2" data-testid="chart-container">
           <CardHeader className="pb-2">
-            <CardTitle className="text-3xl font-bold text-ink-black">Asset Trend</CardTitle>
+            <CardTitle className="text-3xl font-bold text-ink-black">Monthly Overview</CardTitle>
+            <p className="text-sm text-pencil-gray">Expenses and debt activity over the last 6 months</p>
           </CardHeader>
           <CardContent>
-            <div className="relative h-72 rounded-md border border-note-yellow/20 bg-gradient-to-b from-orange-50 to-white overflow-hidden">
-              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4">
-                {Array.from({ length: 24 }).map((_, index) => (
-                  <div key={index} className="border-[0.5px] border-dashed border-note-yellow/20" />
-                ))}
+            {monthlyStatsLoading ? (
+              <div className="h-72 rounded-md border border-note-yellow/20 bg-gray-50 animate-pulse" />
+            ) : monthlyStats.length === 0 ? (
+              <div className="h-72 rounded-md border border-note-yellow/20 bg-gray-50 flex flex-col items-center justify-center gap-2">
+                <p className="text-pencil-gray">No data available</p>
+                <p className="text-xs text-pencil-gray/60">Make sure backend API is running and restarted</p>
               </div>
-              <div className="absolute left-4 right-4 bottom-12 h-24 border-t-2 border-orange-300 rounded-t-full" />
-              <div className="absolute left-4 right-4 bottom-6 flex justify-between text-xs text-pencil-gray">
-                <span>T8</span>
-                <span>T9</span>
-                <span>T10</span>
-                <span>T11</span>
-                <span>T12</span>
-                <span>T1</span>
+            ) : (
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#fcd34d" opacity={0.3} />
+                    <XAxis dataKey="monthLabel" tick={{ fill: "#374151", fontSize: 12 }} />
+                    <YAxis tick={{ fill: "#374151", fontSize: 12 }} tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
+                    <Tooltip
+                      formatter={(value) => formatVnd(Number(value))}
+                      labelStyle={{ color: "#1f2937" }}
+                      contentStyle={{ backgroundColor: "#fffbeb", border: "1px solid #fcd34d", borderRadius: "8px" }}
+                    />
+                    <Legend />
+                    <Bar dataKey="expense" name="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="debtIncrease" name="New Debt" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="debtDecrease" name="Repaid" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
