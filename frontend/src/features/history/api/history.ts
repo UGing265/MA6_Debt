@@ -43,14 +43,7 @@ export const getMonthlyStats = async (months: number = 6): Promise<MonthlyStatsD
   });
 
   if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch {
-      throw new Error(`Failed to get monthly stats (status ${response.status})`);
-    }
-    console.error("Monthly stats error:", errorData);
-    throw new Error(`Failed to get monthly stats: ${JSON.stringify(errorData)}`);
+    throw new Error("Failed to get monthly stats");
   }
 
   return response.json();

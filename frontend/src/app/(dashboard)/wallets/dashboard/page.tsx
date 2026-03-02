@@ -101,10 +101,8 @@ export default function WalletDashboardPage() {
     setMonthlyStatsLoading(true);
     try {
       const result = await getMonthlyStats(6);
-      console.log("Monthly stats:", result);
       setMonthlyStats(result);
-    } catch (error) {
-      console.error("Failed to fetch monthly stats:", error);
+    } catch {
       setMonthlyStats([]);
     } finally {
       setMonthlyStatsLoading(false);
