@@ -22,42 +22,42 @@ const TAG_OPTIONS: { value: HistoryKindTag; label: string }[] = [
 
 const TAG_HELP: Record<HistoryKindTag, { title: string; description: string; usage: string[] }> = {
   salary: {
-    title: "Salary (Thu nhập)",
-    description: "Các giao dịch có số tiền dương (+), tức là tiền chảy vào ví của bạn.",
+    title: "Salary (Income)",
+    description: "Transactions with positive amount (+), money flowing into your wallet.",
     usage: [
-      "Lương hàng tháng, thưởng",
-      "Tiền được chuyển khoản vào",
-      "Hoàn tiền, cashback",
-      "Bán hàng, doanh thu"
+      "Monthly salary, bonuses",
+      "Money transferred in",
+      "Refunds, cashback",
+      "Sales, revenue"
     ],
   },
   bill: {
-    title: "Bill (Hóa đơn chia sẻ)",
-    description: "Giao dịch có liên quan đến partner, dùng để chia tiền hóa đơn với người khác.",
+    title: "Bill (Shared Bills)",
+    description: "Transactions related to partners, used to split bills with others.",
     usage: [
-      "Đi ăn chung, chia tiền",
-      "Mua sắm chung",
-      "Chi tiêu cần chia đôi",
-      "Tự động tính nợ giữa 2 người"
+      "Dining together, splitting costs",
+      "Shared shopping",
+      "Expenses to be split",
+      "Auto-calculates debt between 2 people"
     ],
   },
   repay: {
-    title: "Repay (Trả nợ)",
-    description: "Giao dịch trả nợ cho partner, được đánh dấu tự động khi note có chứa từ khóa.",
+    title: "Repay (Debt Repayment)",
+    description: "Debt repayment transactions for partners, auto-marked when note contains keyword.",
     usage: [
-      "Trả nợ cho partner",
-      "Ghi chú có chứa từ khóa trả nợ",
-      "Giảm số dư nợ giữa 2 người"
+      "Repay debt to partner",
+      "Note contains repayment keyword",
+      "Reduces debt balance between 2 people"
     ],
   },
   consume: {
-    title: "Consume (Tiêu dùng)",
-    description: "Các giao dịch có số tiền âm (-), tức là tiền chảy ra khỏi ví của bạn.",
+    title: "Consume (Personal Spending)",
+    description: "Transactions with negative amount (-), money flowing out of your wallet.",
     usage: [
-      "Mua sắm cá nhân",
-      "Thanh toán hóa đơn",
-      "Rút tiền, chuyển khoản ra",
-      "Chi tiêu hàng ngày"
+      "Personal shopping",
+      "Bill payments",
+      "Withdrawals, transfers out",
+      "Daily expenses"
     ],
   },
 };
@@ -176,7 +176,7 @@ export const HistoryFilters: React.FC = () => {
                 {TAG_HELP[selectedHelp].description}
               </p>
               <div>
-                <p className="text-sm font-semibold text-ink-black mb-2">Công dụng:</p>
+                <p className="text-sm font-semibold text-ink-black mb-2">Usage:</p>
                 <ul className="text-sm text-ink-black space-y-1">
                   {TAG_HELP[selectedHelp].usage.map((item, idx) => (
                     <li key={idx} className="flex items-start gap-2">
@@ -191,7 +191,7 @@ export const HistoryFilters: React.FC = () => {
                   onClick={() => setHelpOpen(false)}
                   className="w-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
                 >
-                  Đã hiểu
+                  Got it
                 </Button>
               </div>
             </div>
