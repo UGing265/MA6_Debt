@@ -3,38 +3,27 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Edit2,
-  Trash2,
-  Loader2,
-  Lock,
-  AlertTriangle,
-  Wallet2,
-  Users,
-  Calendar,
-  FileText,
-  ArrowLeftRight,
-  Banknote,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getHistoryItem, deleteHistoryItem, updateTransactionDebt } from "../api/history";
 import { getDebtPartners } from "@/features/debt/api/debtPartners";
 import { isRepayNote, stripRepayMarker, withRepayMarker } from "../utils/historyKind";
-import { HistoryDto, TransferDirection, PayerMode } from "../types/history";
-import { formatVnd } from "@/lib/utils";
+import { HistoryDto, PayerMode } from "../types/history";
+import {
+  TransactionHeader,
+  AmountCard,
+  DebtInfoCard,
+  WalletInfoCard,
+  TransferDetailsCard,
+  NoteCard,
+  EditTransactionDialog,
+  DeleteTransactionDialog,
+  DebtDialog,
+} from "./TransactionDetail";
 
+// Utility functions
 const extractGeneralError = (e: unknown): string => {
   if (!e) return "An error occurred. Please try again.";
   if (typeof e === "string") return e;
@@ -55,18 +44,6 @@ const isLockLikeMessage = (msg: string): boolean => {
   return m.includes("lock") || m.includes("locked") || m.includes("conflict") || m.includes("closed") || m.includes("settled");
 };
 
-const formatDateTime = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return date.toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-};
-
 const formatDateForInput = (dateStr: string): string => {
   const date = new Date(dateStr);
   const year = date.getFullYear();
@@ -75,26 +52,6 @@ const formatDateForInput = (dateStr: string): string => {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (
-    e.key === "Backspace" ||
-    e.key === "Delete" ||
-    e.key === "Tab" ||
-    e.key === "Escape" ||
-    e.key === "Enter" ||
-    e.key === "ArrowLeft" ||
-    e.key === "ArrowRight" ||
-    e.key === "ArrowUp" ||
-    e.key === "ArrowDown" ||
-    (e.ctrlKey && (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x"))
-  ) {
-    return;
-  }
-  if (!/^\d$/.test(e.key)) {
-    e.preventDefault();
-  }
 };
 
 export const TransactionDetailPage: React.FC = () => {
@@ -230,6 +187,7 @@ export const TransactionDetailPage: React.FC = () => {
     }
   }, [transaction, router, fetchTransaction]);
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -246,6 +204,7 @@ export const TransactionDetailPage: React.FC = () => {
     );
   }
 
+  // Error state
   if (error || !transaction) {
     return (
       <div className="space-y-6">
@@ -271,524 +230,76 @@ export const TransactionDetailPage: React.FC = () => {
     );
   }
 
-  const amount = transaction.amount ?? 0;
+  // Computed values
   const isTransfer = transaction.transferId != null;
-  const direction = transaction.transferDirection ?? null;
-  const absAmount = Math.abs(amount);
   const isLocked = Boolean(transaction.isLocked);
   const lockReason = "This transaction is locked and can't be edited or deleted.";
   const isRepay = isRepayNote(transaction.note);
 
-  const sign = isTransfer
-    ? direction === TransferDirection.Incoming
-      ? "+"
-      : "-"
-    : amount >= 0
-    ? "+"
-    : "-";
-
-  const transferLabel = isTransfer
-    ? direction === TransferDirection.Incoming
-      ? "Transfer In"
-      : "Transfer Out"
-    : "";
-
-  const amountColor = isTransfer
-    ? direction === TransferDirection.Incoming
-      ? "text-green-600"
-      : "text-red-600"
-    : amount >= 0
-    ? "text-green-600"
-    : "text-red-600";
-
-  const walletDisplay = transaction.walletName ?? "";
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/history">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold text-ink-black">Transaction Details</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {isLocked && (
-            <span
-              className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
-              title={lockReason}
-            >
-              <Lock className="h-4 w-4" />
-              Locked
-            </span>
-          )}
-        </div>
-      </div>
+      <TransactionHeader isLocked={isLocked} lockReason={lockReason} />
 
-      {/* Amount Card */}
-      <Card className="border-note-yellow/30">
-        <CardContent className="pt-6 pb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-pencil-gray">Amount</p>
-              <p className={`text-4xl font-bold ${amountColor}`}>
-                {sign}
-                {formatVnd(absAmount)}
-              </p>
-              {isTransfer && (
-                <span
-                  className={`inline-flex items-center mt-2 px-3 py-1 rounded-full text-sm ${
-                    direction === TransferDirection.Incoming
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  <ArrowLeftRight className="h-4 w-4 mr-1" />
-                  {transferLabel}
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {/* Add/Edit Debt button - only show for non-transfer transactions */}
-              {!isTransfer && (
-                <Button
-                  className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 border border-note-yellow"
-                  onClick={() => setIsDebtOpen(true)}
-                  disabled={isLocked}
-                  title={isLocked ? lockReason : transaction.partnerId ? "Edit debt info" : "Add debt info"}
-                >
-                  <Banknote className="h-4 w-4 mr-2" />
-                  {transaction.partnerId ? "Edit Debt" : "Add Debt"}
-                </Button>
-              )}
-              <Button
-                className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 border border-note-yellow"
-                onClick={() => setIsEditOpen(true)}
-                disabled={isLocked}
-                title={isLocked ? lockReason : "Edit transaction"}
-              >
-                <Edit2 className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setIsDeleteOpen(true)}
-                disabled={isLocked}
-                title={isLocked ? lockReason : "Delete transaction"}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <AmountCard
+        transaction={transaction}
+        isLocked={isLocked}
+        lockReason={lockReason}
+        onEdit={() => setIsEditOpen(true)}
+        onDelete={() => setIsDeleteOpen(true)}
+        onAddDebt={() => setIsDebtOpen(true)}
+      />
 
       {/* Two Column Layout */}
       <div className="grid gap-4 md:grid-cols-2">
         {transaction.partnerId ? (
           <>
-            {/* LEFT: Debt Info */}
-            <Card className={`border-purple-200 ${isRepay ? "bg-emerald-50/30" : "bg-purple-50/30"}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className={`text-lg flex items-center gap-2 ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>
-                  <Users className="h-5 w-5" />
-                  {isRepay ? "Repayment" : "Debt Info"}
-                  {isRepay && (
-                    <span className="ml-auto text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded-full">
-                      Repaid
-                    </span>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Who owes whom */}
-                <div className={`p-3 rounded-lg bg-white border ${isRepay ? "border-emerald-200" : "border-purple-200"}`}>
-                  {transaction.payerMode === PayerMode.ToiTra ? (
-                    <div>
-                      <p className="text-xs text-pencil-gray mb-1">
-                        {isRepay ? "You repaid debt to" : "Partner owes you"}
-                      </p>
-                      <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{transaction.partnerName}</p>
-                    </div>
-                  ) : transaction.payerMode === PayerMode.PartnerTra ? (
-                    <div>
-                      <p className="text-xs text-pencil-gray mb-1">
-                        {isRepay ? "Partner repaid debt to you" : "You owe partner"}
-                      </p>
-                      <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{transaction.partnerName}</p>
-                    </div>
-                  ) : (
-                    <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{transaction.partnerName}</p>
-                  )}
-                </div>
-
-                {/* Bill amounts */}
-                <div className="grid grid-cols-2 gap-3">
-                  {transaction.totalAmount != null && (
-                    <div className="p-2 rounded-lg bg-white border border-gray-200">
-                      <p className="text-xs text-pencil-gray">Total Bill</p>
-                      <p className="text-lg font-bold text-ink-black">{formatVnd(transaction.totalAmount)}</p>
-                    </div>
-                  )}
-                  {transaction.debtAmount != null && transaction.debtAmount !== 0 ? (
-                    <div className={`p-2 rounded-lg ${isRepay ? "bg-emerald-100 border-emerald-200" : "bg-purple-100 border-purple-200"} border`}>
-                      <p className={`text-xs ${isRepay ? "text-emerald-600" : "text-purple-600"}`}>
-                        {isRepay
-                          ? "Amount Repaid"
-                          : transaction.payerMode === PayerMode.ToiTra
-                            ? `${transaction.partnerName} owes you`
-                            : `You owe ${transaction.partnerName}`}
-                      </p>
-                      <p className={`text-lg font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>{formatVnd(transaction.debtAmount)}</p>
-                    </div>
-                  ) : (
-                    <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
-                      <p className="text-xs text-amber-600">Debt Amount</p>
-                      <p className="text-sm font-medium text-amber-700">/!\ Not set</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Payer Mode */}
-                {transaction.payerMode != null && (
-                  <div className="text-sm">
-                    <span className="text-pencil-gray">
-                      {isRepay ? "Who repaid: " : "Who paid: "}
-                    </span>
-                    <span className="font-semibold text-ink-black">
-                      {transaction.payerMode === PayerMode.ToiTra ? "You" : transaction.partnerName}
-                    </span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* RIGHT: Wallet Info */}
-            <Card className="border-note-yellow/30 bg-note-yellow/5">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
-                  <Wallet2 className="h-5 w-5" />
-                  Wallet Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Wallet */}
-                <div className="p-3 rounded-lg bg-white border border-amber-200">
-                  <p className="text-xs text-pencil-gray mb-1">Wallet</p>
-                  <p className="text-lg font-bold text-ink-black">{walletDisplay}</p>
-                  {transaction.parentWalletName && (
-                    <p className="text-xs text-pencil-gray mt-1">Parent: {transaction.parentWalletName}</p>
-                  )}
-                </div>
-
-                {/* Date & Created */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-2 rounded-lg bg-white border border-gray-200">
-                    <p className="text-xs text-pencil-gray">Date</p>
-                    <p className="text-sm font-semibold text-ink-black">{formatDateTime(transaction.transactionDate)}</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white border border-gray-200">
-                    <p className="text-xs text-pencil-gray">Created</p>
-                    <p className="text-sm font-semibold text-ink-black">{formatDateTime(transaction.createdAt)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Note - Full width when debt exists */}
-            {stripRepayMarker(transaction.note) && (
-              <Card className="md:col-span-2 border-gray-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Note
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-ink-black whitespace-pre-wrap">{stripRepayMarker(transaction.note)}</p>
-                </CardContent>
-              </Card>
-            )}
+            <DebtInfoCard transaction={transaction} isRepay={isRepay} />
+            <WalletInfoCard transaction={transaction} />
+            <NoteCard note={transaction.note} className="md:col-span-2" />
           </>
         ) : (
           <>
-            {/* LEFT: Wallet Info (when no debt) */}
-            <Card className="border-note-yellow/30 bg-note-yellow/5">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
-                  <Wallet2 className="h-5 w-5" />
-                  Wallet Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Wallet */}
-                <div className="p-3 rounded-lg bg-white border border-amber-200">
-                  <p className="text-xs text-pencil-gray mb-1">Wallet</p>
-                  <p className="text-lg font-bold text-ink-black">{walletDisplay}</p>
-                  {transaction.parentWalletName && (
-                    <p className="text-xs text-pencil-gray mt-1">Parent: {transaction.parentWalletName}</p>
-                  )}
-                </div>
-
-                {/* Date & Created */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-2 rounded-lg bg-white border border-gray-200">
-                    <p className="text-xs text-pencil-gray">Date</p>
-                    <p className="text-sm font-semibold text-ink-black">{formatDateTime(transaction.transactionDate)}</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white border border-gray-200">
-                    <p className="text-xs text-pencil-gray">Created</p>
-                    <p className="text-sm font-semibold text-ink-black">{formatDateTime(transaction.createdAt)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* RIGHT: Note (when no debt) */}
-            {stripRepayMarker(transaction.note) && (
-              <Card className="border-gray-200 bg-gray-50/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Note
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-ink-black whitespace-pre-wrap">{stripRepayMarker(transaction.note)}</p>
-                </CardContent>
-              </Card>
-            )}
+            <WalletInfoCard transaction={transaction} />
+            <NoteCard note={transaction.note} className="bg-gray-50/30" />
           </>
         )}
 
-        {/* Transfer Details */}
-        {isTransfer && (
-          <Card className="border-blue-200 bg-blue-50/30 md:col-span-2">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <ArrowLeftRight className="h-5 w-5 text-blue-600" />
-                Transfer Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-center">
-                  <p className="text-sm text-pencil-gray">From</p>
-                  <p className="font-bold text-ink-black">{transaction.transferFromWalletName || "Unknown"}</p>
-                </div>
-                <ArrowLeftRight className="h-6 w-6 text-blue-600" />
-                <div className="text-center">
-                  <p className="text-sm text-pencil-gray">To</p>
-                  <p className="font-bold text-ink-black">{transaction.transferToWalletName || "Unknown"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <TransferDetailsCard transaction={transaction} />
       </div>
 
-      {/* Edit Dialog - Now includes Transaction Date */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogClose onClose={() => setIsEditOpen(false)} />
-          <DialogHeader>
-            <DialogTitle>Edit Transaction</DialogTitle>
-            <DialogDescription>Update the transaction details.</DialogDescription>
-          </DialogHeader>
+      {/* Dialogs */}
+      <EditTransactionDialog
+        isOpen={isEditOpen}
+        noteDraft={noteDraft}
+        transactionDateDraft={transactionDateDraft}
+        isSaving={isSaving}
+        onNoteChange={setNoteDraft}
+        onDateChange={setTransactionDateDraft}
+        onSave={handleSaveEdit}
+        onCancel={() => setIsEditOpen(false)}
+      />
 
-          <div className="space-y-4">
-            {/* Transaction Date */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Transaction Date
-              </label>
-              <input
-                type="datetime-local"
-                value={transactionDateDraft}
-                onChange={(e) => setTransactionDateDraft(e.target.value)}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-              />
-            </div>
+      <DeleteTransactionDialog
+        isOpen={isDeleteOpen}
+        isDeleting={isDeleting}
+        onDelete={handleDelete}
+        onCancel={() => setIsDeleteOpen(false)}
+      />
 
-            {/* Note */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Note
-              </label>
-              <textarea
-                value={noteDraft}
-                onChange={(e) => setNoteDraft(e.target.value)}
-                rows={4}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-                placeholder="Add a note..."
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} disabled={isSaving}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveEdit}
-              disabled={isSaving}
-              className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Dialog */}
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent>
-          <DialogClose onClose={() => setIsDeleteOpen(false)} />
-          <DialogHeader>
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <DialogTitle>Delete transaction</DialogTitle>
-            <DialogDescription>This action cannot be undone.</DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => setIsDeleteOpen(false)} disabled={isDeleting}>
-              Cancel
-            </Button>
-            <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Debt Dialog */}
-      <Dialog open={isDebtOpen} onOpenChange={setIsDebtOpen}>
-        <DialogContent>
-          <DialogClose onClose={() => setIsDebtOpen(false)} />
-          <DialogHeader>
-            <DialogTitle>{transaction.partnerId ? "Edit Debt Info" : "Add Debt Info"}</DialogTitle>
-            <DialogDescription>
-              {transaction.partnerId
-                ? "Update debt information for this transaction."
-                : "Add debt information to track who owes whom."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Partner */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">Partner</label>
-              <select
-                value={debtPartnerId}
-                onChange={(e) => setDebtPartnerId(e.target.value)}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-              >
-                <option value="">Select partner</option>
-                {partners.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({formatVnd(p.balance)})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Payer Mode */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">Who Paid?</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDebtPayerMode(PayerMode.ToiTra)}
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    debtPayerMode === PayerMode.ToiTra
-                      ? "bg-note-yellow text-ink-black"
-                      : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-                  }`}
-                >
-                  I Paid
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDebtPayerMode(PayerMode.PartnerTra)}
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    debtPayerMode === PayerMode.PartnerTra
-                      ? "bg-note-yellow text-ink-black"
-                      : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-                  }`}
-                >
-                  Partner Paid
-                </button>
-              </div>
-            </div>
-
-            {/* Debt Amount */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">
-                {debtPayerMode === PayerMode.ToiTra ? "Partner Owes Me" : "I Owe Partner"}
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="0"
-                  value={debtAmount ? Number(debtAmount.replace(/,/g, "")).toLocaleString("en-US") : ""}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
-                    setDebtAmount(raw);
-                  }}
-                  onKeyDown={handleNumericKeyDown}
-                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 pr-12 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pencil-gray">vnd</span>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => setIsDebtOpen(false)} disabled={isSavingDebt}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveDebt}
-              disabled={isSavingDebt}
-              className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-            >
-              {isSavingDebt ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DebtDialog
+        isOpen={isDebtOpen}
+        hasExistingDebt={!!transaction.partnerId}
+        debtPartnerId={debtPartnerId}
+        debtPayerMode={debtPayerMode}
+        debtAmount={debtAmount}
+        partners={partners}
+        isSaving={isSavingDebt}
+        onPartnerChange={setDebtPartnerId}
+        onPayerModeChange={setDebtPayerMode}
+        onDebtAmountChange={setDebtAmount}
+        onSave={handleSaveDebt}
+        onCancel={() => setIsDebtOpen(false)}
+      />
     </div>
   );
 };
