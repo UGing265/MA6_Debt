@@ -64,6 +64,7 @@ public class TransfersController : ControllerBase
             FromWalletId = request.FromWalletId,
             ToWalletId = request.ToWalletId,
             Amount = request.Amount,
+            Note = request.Note,
             SourceTransactionId = request.SourceTransactionId,
             DestinationTransactionId = request.DestinationTransactionId
         };

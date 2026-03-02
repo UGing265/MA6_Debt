@@ -212,6 +212,7 @@ export const TransferForm: React.FC = () => {
           fromWalletId: values.fromWalletId,
           toWalletId: values.toWalletId,
           amount: values.amount,
+          note: values.note || null,
         });
 
         toast.success("Transfer successful");
@@ -453,22 +454,22 @@ export const TransferForm: React.FC = () => {
                   )}
                 />
 
-                {/* Note - Coming Soon */}
+                {/* Note */}
                 <FormField
                   control={form.control}
                   name="note"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-400 font-medium">
+                      <FormLabel className="text-gray-700 font-medium">
                         Note{" "}
-                        <span className="text-pencil-gray font-normal italic">(Coming soon)</span>
+                        <span className="text-pencil-gray font-normal">(Optional)</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Coming soon..."
+                          placeholder="Add a note for this transfer..."
                           data-testid="transfer-note"
-                          disabled={true}
-                          className="h-10 bg-gray-100 cursor-not-allowed"
+                          disabled={isDisabled}
+                          className="h-10"
                           {...field}
                         />
                       </FormControl>

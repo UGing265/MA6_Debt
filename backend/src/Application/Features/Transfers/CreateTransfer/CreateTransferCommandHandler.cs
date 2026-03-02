@@ -29,6 +29,9 @@ namespace Application.Features.Transfers.CreateTransfer
             var fromWalletName = walletNames.TryGetValue(request.FromWalletId, out var fn) ? fn : "Unknown";
             var toWalletName = walletNames.TryGetValue(request.ToWalletId, out var tn) ? tn : "Unknown";
 
+            // Build note suffix if user provided a custom note
+            var noteSuffix = string.IsNullOrWhiteSpace(request.Note) ? "" : $": {request.Note}";
+
             // Build the Transfer and associated Transactions in a single SaveChanges transaction
             var now = DateTime.UtcNow;
 
@@ -46,7 +49,7 @@ namespace Application.Features.Transfers.CreateTransfer
                 WalletId = request.FromWalletId,
                 Amount = -request.Amount,
                 TransactionDate = now,
-                Note = $"Transfer to {toWalletName}"
+                Note = $"Transfer to {toWalletName}{noteSuffix}"
             };
 
             var creditTx = new Transaction
@@ -54,7 +57,7 @@ namespace Application.Features.Transfers.CreateTransfer
                 WalletId = request.ToWalletId,
                 Amount = request.Amount,
                 TransactionDate = now,
-                Note = $"Transfer from {fromWalletName}"
+                Note = $"Transfer from {fromWalletName}{noteSuffix}"
             };
 
             transfer.SourceTransactionId = debitTx.Id;

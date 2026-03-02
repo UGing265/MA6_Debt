@@ -26,9 +26,8 @@ namespace Application.Features.Transactions.CashAdjustment
                 .GreaterThan(0).WithMessage("Amount must be greater than 0");
 
             RuleFor(x => x.Note)
-                .NotEmpty().WithMessage("Note is required for audit trail")
-                .MinimumLength(3).WithMessage("Note must be at least 3 characters")
-                .MaximumLength(255).WithMessage("Note cannot exceed 255 characters");
+                .MaximumLength(255).WithMessage("Note cannot exceed 255 characters")
+                .When(x => !string.IsNullOrEmpty(x.Note));
 
             RuleFor(x => x)
                 .MustAsync(WalletBelongsToUser)

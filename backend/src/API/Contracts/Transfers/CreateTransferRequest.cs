@@ -21,6 +21,11 @@ namespace API.Contracts.Transfers
         public decimal Amount { get; set; }
 
         /// <summary>
+        /// Optional note for the transfer.
+        /// </summary>
+        public string? Note { get; set; }
+
+        /// <summary>
         /// Optional audit trail reference to the debit-side transaction.
         /// </summary>
         public Guid? SourceTransactionId { get; set; }

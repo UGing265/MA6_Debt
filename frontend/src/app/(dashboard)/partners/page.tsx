@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star, HandCoins } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star, HandCoins, Search } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { PartnerNameDialog } from "@/features/debt/components/PartnerNameDialog";
@@ -32,6 +32,7 @@ export default function PartnersPage() {
   const [repaymentPartner, setRepaymentPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
   const [defaultPartnerId, setDefaultPartnerId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Load default partner from API
   React.useEffect(() => {
@@ -73,10 +74,34 @@ export default function PartnersPage() {
     }
   };
 
-  const sortedPartners = [...partners].sort((a, b) => {
-    if (b.balance !== a.balance) return b.balance - a.balance;
-    return a.name.localeCompare(b.name);
-  });
+  // Filter and sort partners: starred first, then by balance, then by name
+  const sortedPartners = useMemo(() => {
+    let result = [...partners];
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter((p) => p.name.toLowerCase().includes(query));
+    }
+
+    // Sort: starred first, then by balance, then by name
+    result.sort((a, b) => {
+      const aIsStarred = defaultPartnerId === a.id;
+      const bIsStarred = defaultPartnerId === b.id;
+
+      // Starred partners always come first
+      if (aIsStarred && !bIsStarred) return -1;
+      if (!aIsStarred && bIsStarred) return 1;
+
+      // Then sort by balance
+      if (b.balance !== a.balance) return b.balance - a.balance;
+
+      // Then sort by name
+      return a.name.localeCompare(b.name);
+    });
+
+    return result;
+  }, [partners, defaultPartnerId, searchQuery]);
 
   const handleCreate = async (data: { name: string; balance?: number }) => {
     await createPartner({ name: data.name, balance: data.balance ?? 0 });
@@ -105,18 +130,31 @@ export default function PartnersPage() {
 
   return (
     <div data-testid="partners-page-root" className="space-y-6">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-5xl font-bold text-ink-black">Debt Partners</h1>
           <p className="text-pencil-gray mt-2">Manage receivables and payables by partner</p>
         </div>
-        <Button
-          className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-          onClick={() => setIsCreateOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Partner
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-note-yellow" />
+            <input
+              type="text"
+              placeholder="Search partners..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-64 pl-11 pr-4 py-2.5 border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow focus:ring-1 focus:ring-note-yellow text-ink-black font-medium placeholder:text-pencil-gray/70"
+            />
+          </div>
+          <Button
+            className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+            onClick={() => setIsCreateOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Partner
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -138,7 +176,7 @@ export default function PartnersPage() {
       {!isLoading && !error ? (
         sortedPartners.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {sortedPartners.map((partner, index) => {
+            {sortedPartners.map((partner) => {
               const receivable = partner.balance > 0;
               const payable = partner.balance < 0;
               const neutral = partner.balance === 0;
@@ -232,6 +270,13 @@ export default function PartnersPage() {
               );
             })}
           </div>
+        ) : searchQuery.trim() && partners.length > 0 ? (
+          <Card className="border-note-yellow/30">
+            <CardContent className="p-6 text-center">
+              <p className="text-xl font-semibold text-ink-black">No partners found</p>
+              <p className="text-sm text-pencil-gray">No partners match your search "{searchQuery}"</p>
+            </CardContent>
+          </Card>
         ) : (
           <Card className="border-note-yellow/30">
             <CardContent className="p-6 text-center">
