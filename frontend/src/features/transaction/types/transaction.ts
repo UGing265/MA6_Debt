@@ -38,7 +38,7 @@ export interface CashAdjustmentRequest {
   walletId: string;
   direction: AdjustmentDirection;
   amount: number;
-  note: string;
+  note?: string;
   transactionDate?: string;
 }
 

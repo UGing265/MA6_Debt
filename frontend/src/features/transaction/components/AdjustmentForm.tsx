@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -81,6 +81,23 @@ export const AdjustmentForm = () => {
   });
 
   const amountValue = form.watch("amount");
+
+  // Get default wallet ID from localStorage
+  const getDefaultWalletId = (): string => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("defaultWalletId") || "";
+  };
+
+  // Auto-select default wallet on mount
+  useEffect(() => {
+    const defaultWalletId = getDefaultWalletId();
+    if (defaultWalletId) {
+      const walletExists = childWallets.some(w => w.id === defaultWalletId);
+      if (walletExists) {
+        form.setValue("walletId", defaultWalletId);
+      }
+    }
+  }, [form, childWallets]);
 
   const onSubmit = async (values: AdjustmentFormInput) => {
     setIsSubmitting(true);

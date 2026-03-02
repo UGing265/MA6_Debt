@@ -110,17 +110,23 @@ export function QuickDebtForm() {
   useEffect(() => {
     const defaultPartnerId = getDefaultPartnerId();
     const defaultWalletId = getDefaultWalletId();
-    if (defaultPartnerId && !form.getValues("partnerId")) {
-      form.setValue("partnerId", defaultPartnerId);
+
+    // Auto-select default partner
+    if (defaultPartnerId) {
+      const partnerExists = partners.some(p => p.id === defaultPartnerId);
+      if (partnerExists) {
+        form.setValue("partnerId", defaultPartnerId);
+      }
     }
-    if (defaultWalletId && !form.getValues("walletId")) {
-      // Only set if the wallet exists in childWallets
-      const exists = childWallets.some(w => w.id === defaultWalletId);
-      if (exists) {
+
+    // Auto-select default wallet (only if it's a child wallet)
+    if (defaultWalletId) {
+      const walletExists = childWallets.some(w => w.id === defaultWalletId);
+      if (walletExists) {
         form.setValue("walletId", defaultWalletId);
       }
     }
-  }, [form, childWallets]);
+  }, [form, childWallets, partners]);
 
   const onSubmit = async (values: QuickDebtFormValues) => {
     if (isSubmitting) {

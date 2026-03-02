@@ -462,7 +462,6 @@ export const TransferForm: React.FC = () => {
                     <FormItem>
                       <FormLabel className="text-gray-700 font-medium">
                         Note{" "}
-                        <span className="text-pencil-gray font-normal">(Optional)</span>
                       </FormLabel>
                       <FormControl>
                         <Input
