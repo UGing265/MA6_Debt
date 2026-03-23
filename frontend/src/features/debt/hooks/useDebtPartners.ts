@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   getDebtPartners,
@@ -14,6 +14,14 @@ import type {
   UpdateDebtPartnerRequest,
 } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+
+type DebtPartnersListener = () => void;
+
+const debtPartnersListeners = new Set<DebtPartnersListener>();
+
+export const triggerDebtPartnersRefresh = () => {
+  debtPartnersListeners.forEach((listener) => listener());
+};
 
 interface UseDebtPartnersReturn {
   partners: DebtPartner[];
@@ -36,27 +44,50 @@ export function useDebtPartners(): UseDebtPartnersReturn {
   const [partners, setPartners] = useState<DebtPartner[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestIdRef = useRef(0);
 
   // Fetch all debt partners
-  const fetchPartners = async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchPartners = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    if (isMountedRef.current) {
+      setIsLoading(true);
+      setError(null);
+    }
+
     try {
       const data = await getDebtPartners();
+
+      if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setPartners(data);
     } catch (err: any) {
+      if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       const parsedError = parseErrorResponse(err);
       setError(parsedError.general);
       toast.error(parsedError.general || "Failed to load debt partners");
     } finally {
+      if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Initial load
   useEffect(() => {
-    fetchPartners();
-  }, []);
+    isMountedRef.current = true;
+    void fetchPartners();
+
+    const listener = () => {
+      void fetchPartners();
+    };
+
+    debtPartnersListeners.add(listener);
+
+    return () => {
+      isMountedRef.current = false;
+      debtPartnersListeners.delete(listener);
+    };
+  }, [fetchPartners]);
 
   // Create new partner
   const createPartner = async (
@@ -65,7 +96,7 @@ export function useDebtPartners(): UseDebtPartnersReturn {
     try {
       const newPartner = await createDebtPartner(data);
       toast.success("Partner created successfully!");
-      await fetchPartners(); // Refresh list
+      triggerDebtPartnersRefresh();
       return newPartner;
     } catch (err: any) {
       const parsedError = parseErrorResponse(err);
@@ -83,7 +114,7 @@ export function useDebtPartners(): UseDebtPartnersReturn {
     try {
       const updatedPartner = await updateDebtPartner(id, data);
       toast.success("Partner updated successfully!");
-      await fetchPartners(); // Refresh list
+      triggerDebtPartnersRefresh();
       return updatedPartner;
     } catch (err: any) {
       const parsedError = parseErrorResponse(err);
@@ -97,7 +128,7 @@ export function useDebtPartners(): UseDebtPartnersReturn {
     try {
       await deleteDebtPartner(id);
       toast.success("Partner deleted successfully!");
-      await fetchPartners(); // Refresh list
+      triggerDebtPartnersRefresh();
       return true;
     } catch (err: any) {
       const parsedError = parseErrorResponse(err);

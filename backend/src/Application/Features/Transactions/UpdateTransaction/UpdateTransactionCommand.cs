@@ -11,6 +11,11 @@ namespace Application.Features.Transactions.UpdateTransaction
         [JsonIgnore]
         public Guid UserId { get; set; }
 
+        /// <summary>
+        /// Optional partner ID. Set to add debt tracking to a transaction that doesn't have one.
+        /// </summary>
+        public Guid? PartnerId { get; set; }
+
         public PayerMode PayerMode { get; set; }
 
         public decimal Total { get; set; }

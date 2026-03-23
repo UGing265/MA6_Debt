@@ -62,24 +62,37 @@ const DialogHeader = ({ children }: DialogHeaderProps) => {
   );
 };
 
-interface DialogTitleProps {
+interface DialogTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   children: React.ReactNode;
 }
 
-const DialogTitle = ({ children }: DialogTitleProps) => {
+const DialogTitle = ({ children, className, ...props }: DialogTitleProps) => {
   return (
-    <h2 className="text-lg font-semibold leading-none tracking-tight text-gray-900">
+    <h2
+      className={cn(
+        "text-lg font-semibold leading-none tracking-tight text-gray-900",
+        className
+      )}
+      {...props}
+    >
       {children}
     </h2>
   );
 };
 
-interface DialogDescriptionProps {
+interface DialogDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
   children: React.ReactNode;
 }
 
-const DialogDescription = ({ children }: DialogDescriptionProps) => {
-  return <p className="text-sm text-gray-500">{children}</p>;
+const DialogDescription = ({ children, className, ...props }: DialogDescriptionProps) => {
+  return (
+    <p
+      className={cn("text-sm text-gray-500", className)}
+      {...props}
+    >
+      {children}
+    </p>
+  );
 };
 
 interface DialogFooterProps {

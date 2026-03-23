@@ -14,6 +14,9 @@ namespace Application.Features.Transfers.CreateTransfer
         public Guid ToWalletId { get; set; }
         public decimal Amount { get; set; }
 
+        // Optional note for the transfer
+        public string? Note { get; set; }
+
         // Optional: allow pre-linked transactions as audit trail references
         public Guid? SourceTransactionId { get; set; }
         public Guid? DestinationTransactionId { get; set; }

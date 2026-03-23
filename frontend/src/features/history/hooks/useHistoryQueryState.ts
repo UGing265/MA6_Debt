@@ -2,6 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { HistoryKindTag } from "../utils/historyKind";
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -16,6 +17,8 @@ export function useHistoryQueryState() {
   // Read directly from URL - this ensures all components stay in sync
   const currentSearch = searchParams.get("search") ?? "";
   const currentWalletId = searchParams.get("walletId") ?? "";
+  const currentPartnerId = searchParams.get("partnerId") ?? "";
+  const currentKind = (searchParams.get("kind") as HistoryKindTag | null) ?? "";
   const currentPage = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const currentPageSize = PAGE_SIZE_OPTIONS.includes(parseInt(searchParams.get("pageSize") ?? "10", 10) as PageSizeOption)
     ? (parseInt(searchParams.get("pageSize") ?? "10", 10) as PageSizeOption)
@@ -46,9 +49,9 @@ export function useHistoryQueryState() {
   }, [currentSearch]);
 
   // Update URL with all params
-  const updateUrl = React.useCallback((updates: { walletId?: string; page?: number; pageSize?: number }) => {
+  const updateUrl = React.useCallback((updates: { walletId?: string; partnerId?: string; kind?: string; page?: number; pageSize?: number }) => {
     const url = new URL(window.location.href);
-    
+
     if (updates.walletId !== undefined) {
       if (updates.walletId) {
         url.searchParams.set("walletId", updates.walletId);
@@ -58,7 +61,27 @@ export function useHistoryQueryState() {
       // Reset to page 1 when wallet changes
       url.searchParams.delete("page");
     }
-    
+
+    if (updates.partnerId !== undefined) {
+      if (updates.partnerId) {
+        url.searchParams.set("partnerId", updates.partnerId);
+      } else {
+        url.searchParams.delete("partnerId");
+      }
+      // Reset to page 1 when partner changes
+      url.searchParams.delete("page");
+    }
+
+    if (updates.kind !== undefined) {
+      if (updates.kind) {
+        url.searchParams.set("kind", updates.kind);
+      } else {
+        url.searchParams.delete("kind");
+      }
+      // Reset to page 1 when kind changes
+      url.searchParams.delete("page");
+    }
+
     if (updates.page !== undefined) {
       if (updates.page > 1) {
         url.searchParams.set("page", String(updates.page));
@@ -66,7 +89,7 @@ export function useHistoryQueryState() {
         url.searchParams.delete("page");
       }
     }
-    
+
     if (updates.pageSize !== undefined) {
       if (updates.pageSize !== 10) {
         url.searchParams.set("pageSize", String(updates.pageSize));
@@ -76,13 +99,23 @@ export function useHistoryQueryState() {
       // Reset to page 1 when pageSize changes
       url.searchParams.delete("page");
     }
-    
+
     router.replace(`${pathname}${url.search}`, { scroll: false });
   }, [pathname, router]);
 
   // Immediate walletId updates
   const setWalletId = React.useCallback((value: string) => {
     updateUrl({ walletId: value });
+  }, [updateUrl]);
+
+  // Immediate partnerId updates
+  const setPartnerId = React.useCallback((value: string) => {
+    updateUrl({ partnerId: value });
+  }, [updateUrl]);
+
+  // Immediate kind updates
+  const setKind = React.useCallback((value: string) => {
+    updateUrl({ kind: value });
   }, [updateUrl]);
 
   // Setter for search input (debounced to URL in effect)
@@ -103,11 +136,15 @@ export function useHistoryQueryState() {
   return {
     currentSearch,
     currentWalletId,
+    currentPartnerId,
+    currentKind,
     currentPage,
     currentPageSize,
     inputValue,
     setSearch,
     setWalletId,
+    setPartnerId,
+    setKind,
     setPage,
     setPageSize,
   };

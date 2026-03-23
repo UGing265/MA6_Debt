@@ -4,18 +4,7 @@ import {
   UpdateDebtPartnerRequest,
 } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@/lib/authToken";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
-
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
+import { apiFetch } from "@/lib/apiClient";
 
 /**
  * Create a new debt partner
@@ -24,11 +13,9 @@ const getAuthHeaders = () => {
 export const createDebtPartner = async (
   data: CreateDebtPartnerRequest
 ): Promise<DebtPartner> => {
-  const response = await fetch(`${API_URL}/api/debtpartners`, {
+  const response = await apiFetch(`/api/debtpartners`, {
     method: "POST",
-    headers: getAuthHeaders(),
     body: JSON.stringify(data),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -51,10 +38,8 @@ export const createDebtPartner = async (
  * GET /api/debtpartners
  */
 export const getDebtPartners = async (): Promise<DebtPartner[]> => {
-  const response = await fetch(`${API_URL}/api/debtpartners`, {
+  const response = await apiFetch(`/api/debtpartners`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -76,10 +61,8 @@ export const getDebtPartners = async (): Promise<DebtPartner[]> => {
  * GET /api/debtpartners/{id}
  */
 export const getDebtPartnerById = async (id: string): Promise<DebtPartner> => {
-  const response = await fetch(`${API_URL}/api/debtpartners/${id}`, {
+  const response = await apiFetch(`/api/debtpartners/${id}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -104,11 +87,9 @@ export const updateDebtPartner = async (
   id: string,
   data: UpdateDebtPartnerRequest
 ): Promise<DebtPartner> => {
-  const response = await fetch(`${API_URL}/api/debtpartners/${id}`, {
+  const response = await apiFetch(`/api/debtpartners/${id}`, {
     method: "PUT",
-    headers: getAuthHeaders(),
     body: JSON.stringify(data),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -131,10 +112,8 @@ export const updateDebtPartner = async (
  * Returns no content (204)
  */
 export const deleteDebtPartner = async (id: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/api/debtpartners/${id}`, {
+  const response = await apiFetch(`/api/debtpartners/${id}`, {
     method: "DELETE",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {

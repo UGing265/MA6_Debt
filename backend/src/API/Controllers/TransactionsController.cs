@@ -4,6 +4,7 @@ using Application.Common;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.DeleteTransaction;
+using Application.Features.Transactions.GetMonthlyStats;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
 using Application.Features.Transactions.QuickDeduct;
@@ -86,10 +87,11 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Get all transactions for the current user, optionally filtered by wallet and keyword search.
+        /// Get all transactions for the current user, optionally filtered by wallet, partner, and keyword search.
         /// Supports pagination.
         /// </summary>
         /// <param name="walletId">Optional wallet identifier. When provided, returns only transactions in that wallet.</param>
+        /// <param name="partnerId">Optional partner identifier. When provided, returns only transactions involving this partner.</param>
         /// <param name="search">Optional keyword filter (case-insensitive) applied to transaction note and debt partner name.</param>
         /// <param name="page">Page number (1-based). Default is 1.</param>
         /// <param name="pageSize">Number of items per page. Default is 10, max is 100.</param>
@@ -99,7 +101,8 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PagedResult<TransactionDto>>> GetAll(
-            [FromQuery] Guid? walletId, 
+            [FromQuery] Guid? walletId,
+            [FromQuery] Guid? partnerId,
             [FromQuery] string? search,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
@@ -108,6 +111,7 @@ namespace API.Controllers
             {
                 UserId = GetCurrentUserId(),
                 WalletId = walletId,
+                PartnerId = partnerId,
                 SearchTerm = search,
                 Page = page,
                 PageSize = pageSize
@@ -128,6 +132,7 @@ namespace API.Controllers
             {
                 Id = id,
                 UserId = GetCurrentUserId(),
+                PartnerId = request.PartnerId,
                 PayerMode = request.PayerMode,
                 Total = request.Total,
                 DebtAmount = request.DebtAmount,
@@ -170,6 +175,24 @@ namespace API.Controllers
             {
                 Id = id,
                 UserId = GetCurrentUserId()
+            });
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get monthly statistics for dashboard chart.
+        /// </summary>
+        [HttpGet("monthly-stats")]
+        [ProducesResponseType(typeof(List<MonthlyStatsDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<MonthlyStatsDto>>> GetMonthlyStats([FromQuery] int months = 6)
+        {
+            var result = await _mediator.Send(new GetMonthlyStatsQuery
+            {
+                UserId = GetCurrentUserId(),
+                Months = Math.Min(Math.Max(months, 1), 12)  // Clamp between 1-12
             });
 
             return Ok(result);

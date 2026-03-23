@@ -1,8 +1,22 @@
 import { HistoryDto } from "@/features/history/types/history";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@/lib/authToken";
+import { apiFetch } from "@/lib/apiClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
+// History refresh event system
+type HistoryListener = () => void;
+
+const historyListeners = new Set<HistoryListener>();
+
+export const subscribeToHistoryRefresh = (listener: () => void): (() => void) => {
+  historyListeners.add(listener);
+  return () => {
+    historyListeners.delete(listener);
+  };
+};
+
+export const triggerHistoryRefresh = () => {
+  historyListeners.forEach((listener) => listener());
+};
 
 export interface PagedResult<T> {
   items: T[];
@@ -14,18 +28,31 @@ export interface PagedResult<T> {
   hasNextPage: boolean;
 }
 
-const getAuthHeaders = () => {
-  const token = getAuthToken();
+export interface MonthlyStatsDto {
+  month: string;
+  monthLabel: string;
+  expense: number;
+  income: number;
+  debtIncrease: number;
+  debtDecrease: number;
+}
 
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+export const getMonthlyStats = async (months: number = 6): Promise<MonthlyStatsDto[]> => {
+  const response = await apiFetch(`/api/transactions/monthly-stats?months=${months}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get monthly stats");
+  }
+
+  return response.json();
 };
 
 export const getHistory = async (params: {
   search?: string;
   walletId?: string | null;
+  partnerId?: string | null;
   page?: number;
   pageSize?: number;
 }): Promise<PagedResult<HistoryDto>> => {
@@ -36,6 +63,9 @@ export const getHistory = async (params: {
   if (params.walletId && params.walletId.trim().length > 0) {
     queryParts.push(`walletId=${encodeURIComponent(params.walletId)}`);
   }
+  if (params.partnerId && params.partnerId.trim().length > 0) {
+    queryParts.push(`partnerId=${encodeURIComponent(params.partnerId)}`);
+  }
   if (params.page && params.page > 1) {
     queryParts.push(`page=${params.page}`);
   }
@@ -43,10 +73,8 @@ export const getHistory = async (params: {
     queryParts.push(`pageSize=${params.pageSize}`);
   }
   const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
-  const response = await fetch(`${API_URL}/api/transactions${query}`, {
+  const response = await apiFetch(`/api/transactions${query}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -64,10 +92,8 @@ export const getHistory = async (params: {
 };
 
 export const getHistoryItem = async (id: string): Promise<HistoryDto> => {
-  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const response = await apiFetch(`/api/transactions/${id}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -103,11 +129,9 @@ export const updateHistoryNote = async (id: string, note: string): Promise<Histo
     TransactionDate: existing.transactionDate,
   };
 
-  const putRes = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const putRes = await apiFetch(`/api/transactions/${id}`, {
     method: "PUT",
-    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!putRes.ok) {
@@ -125,10 +149,8 @@ export const updateHistoryNote = async (id: string, note: string): Promise<Histo
 };
 
 export const deleteHistoryItem = async (id: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/api/transactions/${id}`, {
+  const response = await apiFetch(`/api/transactions/${id}`, {
     method: "DELETE",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -141,4 +163,77 @@ export const deleteHistoryItem = async (id: string): Promise<void> => {
     const parsed = parseErrorResponse(errorData);
     throw { ...parsed, raw: errorData };
   }
+};
+
+export interface UpdateDebtRequest {
+  partnerId?: string;
+  payerMode: number;
+  total: number;
+  debtAmount?: number;
+  note?: string;
+  transactionDate?: string;
+}
+
+export const updateTransactionDebt = async (
+  id: string,
+  data: UpdateDebtRequest
+): Promise<HistoryDto> => {
+  const payload = {
+    PartnerId: data.partnerId ?? null,
+    PayerMode: data.payerMode,
+    Total: data.total,
+    DebtAmount: data.debtAmount ?? undefined,
+    Note: data.note ?? undefined,
+    TransactionDate: data.transactionDate,
+  };
+
+  const response = await apiFetch(`/api/transactions/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw { message: `Request failed with status ${response.status}` };
+    }
+    const parsed = parseErrorResponse(errorData);
+    throw { ...parsed, raw: errorData };
+  }
+
+  return response.json() as Promise<HistoryDto>;
+};
+
+export const getHistoryByPartner = async (params: {
+  partnerId: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<PagedResult<HistoryDto>> => {
+  const queryParts: string[] = [];
+  queryParts.push(`partnerId=${encodeURIComponent(params.partnerId)}`);
+  if (params.page && params.page > 1) {
+    queryParts.push(`page=${params.page}`);
+  }
+  if (params.pageSize && params.pageSize !== 10) {
+    queryParts.push(`pageSize=${params.pageSize}`);
+  }
+  const query = `?${queryParts.join('&')}`;
+  const response = await apiFetch(`/api/transactions${query}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw { message: `Request failed with status ${response.status}` };
+    }
+    const parsed = parseErrorResponse(errorData);
+    throw { ...parsed, raw: errorData };
+  }
+
+  return response.json() as Promise<PagedResult<HistoryDto>>;
 };

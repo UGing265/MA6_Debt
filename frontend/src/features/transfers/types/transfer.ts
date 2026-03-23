@@ -16,6 +16,7 @@ export interface CreateTransferRequest {
   fromWalletId: string;
   toWalletId: string;
   amount: number;
+  note?: string | null;
   sourceTransactionId?: string | null;
   destinationTransactionId?: string | null;
 }

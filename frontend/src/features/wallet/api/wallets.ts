@@ -1,28 +1,15 @@
 import { Wallet, CreateWalletRequest, UpdateWalletRequest } from "../types/wallet";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
-import { getAuthToken } from "@/lib/authToken";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
-
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
+import { apiFetch } from "@/lib/apiClient";
 
 /**
  * Create a new wallet
  * POST /api/wallets
  */
 export const createWallet = async (data: CreateWalletRequest): Promise<Wallet> => {
-  const response = await fetch(`${API_URL}/api/wallets`, {
+  const response = await apiFetch(`/api/wallets`, {
     method: "POST",
-    headers: getAuthHeaders(),
     body: JSON.stringify(data),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -45,10 +32,8 @@ export const createWallet = async (data: CreateWalletRequest): Promise<Wallet> =
  * GET /api/wallets
  */
 export const getWallets = async (): Promise<Wallet[]> => {
-  const response = await fetch(`${API_URL}/api/wallets`, {
+  const response = await apiFetch(`/api/wallets`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -70,10 +55,8 @@ export const getWallets = async (): Promise<Wallet[]> => {
  * GET /api/wallets/{id}
  */
 export const getWalletById = async (id: string): Promise<Wallet> => {
-  const response = await fetch(`${API_URL}/api/wallets/${id}`, {
+  const response = await apiFetch(`/api/wallets/${id}`, {
     method: "GET",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -98,11 +81,9 @@ export const updateWallet = async (
   id: string,
   data: UpdateWalletRequest
 ): Promise<Wallet> => {
-  const response = await fetch(`${API_URL}/api/wallets/${id}`, {
+  const response = await apiFetch(`/api/wallets/${id}`, {
     method: "PUT",
-    headers: getAuthHeaders(),
     body: JSON.stringify(data),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -125,10 +106,8 @@ export const updateWallet = async (
  * Returns no content (204)
  */
 export const deleteWallet = async (id: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/api/wallets/${id}`, {
+  const response = await apiFetch(`/api/wallets/${id}`, {
     method: "DELETE",
-    headers: getAuthHeaders(),
-    credentials: "include",
   });
 
   if (!response.ok) {

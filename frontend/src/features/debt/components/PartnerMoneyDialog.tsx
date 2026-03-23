@@ -17,18 +17,18 @@ interface PartnerMoneyDialogProps {
   open: boolean;
   partner: DebtPartner | null;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (partnerId: string, data: { name: string; balance: number }) => Promise<void>;
+  onSubmit: (partnerId: string, data: { name: string; balance?: number }) => Promise<void>;
 }
 
 export function PartnerMoneyDialog({ open, partner, onOpenChange, onSubmit }: PartnerMoneyDialogProps) {
   // Adapter to align with DebtPartnerForm's onSubmit(data, mode?) signature
   const handleSubmit = async (
-    data: { name: string; balance: number },
+    data: { name: string; balance?: number },
     _mode?: DebtPartnerFormMode
   ) => {
     if (!partner) return;
     // Preserve name, update balance for the specific partner
-    await onSubmit(partner.id, { name: partner.name, balance: data.balance });
+    await onSubmit(partner.id, { name: partner.name, balance: data.balance ?? 0 });
   };
 
   return (

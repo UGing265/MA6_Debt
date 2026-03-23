@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Plus, Pencil, Trash2, TrendingDown, TrendingUp, Star, HandCoins, Search } from "lucide-react";
 import { formatVnd } from "@/lib/utils";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
 import { PartnerNameDialog } from "@/features/debt/components/PartnerNameDialog";
 import { PartnerMoneyDialog } from "@/features/debt/components/PartnerMoneyDialog";
+import { PartnerRepaymentDialog } from "@/features/debt/components/PartnerRepaymentDialog";
 import { DebtPartnerForm } from "@/features/debt/components/DebtPartnerForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,55 +20,105 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { DebtPartner } from "@/features/debt/types/debtPartner";
+import { getUserPreferences, updateDefaultPartner } from "@/features/user/api/userApi";
 
-// formatVnd centralized via '@/lib/utils'
+const isMountedRef = { current: true };
 
 export default function PartnersPage() {
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
   const [moneyDialogPartner, setMoneyDialogPartner] = useState<DebtPartner | null>(null);
+  const [repaymentPartner, setRepaymentPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
   const [defaultPartnerId, setDefaultPartnerId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Load default partner from localStorage
+  // Load default partner from API
   React.useEffect(() => {
-    const stored = localStorage.getItem("defaultPartnerId") || "";
-    setDefaultPartnerId(stored);
+    const loadPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences();
+        if (isMountedRef.current) {
+          setDefaultPartnerId(prefs.defaultPartnerId || "");
+        }
+      } catch {
+        // Fallback to localStorage if API fails
+        const stored = localStorage.getItem("defaultPartnerId") || "";
+        if (isMountedRef.current) {
+          setDefaultPartnerId(stored);
+        }
+      }
+    };
+    loadPreferences();
   }, []);
 
-  // Save/clear default partner
-  const setAsDefault = (partnerId: string) => {
+  // Save/clear default partner via API (also update localStorage for other components)
+  const setAsDefault = async (partnerId: string) => {
     setDefaultPartnerId(partnerId);
     localStorage.setItem("defaultPartnerId", partnerId);
+    try {
+      await updateDefaultPartner(partnerId);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
-  const clearDefault = () => {
+  const clearDefault = async () => {
     setDefaultPartnerId("");
     localStorage.removeItem("defaultPartnerId");
+    try {
+      await updateDefaultPartner(null);
+    } catch {
+      // Silently fail, keep local state
+    }
   };
 
-  const sortedPartners = [...partners].sort((a, b) => {
-    if (b.balance !== a.balance) return b.balance - a.balance;
-    return a.name.localeCompare(b.name);
-  });
+  // Filter and sort partners: starred first, then by balance, then by name
+  const sortedPartners = useMemo(() => {
+    let result = [...partners];
 
-  const handleCreate = async (data: { name: string; balance: number }) => {
-    await createPartner(data);
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter((p) => p.name.toLowerCase().includes(query));
+    }
+
+    // Sort: starred first, then by balance, then by name
+    result.sort((a, b) => {
+      const aIsStarred = defaultPartnerId === a.id;
+      const bIsStarred = defaultPartnerId === b.id;
+
+      // Starred partners always come first
+      if (aIsStarred && !bIsStarred) return -1;
+      if (!aIsStarred && bIsStarred) return 1;
+
+      // Then sort by balance
+      if (b.balance !== a.balance) return b.balance - a.balance;
+
+      // Then sort by name
+      return a.name.localeCompare(b.name);
+    });
+
+    return result;
+  }, [partners, defaultPartnerId, searchQuery]);
+
+  const handleCreate = async (data: { name: string; balance?: number }) => {
+    await createPartner({ name: data.name, balance: data.balance ?? 0 });
     setIsCreateOpen(false);
   };
 
-  const handleNameSubmit = async (id: string, data: { name: string; balance: number }) => {
+  const handleNameSubmit = async (id: string, data: { name: string; balance?: number }) => {
     const existing = partners.find((p) => p.id === id);
     if (!existing) return;
     await updatePartner(id, { name: data.name, balance: existing.balance });
     setNameDialogPartner(null);
   };
 
-  const handleMoneySubmit = async (id: string, data: { name: string; balance: number }) => {
+  const handleMoneySubmit = async (id: string, data: { name: string; balance?: number }) => {
     const existing = partners.find((p) => p.id === id);
     if (!existing) return;
-    await updatePartner(id, { name: existing.name, balance: data.balance });
+    await updatePartner(id, { name: existing.name, balance: data.balance ?? 0 });
     setMoneyDialogPartner(null);
   };
 
@@ -79,18 +130,31 @@ export default function PartnersPage() {
 
   return (
     <div data-testid="partners-page-root" className="space-y-6">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-5xl font-bold text-ink-black">Debt Partners</h1>
           <p className="text-pencil-gray mt-2">Manage receivables and payables by partner</p>
         </div>
-        <Button
-          className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
-          onClick={() => setIsCreateOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Partner
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-note-yellow" />
+            <input
+              type="text"
+              placeholder="Search partners..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-64 pl-11 pr-4 py-2.5 border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow focus:ring-1 focus:ring-note-yellow text-ink-black font-medium placeholder:text-pencil-gray/70"
+            />
+          </div>
+          <Button
+            className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+            onClick={() => setIsCreateOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Partner
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -112,20 +176,24 @@ export default function PartnersPage() {
       {!isLoading && !error ? (
         sortedPartners.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {sortedPartners.map((partner, index) => {
+            {sortedPartners.map((partner) => {
               const receivable = partner.balance > 0;
               const payable = partner.balance < 0;
               const neutral = partner.balance === 0;
+              const isDefault = defaultPartnerId === partner.id;
               return (
-                <Card key={partner.id} className="border-note-yellow/25">
+                <Card key={partner.id} className={`border-note-yellow/25 transition-all duration-200 ${isDefault ? "border-yellow-400 bg-yellow-50/50 shadow-md ring-1 ring-yellow-300" : ""}`}>
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="h-12 w-12 rounded-full bg-note-yellow/25 text-note-yellow flex items-center justify-center font-bold text-xl">
+                        <div className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-xl ${isDefault ? "bg-yellow-400 text-yellow-900" : "bg-note-yellow/25 text-note-yellow"}`}>
                           {partner.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="flex items-center gap-2">
                           <p className="text-3xl font-semibold text-ink-black">{partner.name}</p>
+                          {isDefault && (
+                            <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                          )}
                         </div>
                       </div>
 
@@ -184,11 +252,31 @@ export default function PartnersPage() {
                         {neutral ? "No debt" : null}
                       </span>
                     </div>
+
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+                        onClick={() => setRepaymentPartner(partner)}
+                        disabled={neutral}
+                      >
+                        <HandCoins className="mr-1 h-4 w-4" />
+                        Repay Debt
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
+        ) : searchQuery.trim() && partners.length > 0 ? (
+          <Card className="border-note-yellow/30">
+            <CardContent className="p-6 text-center">
+              <p className="text-xl font-semibold text-ink-black">No partners found</p>
+              <p className="text-sm text-pencil-gray">No partners match your search "{searchQuery}"</p>
+            </CardContent>
+          </Card>
         ) : (
           <Card className="border-note-yellow/30">
             <CardContent className="p-6 text-center">
@@ -225,6 +313,13 @@ export default function PartnersPage() {
           if (!open) setMoneyDialogPartner(null);
         }}
         onSubmit={handleMoneySubmit}
+      />
+      <PartnerRepaymentDialog
+        open={repaymentPartner !== null}
+        partner={repaymentPartner}
+        onOpenChange={(open) => {
+          if (!open) setRepaymentPartner(null);
+        }}
       />
 
       <Dialog open={deletingPartner !== null} onOpenChange={(open) => !open && setDeletingPartner(null)}>

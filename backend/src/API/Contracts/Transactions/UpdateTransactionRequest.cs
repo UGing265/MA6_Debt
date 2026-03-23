@@ -6,6 +6,11 @@ namespace API.Contracts.Transactions
     public class UpdateTransactionRequest
     {
         /// <summary>
+        /// Optional partner ID for debt tracking. Set this to add debt info to a transaction.
+        /// </summary>
+        public Guid? PartnerId { get; set; }
+
+        /// <summary>
         /// Payer mode (enum defined in Application.Features.Transactions).
         /// </summary>
         public PayerMode PayerMode { get; set; }

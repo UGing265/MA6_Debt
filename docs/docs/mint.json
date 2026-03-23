@@ -1,0 +1,63 @@
+{
+    "$schema": "https://mintlify.com/schema.json",
+    "name": "MA6_Debt Documentation",
+    "logo": {
+        "light": "/logo/light.svg",
+        "dark": "/logo/dark.svg"
+    },
+    "favicon": "/favicon.svg",
+    "colors": {
+        "primary": "#0D9488",
+        "light": "#2DD4BF",
+        "dark": "#115E59"
+    },
+    "topbarLinks": [
+        {
+            "name": "Support",
+            "url": "mailto:support@example.com"
+        }
+    ],
+    "topbarCtaButton": {
+        "name": "Dashboard",
+        "url": "https://dashboard.example.com"
+    },
+    "anchors": [
+        {
+            "name": "API Reference",
+            "icon": "book-open-cover",
+            "url": "api/introduction"
+        },
+        {
+            "name": "Community",
+            "icon": "discord",
+            "url": "https://discord.gg/example"
+        }
+    ],
+    "navigation": [
+        {
+            "group": "Get Started",
+            "pages": [
+                "introduction",
+                "development"
+            ]
+        },
+        {
+            "group": "API Reference",
+            "pages": [
+                "api/introduction"
+            ]
+        },
+        {
+            "group": "Architecture",
+            "pages": [
+                "backend/structure",
+                "frontend/structure"
+            ]
+        }
+    ],
+    "footerSocials": {
+        "x": "https://x.com/mintlify",
+        "github": "https://github.com/mintlify",
+        "linkedin": "https://www.linkedin.com/company/mintlify"
+    }
+}

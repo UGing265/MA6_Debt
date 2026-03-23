@@ -27,9 +27,10 @@ namespace Application.Features.Transactions.QuickDeduct
                 throw new NotFoundException("DefaultWallet", "User has no default wallet configured");
             }
 
-            // Resolve partner ID (use default if not provided and debt amount is specified)
+            // Resolve partner ID (use default if not provided and debt amount is specified OR PartnerTra mode)
             Guid? partnerId = request.PartnerId;
-            if (request.DebtAmount.HasValue && request.DebtAmount.Value > 0 && !partnerId.HasValue)
+            bool needsPartner = (request.DebtAmount.HasValue && request.DebtAmount.Value > 0) || request.PayerMode == PayerMode.PartnerTra;
+            if (needsPartner && !partnerId.HasValue)
             {
                 partnerId = await GetDefaultPartnerId(request.UserId, cancellationToken);
             }
@@ -80,12 +81,6 @@ namespace Application.Features.Transactions.QuickDeduct
                 throw new InvalidOperationException("DebtAmount cannot exceed Total. This should have been caught by validation.");
             }
 
-            // Invariant 4: PartnerTra requires valid DebtAmount for split tracking
-            if (request.PayerMode == PayerMode.PartnerTra && (!request.DebtAmount.HasValue || request.DebtAmount.Value < 0))
-            {
-                throw new InvalidOperationException("PartnerTra mode requires a valid DebtAmount to track the bill split.");
-            }
-
             // Calculate amounts based on payer mode (US-03.3 formulas)
             decimal walletDelta;
             decimal partnerDelta;
@@ -94,16 +89,16 @@ namespace Application.Features.Transactions.QuickDeduct
             switch (request.PayerMode)
             {
                 case PayerMode.ToiTra:
-                    // User pays: wallet decreases by Total, partner increases by DebtAmount
+                    // User pays: wallet decreases by Total, partner owes user by DebtAmount
                     walletDelta = -request.Total;
                     partnerDelta = debtAmount.Value;
                     break;
 
                 case PayerMode.PartnerTra:
-                    // Partner pays: wallet unchanged, partner decreases by (Total - DebtAmount)
-                    // Where DebtAmount in this case is what user consumed
-                    walletDelta = 0;
-                    partnerDelta = -(request.Total - debtAmount.Value);
+                    // Partner pays: wallet increases by Total (partner gives money to wallet),
+                    // user owes partner by DebtAmount
+                    walletDelta = request.Total;
+                    partnerDelta = -debtAmount.Value;
                     break;
 
                 default:
@@ -196,9 +191,9 @@ namespace Application.Features.Transactions.QuickDeduct
 
             var message = balance switch
             {
-                > 0 => $"{partner.Name} đang nợ bạn {balance:N0} đ",
-                < 0 => $"Bạn đang nợ {partner.Name} {Math.Abs(balance):N0} đ",
-                _ => $"Bạn và {partner.Name} đã hết nợ"
+                > 0 => $"{partner.Name} owes you {balance:N0} đ",
+                < 0 => $"You owe {partner.Name} {Math.Abs(balance):N0} đ",
+                _ => $"Settled with {partner.Name}"
             };
 
             return new DebtNotification

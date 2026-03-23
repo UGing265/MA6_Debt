@@ -27,7 +27,7 @@ namespace Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // US-03 specific fields for auditability and reconstructing debt impact
-        
+
         /// <summary>
         /// Payer mode: 0 = ToiTra (user pays), 1 = PartnerTra (partner pays).
         /// Nullable for backward compatibility with existing transactions.
