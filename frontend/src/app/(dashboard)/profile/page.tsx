@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { getProfile, updateProfile, changePassword, UserProfile } from "@/features/user/api/userApi";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -113,7 +114,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-5xl font-bold text-ink-black">Profile</h1>
+        <PageHeader title="Profile" />
         <Card className="animate-pulse h-64" />
       </div>
     );
@@ -121,12 +122,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-5xl font-bold text-ink-black">Profile</h1>
-          <p className="text-pencil-gray mt-2">Manage your account settings</p>
-        </div>
-      </div>
+      <PageHeader title="Profile" description="Manage your account settings" />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Profile Info Card */}

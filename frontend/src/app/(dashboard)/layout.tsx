@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Toaster } from "sonner";
 import { getAuthToken, clearAuthToken } from "@/lib/authToken";
+import { getProfile } from "@/features/user/api/userApi";
 import {
   ArrowLeftRight,
   Clock3,
@@ -15,6 +16,7 @@ import {
   Users,
   Wallet2,
   Zap,
+  HelpCircle,
 } from "lucide-react";
 
 type NavItem = {
@@ -60,6 +62,12 @@ const navItems: NavItem[] = [
     href: "/transfer",
     icon: <ArrowLeftRight className="h-4 w-4" />,
     testId: "nav-transfer",
+  },
+  {
+    label: "User Guide",
+    href: "/help",
+    icon: <HelpCircle className="h-4 w-4" />,
+    testId: "nav-help",
   },
   {
     label: "Profile",
@@ -142,6 +150,20 @@ export default function DashboardLayout({
   React.useEffect(() => {
     const token = getAuthToken();
     setDisplayName(getDisplayNameFromToken(token));
+
+    getProfile().then(data => {
+      if (data?.username) setDisplayName(data.username);
+    }).catch(console.error);
+
+    const handleProfileUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.username) {
+        setDisplayName(customEvent.detail.username);
+      }
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
   }, []);
 
   return (

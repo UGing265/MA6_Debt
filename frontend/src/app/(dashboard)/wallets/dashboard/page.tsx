@@ -13,6 +13,7 @@ import {
   WalletsPanel,
   RecentHistoryPanel,
 } from "./components";
+import { PageHeader } from "@/components/ui/page-header";
 
 const extractHistoryError = (error: unknown): string => {
   if (typeof error === "string") return error;
@@ -97,7 +98,7 @@ export default function WalletDashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6" data-testid="wallet-dashboard-summary">
-        <h1 className="text-3xl font-bold text-ink-black">Dashboard</h1>
+        <PageHeader title="Dashboard" description="Financial overview of your wallets" />
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((item) => (
             <Card key={item} className="animate-pulse">
@@ -130,7 +131,7 @@ export default function WalletDashboardPage() {
   if (error) {
     return (
       <div className="space-y-6" data-testid="wallet-dashboard-summary">
-        <h1 className="text-3xl font-bold text-ink-black">Dashboard</h1>
+        <PageHeader title="Dashboard" description="Financial overview of your wallets" />
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-4 pb-4">
             <p className="text-red-600">Failed to load wallet data: {String(error)}</p>
@@ -142,10 +143,7 @@ export default function WalletDashboardPage() {
 
   return (
     <div className="space-y-6" data-testid="wallet-dashboard-summary">
-      <div>
-        <h1 className="text-4xl font-bold text-ink-black">Dashboard</h1>
-        <p className="text-pencil-gray mt-1">Financial overview of your wallets</p>
-      </div>
+      <PageHeader title="Dashboard" description="Financial overview of your wallets" className="mb-2 pb-3" />
 
       <SummaryCards
         netWorth={netWorth}
