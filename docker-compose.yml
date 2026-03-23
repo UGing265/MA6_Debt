@@ -6,9 +6,9 @@ services:
     container_name: ma6_postgres
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Password123!
-      POSTGRES_DB: ma6_debt_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-ma6_debt_db}
     ports:
       - "5432:5432"
     volumes:
@@ -21,8 +21,8 @@ services:
     container_name: ma6_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@ma6.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ma6.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
@@ -39,7 +39,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       # Replace 'db' with the postgres container name within the docker network
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=ma6_debt_db;Username=postgres;Password=Password123!
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB:-ma6_debt_db};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
