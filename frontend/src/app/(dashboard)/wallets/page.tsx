@@ -13,6 +13,7 @@ import {
   WalletsDialogs,
   EmptyState,
 } from "@/features/wallet/components/WalletsPage";
+import { PageHeader } from "@/components/ui/page-header";
 
 type SortOption = "name-asc" | "name-desc" | "balance-high" | "balance-low";
 
@@ -124,12 +125,7 @@ export default function WalletsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6" data-testid="parent-wallet-list">
-        <div className="flex items-end justify-between">
-          <div>
-            <h1 className="text-5xl font-bold text-ink-black">Wallet Management</h1>
-            <p className="text-pencil-gray mt-2">Parent and child wallets</p>
-          </div>
-        </div>
+        <PageHeader title="Wallet Management" description="Parent and child wallets" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2].map((i) => (
             <Card key={i} className="animate-pulse h-24" />
@@ -148,7 +144,7 @@ export default function WalletsPage() {
   if (error) {
     return (
       <div className="space-y-6" data-testid="parent-wallet-list">
-        <h1 className="text-5xl font-bold text-ink-black">Wallet Management</h1>
+        <PageHeader title="Wallet Management" description="Parent and child wallets" />
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-4 pb-4">
             <p className="text-red-600">Failed to load wallets: {String(error)}</p>
@@ -167,20 +163,16 @@ export default function WalletsPage() {
 
   return (
     <div className="space-y-6" data-testid="parent-wallet-list">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-5xl font-bold text-ink-black">Wallet Management</h1>
-          <p className="text-pencil-gray mt-2">Parent and child wallets</p>
-        </div>
+      <PageHeader title="Wallet Management" description="Parent and child wallets">
         <Button
-          className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+          className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-semibold"
           disabled={isDeleting}
           onClick={() => setIsCreateParentOpen(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
           Create Parent Wallet
         </Button>
-      </div>
+      </PageHeader>
 
       <WalletsStats
         parentWalletCount={parentWallets.length}

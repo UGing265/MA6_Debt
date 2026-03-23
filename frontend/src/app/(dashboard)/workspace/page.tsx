@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeftRight, Clock3, LayoutDashboard, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 
 const tabMap: Record<string, { title: string; description: string; icon: React.ReactNode }> = {
   "quick-deduct": {
@@ -52,10 +53,7 @@ export default function WorkspacePage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-4xl font-bold text-ink-black">Workspace</h1>
-        <p className="text-pencil-gray mt-1">This route is kept for compatibility.</p>
-      </div>
+      <PageHeader title="Workspace" description="This route is kept for compatibility." className="mb-0 pb-3" />
 
       {current ? (
         <Card className="border-note-yellow/30">

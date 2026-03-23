@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import type { DebtPartner } from "@/features/debt/types/debtPartner";
 import { getUserPreferences, updateDefaultPartner } from "@/features/user/api/userApi";
+import { PageHeader } from "@/components/ui/page-header";
 
 const isMountedRef = { current: true };
 
@@ -130,14 +131,12 @@ export default function PartnersPage() {
 
   return (
     <div data-testid="partners-page-root" className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-5xl font-bold text-ink-black">Debt Partners</h1>
-          <p className="text-pencil-gray mt-2">Manage receivables and payables by partner</p>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          {/* Search Input */}
-          <div className="relative">
+      <PageHeader
+        title="Debt Partners"
+        description="Manage receivables and payables by partner"
+      >
+        {/* Search Input */}
+        <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-note-yellow" />
             <input
               type="text"
@@ -154,8 +153,7 @@ export default function PartnersPage() {
             <Plus className="h-4 w-4 mr-2" />
             Add Partner
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       {isLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
