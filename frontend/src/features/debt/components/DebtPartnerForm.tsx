@@ -21,7 +21,7 @@ import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 
 export type DebtPartnerFormMode = "default" | "name-only" | "money-only";
 
- 
+
 type DebtPartnerFormValues = { name: string; balance?: number };
 const DebtPartnerFormSchemaNameOnly = z.object({
   name: z
@@ -83,7 +83,7 @@ export function DebtPartnerForm({
       const parsedError = parseErrorResponse(error);
 
       // Map field errors
-  // Map field errors. In name-only mode we only map name errors.
+      // Map field errors. In name-only mode we only map name errors.
       const fieldMap: Record<string, keyof DebtPartnerFormValues> = {
         Name: "name",
         name: "name",

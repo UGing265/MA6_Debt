@@ -104,7 +104,7 @@ export function HybridBalanceInput({
     const hasMinus = cleaned.startsWith("-");
     const sign = hasMinus ? "-" : "";
     const digits = cleaned.replace(/-/g, "");
-    
+
     return sign + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
@@ -131,11 +131,11 @@ export function HybridBalanceInput({
     const inputValue = e.target.value;
     // Remove non-numeric and commas for internal value, then re-format
     const cleaned = inputValue.replace(/[^0-9.-]/g, "");
-    
+
     // Update formatted display value
     setAmount(formatWithCommas(cleaned));
     setLastModified("adjust");
-    
+
     // Parse numeric value for logic
     const parseResult = parseMoneyInput(cleaned, /*allowNegative=*/ false);
     if (cleaned.trim() === "" || parseResult.valid) {
@@ -156,7 +156,7 @@ export function HybridBalanceInput({
   const handleDirectionToggle = (newDirection: BalanceDirection) => {
     setDirection(newDirection);
     setLastModified("adjust");
-    
+
     // Recalculate signed balance with new direction using current delta
     // Use tolerant parser for delta (amount)
     const deltaParse = parseMoneyInput(amount, /*allowNegative=*/ false);
@@ -164,7 +164,7 @@ export function HybridBalanceInput({
     const signedBalance = newDirection === "receivable" ? baseline + delta : baseline - delta;
     lastNotifiedValueRef.current = signedBalance;
     onChange(signedBalance);
-    
+
     // Sync to Set mode
     setDirectValue(formatWithCommas(signedBalance.toString()));
   };
@@ -174,11 +174,11 @@ export function HybridBalanceInput({
     const inputValue = e.target.value;
     // Remove non-numeric and commas for internal value, then re-format
     const cleaned = inputValue.replace(/[^0-9.-]/g, "");
-    
+
     // Update formatted display value
     setDirectValue(formatWithCommas(cleaned));
     setLastModified("set");
-    
+
     // Use tolerant parser for signed values
     const parseResult = parseMoneyInput(cleaned, /*allowNegative=*/ true);
     if (cleaned.trim() === "" || parseResult.valid) {
@@ -284,7 +284,7 @@ export function HybridBalanceInput({
                 onKeyDown={(e) => handleNumericKeyDown(e, false)}
                 disabled={disabled}
                 className={cn(
-                  "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow pr-12",
+                  "min-h-[44px] rounded-lg border border-gray-200 bg-white text-sm text-ink-black outline-none transition-colors duration-200 focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 pr-12",
                   error && "border-red-500"
                 )}
               />
@@ -298,10 +298,10 @@ export function HybridBalanceInput({
                 onClick={() => handleDirectionToggle("receivable")}
                 disabled={disabled}
                 className={cn(
-                  "px-4 py-2 rounded-lg font-medium transition-all text-sm whitespace-nowrap",
+                  "min-h-[44px] px-4 py-2 rounded-lg font-medium transition-all duration-200 ease-in-out text-sm whitespace-nowrap",
                   direction === "receivable"
-                    ? "bg-green-500 text-white border-2 border-green-600"
-                    : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
+                    ? "bg-note-yellow text-ink-black border border-note-yellow/40 shadow-sm"
+                    : "bg-white text-ink-black/70 border border-gray-200 hover:bg-gray-50 active:scale-[0.98]"
                 )}
               >
                 Partner owes me
@@ -311,10 +311,10 @@ export function HybridBalanceInput({
                 onClick={() => handleDirectionToggle("payable")}
                 disabled={disabled}
                 className={cn(
-                  "px-4 py-2 rounded-lg font-medium transition-all text-sm whitespace-nowrap",
+                  "min-h-[44px] px-4 py-2 rounded-lg font-medium transition-all duration-200 ease-in-out text-sm whitespace-nowrap",
                   direction === "payable"
-                    ? "bg-red-500 text-white border-2 border-red-600"
-                    : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
+                    ? "bg-slate-900 text-white border border-slate-900 shadow-sm"
+                    : "bg-white text-ink-black/70 border border-gray-200 hover:bg-gray-50 active:scale-[0.98]"
                 )}
               >
                 I owe partner
@@ -338,7 +338,7 @@ export function HybridBalanceInput({
               onKeyDown={(e) => handleNumericKeyDown(e, true)}
               disabled={disabled}
               className={cn(
-                "bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow pr-12",
+                "min-h-[44px] rounded-lg border border-gray-200 bg-white text-sm text-ink-black outline-none transition-colors duration-200 focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 pr-12",
                 error && "border-red-500"
               )}
             />
