@@ -6,9 +6,9 @@ services:
     container_name: ma6_postgres
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-ma6_debt_db}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -39,7 +39,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       # Replace 'db' with the postgres container name within the docker network
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB:-ma6_debt_db};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
@@ -60,6 +60,18 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - ma6_network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: ma6_tunnel
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - frontend
     networks:
       - ma6_network
 

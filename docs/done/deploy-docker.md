@@ -37,3 +37,16 @@ docker push ughing265/ma6-frontend:latest
 - Chỉ cần copy đúng 1 file `docker-compose.yml` ném lên Server.
 - Sửa lại nội dung bên trong block `build: context: ./...` bằng thẻ `image: ughing265/ma6-backend:latest`.
 - Gõ lại lệnh `docker-compose up -d`. Server tự động lôi Image từ Docker Hub về khởi chạy!
+
+## 4. Tích hợp Cloudflare Tunnel (Cho Raspberry Pi / Self-Host)
+Hệ thống này đã được trang bị sẵn **Cloudflare Tunnel (`cloudflared`)** trong `docker-compose.yml`. Điều này cho phép mớ app đang chạy ở Raspberry Pi (LAN kín) tại nhà bạn phơi bày thẳng ra mạng Internet với tên miền (HTTPS) mà **KHÔNG CẦN CHỌC NAT (MỞ PORT ROUTER)**.
+
+**Cách dùng:**
+1. Lên trang [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) tạo một Tunnel mới.
+2. Trỏ Public Hostname (vd: `app.ten_mien_cua_ban.com`) về container nội bộ Docker là `http://ma6_frontend:3000`.
+3. Cloudflare sẽ cấp cho bạn 1 cái Token dài ngoằng dài nghẽo.
+4. Mở file `.env` ra, gán nó vào biến:
+```env
+CLOUDFLARE_TUNNEL_TOKEN=ey...chuoi_token_cua_ban...
+```
+5. Chạy `docker-compose up -d`. Xong! Lúc này bạn ra mạng WiFi nhà hàng xóm gõ tên miền là truy cập vô được rPi ở nhà bạn!
