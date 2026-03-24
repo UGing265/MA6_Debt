@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import { getAuthToken, clearAuthToken } from "@/lib/authToken";
 import { getProfile } from "@/features/user/api/userApi";
@@ -142,8 +142,6 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("tab");
   const [displayName, setDisplayName] = React.useState("User");
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
@@ -187,7 +185,7 @@ export default function DashboardLayout({
 
         <nav className="px-2 py-4 space-y-1">
           {navItems.map((item) => {
-            const active = isActive(pathname, currentTab, item.href);
+            const active = isActive(pathname, null, item.href);
             const placeholder = isPlaceholderNav(item.href);
             return (
               <Link
@@ -258,7 +256,7 @@ export default function DashboardLayout({
           { label: "Partners", href: "/partners", icon: <Users className="h-5 w-5" /> },
           { label: "Profile", href: "/profile", icon: <Settings className="h-5 w-5" /> },
         ].map((item) => {
-          const active = isActive(pathname, currentTab, item.href);
+          const active = isActive(pathname, null, item.href);
           
           if (item.center) {
             return (

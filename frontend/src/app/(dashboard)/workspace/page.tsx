@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeftRight, Clock3, LayoutDashboard, Zap } from "lucide-react";
@@ -27,6 +27,14 @@ const tabMap: Record<string, { title: string; description: string; icon: React.R
 };
 
 export default function WorkspacePage() {
+  return (
+    <Suspense fallback={<div className="space-y-6 max-w-4xl"><PageHeader title="Workspace" description="Loading workspace..." className="mb-0 pb-3" /></div>}>
+      <WorkspacePageContent />
+    </Suspense>
+  );
+}
+
+function WorkspacePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "";
