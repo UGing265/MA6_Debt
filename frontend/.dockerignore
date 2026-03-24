@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+*.log
+npm-debug.log
+README.md
+.next
+.git
+.gitignore
+.dockerignore
+.env.local
+.pnpm-store
+.vercel
+dist
+build

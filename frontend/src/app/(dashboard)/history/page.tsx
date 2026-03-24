@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { HistoryPageContainer } from "@/features/history/components/HistoryPageContainer";
 
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,7 +12,9 @@ export default function HistoryPage() {
         title="Transaction History" 
         description="View, filter, and track all your transactions" 
       />
-      <HistoryPageContainer />
+      <Suspense fallback={<div className="h-64 flex items-center justify-center text-pencil-gray">Loading history...</div>}>
+        <HistoryPageContainer />
+      </Suspense>
     </div>
   );
 }

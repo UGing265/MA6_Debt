@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import { getAuthToken, clearAuthToken } from "@/lib/authToken";
 import { getProfile } from "@/features/user/api/userApi";
@@ -142,8 +142,6 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("tab");
   const [displayName, setDisplayName] = React.useState("User");
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
@@ -169,7 +167,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#FFFBEB]">
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-[225px] border-r border-note-yellow/20 bg-white/90 flex flex-col overflow-y-auto transition-transform duration-300 ${
+        className={`hidden md:flex fixed inset-y-0 left-0 z-30 w-[225px] border-r border-note-yellow/20 bg-white/90 flex-col overflow-y-auto transition-transform duration-300 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -187,7 +185,7 @@ export default function DashboardLayout({
 
         <nav className="px-2 py-4 space-y-1">
           {navItems.map((item) => {
-            const active = isActive(pathname, currentTab, item.href);
+            const active = isActive(pathname, null, item.href);
             const placeholder = isPlaceholderNav(item.href);
             return (
               <Link
@@ -228,19 +226,68 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <div className={`min-h-screen transition-all duration-300 ${isSidebarOpen ? "ml-[225px]" : "ml-0"}`}>
-        <header className="sticky top-0 z-20 h-12 border-b border-note-yellow/20 bg-[#FFFBEB]/95 backdrop-blur flex items-center px-6">
+      <div className={`min-h-screen transition-all duration-300 ${isSidebarOpen ? "md:ml-[225px]" : "ml-0"}`}>
+        <header className="sticky top-0 z-20 h-14 border-b border-note-yellow/20 bg-[#FFFBEB]/95 backdrop-blur flex items-center px-4 md:px-6 justify-between md:justify-start">
+          <div className="flex md:hidden items-center gap-2">
+            <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold text-sm">
+              G
+            </div>
+            <span className="font-bold text-ink-black text-lg">MA6 Debt</span>
+          </div>
           <button
             type="button"
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
             onClick={() => setIsSidebarOpen((prev) => !prev)}
-            className="rounded-md p-1 text-ink-black transition-colors hover:bg-note-yellow/20"
+            className="hidden md:block rounded-md p-1.5 text-ink-black transition-colors hover:bg-note-yellow/20"
           >
-            <PanelLeft className="h-4 w-4" />
+            <PanelLeft className="h-5 w-5" />
           </button>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="p-4 pb-28 md:p-6 md:pb-6">{children}</main>
       </div>
+      
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-1 left-2 right-2 z-50 bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between px-1 h-16">
+        {[
+          { label: "Home", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
+          { label: "History", href: "/history", icon: <Clock3 className="h-5 w-5" /> },
+          { label: "Action", href: "/quick-deduct", icon: <Zap className="h-6 w-6" />, center: true },
+          { label: "Partners", href: "/partners", icon: <Users className="h-5 w-5" /> },
+          { label: "Profile", href: "/profile", icon: <Settings className="h-5 w-5" /> },
+        ].map((item) => {
+          const active = isActive(pathname, null, item.href);
+          
+          if (item.center) {
+            return (
+              <Link key={item.label} href={item.href} scroll={false} className="relative -top-5 flex flex-col items-center group z-50">
+                <div className="h-14 w-14 rounded-full bg-note-yellow text-ink-black flex items-center justify-center shadow-lg border-4 border-[#FFFBEB] transform transition-transform duration-200 group-active:scale-95">
+                  {item.icon}
+                </div>
+              </Link>
+            )
+          }
+
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              scroll={false}
+              className={`flex flex-col items-center justify-center w-[4.5rem] h-full gap-1 transition-colors ${
+                active ? "text-[#D97706]" : "text-pencil-gray hover:text-ink-black"
+              }`}
+            >
+              <div className={`transition-transform duration-200 ${active ? "-translate-y-0.5" : ""}`}>
+                {item.icon}
+              </div>
+              <span className={`text-[10px] font-medium leading-none ${active ? "opacity-100" : "opacity-80"}`}>
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
       <Toaster />
     </div>
   );
