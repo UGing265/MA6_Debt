@@ -1,4 +1,6 @@
 node_modules
+**/node_modules
+*.log
 npm-debug.log
 README.md
 .next
@@ -6,3 +8,7 @@ README.md
 .gitignore
 .dockerignore
 .env.local
+.pnpm-store
+.vercel
+dist
+build
