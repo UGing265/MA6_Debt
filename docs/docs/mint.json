@@ -5,7 +5,7 @@
         "light": "/logo/light.svg",
         "dark": "/logo/dark.svg"
     },
-    "favicon": "/favicon.png",
+    "favicon": "/favicon.svg",
     "colors": {
         "primary": "#0D9488",
         "light": "#2DD4BF",
@@ -25,7 +25,7 @@
         {
             "name": "API Reference",
             "icon": "book-open-cover",
-            "url": "api-reference"
+            "url": "api/introduction"
         },
         {
             "name": "Community",
@@ -44,7 +44,7 @@
         {
             "group": "API Reference",
             "pages": [
-                "openapi.json"
+                "api/introduction"
             ]
         },
         {
@@ -55,7 +55,6 @@
             ]
         }
     ],
-    "openapi": "openapi.json",
     "footerSocials": {
         "x": "https://x.com/mintlify",
         "github": "https://github.com/mintlify",

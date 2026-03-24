@@ -1,26 +1,266 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+
+    /* Custom Theme Colors */
+    --paper-cream: #FFFBEB;
+    --note-yellow: #FCD34D;
+    --ink-black: #1F2937;
+    --pencil-gray: #4B5563;
+
+    /* 
+     * Brand Colors - Yellow First Token Map
+     * -------------------------------------
+     * Primary Yellow: #FF7A00 (Matches note-yellow)
+     * Usage: Primary buttons, highlights, active states.
+     * Contrast Rule: ALWAYS use --brand-yellow-foreground (dark) for text on yellow.
+     *                NEVER use white text on yellow (fails WCAG).
+     */
+    --brand-yellow: #FCD34D;
+    --brand-yellow-foreground: #1F2937;
+
+    /* 
+     * Support Colors
+     * --------------
+     * Blue: #2563EB (Tailwind Blue 600)
+     * Usage: Links, info alerts, secondary actions.
+     * Contrast Rule: Use white text on blue background.
+     */
+    --support-blue: #2563EB;
+    --support-blue-foreground: #FFFFFF;
+
+    /* 
+     * Red: #DC2626 (Tailwind Red 600)
+     * Usage: Error states, destructive actions.
+     * Contrast Rule: Use white text on red background.
+     */
+    --support-red: #DC2626;
+    --support-red-foreground: #FFFFFF;
+
+    /* 
+     * Neutrals
+     * --------
+     * Usage: Backgrounds, borders, text.
+     */
+    --neutral-white: #FFFFFF;
+    --neutral-black: #000000;
+    --neutral-gray-50: #F9FAFB;
+    --neutral-gray-100: #F3F4F6;
+    --neutral-gray-200: #E5E7EB;
+    --neutral-gray-300: #D1D5DB;
+    --neutral-gray-400: #9CA3AF;
+    --neutral-gray-500: #6B7280;
+    --neutral-gray-600: #4B5563;
+    --neutral-gray-700: #374151;
+    --neutral-gray-800: #1F2937;
+    --neutral-gray-900: #111827;
+}
+
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.985 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.396 0.141 25.723);
+    --destructive-foreground: oklch(0.637 0.237 25.331);
+    --border: oklch(0.269 0 0);
+    --input: oklch(0.269 0 0);
+    --ring: oklch(0.439 0 0);
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+     --sidebar-ring: oklch(0.439 0 0);
+    --paper-cream: #FFFBEB;
+    --note-yellow: #FCD34D;
+    --ink-black: #1F2937;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    /* Custom Color Declarations */
+    --color-paper-cream: var(--paper-cream);
+    --color-note-yellow: var(--note-yellow);
+    --color-ink-black: var(--ink-black);
+    --color-pencil-gray: var(--pencil-gray);
+
+    /* Brand Tokens */
+    --color-brand-yellow: var(--brand-yellow);
+    --color-brand-yellow-foreground: var(--brand-yellow-foreground);
+    --color-support-blue: var(--support-blue);
+    --color-support-blue-foreground: var(--support-blue-foreground);
+    --color-support-red: var(--support-red);
+    --color-support-red-foreground: var(--support-red-foreground);
+
+    /* Neutral Tokens */
+    --color-neutral-white: var(--neutral-white);
+    --color-neutral-black: var(--neutral-black);
+    --color-neutral-gray-50: var(--neutral-gray-50);
+    --color-neutral-gray-100: var(--neutral-gray-100);
+    --color-neutral-gray-200: var(--neutral-gray-200);
+    --color-neutral-gray-300: var(--neutral-gray-300);
+    --color-neutral-gray-400: var(--neutral-gray-400);
+    --color-neutral-gray-500: var(--neutral-gray-500);
+    --color-neutral-gray-600: var(--neutral-gray-600);
+    --color-neutral-gray-700: var(--neutral-gray-700);
+    --color-neutral-gray-800: var(--neutral-gray-800);
+    --color-neutral-gray-900: var(--neutral-gray-900);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply text-foreground;
+        background-color: var(--paper-cream);
+    }
+
+    /* Keyboard focus visibility - high contrast for accessibility */
+    *:focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-yellow;
+    }
+
+    /* Link focus visibility */
+    a:focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-yellow;
+    }
+
+    /* Button focus visibility */
+    button:focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-yellow;
+    }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@layer components {
+    .animate-fade-in {
+        animation: fade-in 300ms ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slide-up 300ms ease-out forwards;
+    }
+
+    .btn-yellow {
+        @apply bg-note-yellow text-ink-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-note-yellow;
+    }
+
+    .btn-yellow:hover {
+        @apply opacity-90;
+    }
+
+    .input-field {
+        @apply border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-note-yellow;
+    }
 }

@@ -1,8 +1,0 @@
-{
-    "openapi": "3.0.1",
-    "info": {
-        "title": "MA6_Debt API",
-        "version": "1.0"
-    },
-    "paths": {}
-}

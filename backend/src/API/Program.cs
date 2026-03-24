@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
+using Persistence.Data;
 using Application;
 using Application.Common.Interfaces;
 using System.Text;
@@ -15,39 +16,25 @@ namespace API
         public static void Main(string[] args)
         {
             JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            //DotNetEnv.Env.Load(); if not using docker
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
 
+            builder.Services.AddCors(options =>
+            {
+                var allowedOrigins = builder.Configuration["Cors:Origins"];
+                options.AddPolicy("AllowReactApp",
+                    builder => builder
+                        .WithOrigins(allowedOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new[] { "http://localhost:3000" })
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
+
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi(options =>
-            {
-                options.AddDocumentTransformer((document, context, cancellationToken) =>
-                {
-                    document.Components ??= new Microsoft.OpenApi.Models.OpenApiComponents();
-                    document.Components.Schemas["ProblemDetails"] = new Microsoft.OpenApi.Models.OpenApiSchema
-                    {
-                        Type = "object",
-                        Properties = new Dictionary<string, Microsoft.OpenApi.Models.OpenApiSchema>
-                        {
-                            ["type"] = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string" },
-                            ["title"] = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string" },
-                            ["status"] = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "integer" },
-                            ["errors"] = new Microsoft.OpenApi.Models.OpenApiSchema
-                            {
-                                Type = "object",
-                                AdditionalProperties = new Microsoft.OpenApi.Models.OpenApiSchema
-                                {
-                                    Type = "array",
-                                    Items = new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string" }
-                                }
-                            }
-                        }
-                    };
-                    return Task.CompletedTask;
-                });
-            });
+            builder.Services.AddOpenApi();
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<API.Middleware.GlobalExceptionHandler>();
@@ -93,12 +80,41 @@ namespace API
 
             var app = builder.Build();
 
+            // Auto-migrate database in Development and Staging environments
+            using (var scope = app.Services.CreateScope())
+            {
+                var env = scope.ServiceProvider.GetRequiredService<IHostEnvironment>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                if (env.IsDevelopment() || env.IsEnvironment("Staging"))
+                {
+                    logger.LogInformation("{Environment} environment detected - applying pending migrations", env.EnvironmentName);
+                    try
+                    {
+                        dbContext.Database.Migrate();
+                        logger.LogInformation("Database migrations applied successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to apply database migrations");
+                        throw;
+                    }
+                }
+                else
+                {
+                    logger.LogInformation("{Environment} environment - skipping auto-migration", env.EnvironmentName);
+                }
+            }
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
                 app.MapScalarApiReference();
             }
+
+            app.UseCors("AllowReactApp");
 
             app.UseHttpsRedirection();
 

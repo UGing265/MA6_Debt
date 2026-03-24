@@ -29,3 +29,9 @@ Thumbs.db
 #AI agent
 .agent/
 .sisyphus/
+
+
+#other
+img/
+opencode.json
+.claude/
