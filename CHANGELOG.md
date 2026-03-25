@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-25
+### Fixed
+- Fixed legacy `ENV` syntax warnings in frontend Dockerfile by updating to modern `key=value` format
+
 ## [1.0.0] - 2026-03-24
 ### Added
 - Cloudflare tunnel support for secure external access
