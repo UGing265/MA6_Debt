@@ -55,6 +55,7 @@ services:
       - ma6_network
 
   backend:
+    image: shiroruct/ma6_backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -83,6 +84,7 @@ services:
       - ma6_network
 
   frontend:
+    image: shiroruct/ma6-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
