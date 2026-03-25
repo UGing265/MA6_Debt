@@ -29,7 +29,5 @@ COPY --from=publish /app/publish .
 # and overridden by environment variables in docker-compose.yml
 # (e.g., ConnectionStrings__DefaultConnection)
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "API.dll"]
