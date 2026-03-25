@@ -21,7 +21,7 @@ services:
     container_name: ma6_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ma6.com}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
@@ -53,9 +53,10 @@ services:
       dockerfile: Dockerfile
     container_name: ma6_frontend
     restart: always
+    args:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     environment:
-      # Frontend tells the browser where to call the backend
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     ports:
       - "3000:3000"
     depends_on:
