@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-03-25
+
+### Added
+- Implemented Docker healthchecks for database and backend services to ensure reliable startup orchestration
+- Added resource limits (RAM) and log rotation to all Docker containers for system stability
+- Introduced environment variable synchronization in `.env` using variable expansion (e.g., `NEXT_PUBLIC_API_URL` follows `BACKEND_PORT`)
+- Added comprehensive theoretical documentation on Docker architecture (IN/OUT Ports) in `docs/done/deploy-docker.md`
+
+### Changed
+- Refactored `docker-compose.yml` to use flexible port mappings and hardened security (localhost binding)
+- Updated deployment guide with an integrated merged style (preserving original work with new theory)
+- Synchronized `.env.example` with the new flexible configuration logic
+
 ## [1.0.1] - 2026-03-25
+
+### Changed
+- Refactored backend Dockerfile: cleaned up `WORKDIR` paths and added configuration handling documentation
+- Enhanced frontend Dockerfile to support build-time `ARG` for `NEXT_PUBLIC_API_URL`, ensuring correct environment variable baking in Next.js
+- Updated `docker-compose.yml` to support dynamic environment variables for API URL and pgAdmin credentials
+
 ### Fixed
-- Fixed legacy `ENV` syntax warnings in frontend Dockerfile by updating to modern `key=value` format
+- Fixed legacy `ENV` syntax warnings in frontend and backend Dockerfiles by updating to modern `key=value` format
 
 ## [1.0.0] - 2026-03-24
 ### Added
