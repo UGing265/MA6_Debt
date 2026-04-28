@@ -55,10 +55,10 @@ services:
       - ma6_network
 
   backend:
-    image: shiroruct/ma6_backend:latest
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: shiroruct/ma6-backend:latest
+    build:  #xóa
+      context: ./backend  #xóa
+      dockerfile: Dockerfile  #xóa
     container_name: ma6_backend
     restart: always
     environment:
@@ -85,12 +85,12 @@ services:
 
   frontend:
     image: shiroruct/ma6-frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: #xóa
+      context: ./frontend  #xóa
+      dockerfile: Dockerfile #xóa
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-    container_name: ma6_frontend
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} #xóa
+    container_name: ma6-frontend
     restart: always
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}

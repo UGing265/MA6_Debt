@@ -116,7 +116,6 @@ namespace API
 
             app.UseCors("AllowReactApp");
 
-            app.UseHttpsRedirection();
 
             app.UseExceptionHandler();
 
