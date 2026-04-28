@@ -30,19 +30,16 @@ services:
     networks:
       - ma6_network
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: ma6_pgadmin
+  dbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: ma6_dbeaver
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "127.0.0.1:5050:80" # Giới hạn truy cập PgAdmin cho an toàn
+      - "127.0.0.1:8081:8080"
     deploy:
       resources:
         limits:
-          memory: 256m
+          memory: 1024m
     logging:
       driver: "json-file"
       options:
