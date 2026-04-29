@@ -30,19 +30,16 @@ services:
     networks:
       - ma6_network
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: ma6_pgadmin
+  dbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: ma6_dbeaver
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "127.0.0.1:5050:80" # Giới hạn truy cập PgAdmin cho an toàn
+      - "127.0.0.1:8081:8080"
     deploy:
       resources:
         limits:
-          memory: 256m
+          memory: 1024m
     logging:
       driver: "json-file"
       options:
@@ -55,9 +52,10 @@ services:
       - ma6_network
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: shiroruct/ma6-backend:latest
+    build:  #xóa
+      context: ./backend  #xóa
+      dockerfile: Dockerfile  #xóa
     container_name: ma6_backend
     restart: always
     environment:
@@ -83,12 +81,13 @@ services:
       - ma6_network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: shiroruct/ma6-frontend:latest
+    build: #xóa
+      context: ./frontend  #xóa
+      dockerfile: Dockerfile #xóa
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-    container_name: ma6_frontend
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} #xóa
+    container_name: ma6-frontend
     restart: always
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
