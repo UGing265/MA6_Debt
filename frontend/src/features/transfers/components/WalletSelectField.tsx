@@ -15,9 +15,11 @@ type GroupedWallets = {
   children: WalletDto[];
 };
 
+import { formatVnd } from "@/lib/utils";
+
 const getWalletLabel = (wallet: WalletDto, includeBalance = false): string => {
   if (includeBalance) {
-    return `${wallet.name} (${wallet.balance.toLocaleString("en-US")} VND)`;
+    return `${wallet.name} (${formatVnd(wallet.balance)})`;
   }
   return wallet.name;
 };

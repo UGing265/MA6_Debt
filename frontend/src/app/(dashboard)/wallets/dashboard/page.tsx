@@ -29,7 +29,10 @@ const extractHistoryError = (error: unknown): string => {
   return "Failed to load recent history";
 };
 
+import { usePrivacy } from "@/context/PrivacyContext";
+
 export default function WalletDashboardPage() {
+  const { tempShow } = usePrivacy();
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
   const { partners, isLoading: partnersLoading, error: partnersError } = useDebtPartners();
 

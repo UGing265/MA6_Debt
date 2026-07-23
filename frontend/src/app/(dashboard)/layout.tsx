@@ -17,13 +17,75 @@ import {
   Wallet2,
   Zap,
   HelpCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+import { PrivacyProvider, usePrivacy } from "@/context/PrivacyContext";
 
 type NavItem = {
   label: string;
   href: string;
   icon: React.ReactNode;
   testId?: string;
+};
+
+const PrivacyQuickToggle = () => {
+  const { hideAmount, tempShow, setTempShow } = usePrivacy();
+  const pathname = usePathname();
+
+  // Condition 1: Must be turned on in settings
+  if (!hideAmount) return null;
+
+  // Condition 2: Route must be one of the pages containing money
+  const moneyRoutes = [
+    "/dashboard",
+    "/wallets",
+    "/partners",
+    "/history",
+    "/transfer",
+    "/quick-deduct",
+  ];
+  
+  const isMoneyPage = moneyRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
+
+  if (!isMoneyPage) return null;
+
+  const handlePress = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setTempShow(true);
+  };
+
+  const handleRelease = () => {
+    setTempShow(false);
+  };
+
+  return (
+    <button
+      type="button"
+      onMouseDown={handlePress}
+      onMouseUp={handleRelease}
+      onMouseLeave={handleRelease}
+      onTouchStart={handlePress}
+      onTouchEnd={handleRelease}
+      aria-label="Nhấn giữ để xem số tiền"
+      title="Nhấn giữ để xem số tiền"
+      className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-note-yellow/40 bg-white hover:bg-note-yellow/10 text-ink-black transition-colors cursor-pointer select-none active:scale-95 duration-100"
+    >
+      {tempShow ? (
+        <>
+          <Eye className="h-4 w-4 text-note-yellow" />
+          <span className="hidden sm:inline">Xem tiền</span>
+        </>
+      ) : (
+        <>
+          <EyeOff className="h-4 w-4 text-pencil-gray" />
+          <span className="hidden sm:inline">Giữ để xem</span>
+        </>
+      )}
+    </button>
+  );
 };
 
 const navItems: NavItem[] = [
@@ -135,34 +197,32 @@ function getDisplayNameFromToken(token: string | null): string {
   return "User";
 }
 
-export default function DashboardLayout({
+const DashboardLayoutContent = ({
   children,
+  isSidebarOpen,
+  setIsSidebarOpen,
+  displayName,
+  pathname,
+  router
 }: {
   children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [displayName, setDisplayName] = React.useState("User");
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  displayName: string;
+  pathname: string;
+  router: any;
+}) => {
+  const { hideAmount, tempShow } = usePrivacy();
 
-  React.useEffect(() => {
-    const token = getAuthToken();
-    setDisplayName(getDisplayNameFromToken(token));
-
-    getProfile().then(data => {
-      if (data?.username) setDisplayName(data.username);
-    }).catch(console.error);
-
-    const handleProfileUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail?.username) {
-        setDisplayName(customEvent.detail.username);
+  // Clone element to pass a prop. This updates the element reference, which forces React to re-render in-place without remounting!
+  const renderedChildren = React.useMemo(() => {
+    return React.Children.map(children, child => {
+      if (React.isValidElement(child)) {
+        return React.cloneElement(child as React.ReactElement<any>, { hideAmount, tempShow });
       }
-    };
-
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
-  }, []);
+      return child;
+    });
+  }, [children, hideAmount, tempShow]);
 
   return (
     <div className="min-h-screen bg-[#FFFBEB]">
@@ -237,15 +297,19 @@ export default function DashboardLayout({
           <button
             type="button"
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-            onClick={() => setIsSidebarOpen((prev) => !prev)}
-            className="hidden md:block rounded-md p-1.5 text-ink-black transition-colors hover:bg-note-yellow/20"
+            onClick={() => {
+              console.log("Toggle sidebar clicked. Current:", isSidebarOpen);
+              setIsSidebarOpen((prev) => !prev);
+            }}
+            className="hidden md:block rounded-md p-1.5 text-ink-black transition-colors hover:bg-note-yellow/20 cursor-pointer"
           >
             <PanelLeft className="h-5 w-5" />
           </button>
+
+          <PrivacyQuickToggle />
         </header>
-        <main className="p-4 pb-28 md:p-6 md:pb-6">{children}</main>
+        <main className="p-4 pb-28 md:p-6 md:pb-6">{renderedChildren}</main>
       </div>
-      
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-1 left-2 right-2 z-50 bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between px-1 h-16">
@@ -257,7 +321,7 @@ export default function DashboardLayout({
           { label: "Profile", href: "/profile", icon: <Settings className="h-5 w-5" /> },
         ].map((item) => {
           const active = isActive(pathname, null, item.href);
-          
+
           if (item.center) {
             return (
               <Link key={item.label} href={item.href} scroll={false} className="relative -top-5 flex flex-col items-center group z-50">
@@ -290,5 +354,49 @@ export default function DashboardLayout({
 
       <Toaster />
     </div>
+  );
+};
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [displayName, setDisplayName] = React.useState("User");
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+
+  React.useEffect(() => {
+    const token = getAuthToken();
+    setDisplayName(getDisplayNameFromToken(token));
+
+    getProfile().then(data => {
+      if (data?.username) setDisplayName(data.username);
+    }).catch(console.error);
+
+    const handleProfileUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.username) {
+        setDisplayName(customEvent.detail.username);
+      }
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, []);
+
+  return (
+    <PrivacyProvider>
+      <DashboardLayoutContent
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        displayName={displayName}
+        pathname={pathname}
+        router={router}
+      >
+        {children}
+      </DashboardLayoutContent>
+    </PrivacyProvider>
   );
 }

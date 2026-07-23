@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { User, Mail, Lock, Save, KeyRound } from "lucide-react";
+import { User, Mail, Lock, Save, KeyRound, Eye, EyeOff, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +17,10 @@ import {
 import { getProfile, updateProfile, changePassword, UserProfile } from "@/features/user/api/userApi";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { PageHeader } from "@/components/ui/page-header";
+import { usePrivacy } from "@/context/PrivacyContext";
 
 export default function ProfilePage() {
+  const { hideAmount, toggleHideAmount, formatAmount } = usePrivacy();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -211,6 +213,51 @@ export default function ProfilePage() {
                 <KeyRound className="h-4 w-4 mr-2" />
                 Change
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Privacy & Display Card */}
+        <Card className="border-note-yellow/25 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Shield className="h-5 w-5 text-note-yellow" />
+              Privacy & Display Settings (Riêng tư & Hiển thị)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-gray-50 gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-ink-black">Che số tiền (Hide Money Amounts)</p>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${hideAmount ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"}`}>
+                    {hideAmount ? "Đang che (Hidden)" : "Đang hiện (Visible)"}
+                  </span>
+                </div>
+                <p className="text-sm text-pencil-gray">
+                  Tự động che các số dư ví, nợ và giao dịch thành dạng <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">•••••• vnd</code> trên toàn hệ thống.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={toggleHideAmount}
+                  className="border-note-yellow text-ink-black hover:bg-note-yellow/20 flex items-center gap-2 cursor-pointer"
+                >
+                  {hideAmount ? (
+                    <>
+                      <Eye className="h-4 w-4 text-note-yellow" />
+                      Hiện số tiền
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff className="h-4 w-4 text-pencil-gray" />
+                      Che số tiền
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

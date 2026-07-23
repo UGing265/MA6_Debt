@@ -25,7 +25,10 @@ import { PageHeader } from "@/components/ui/page-header";
 
 const isMountedRef = { current: true };
 
+import { usePrivacy } from "@/context/PrivacyContext";
+
 export default function PartnersPage() {
+  const { tempShow } = usePrivacy();
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
