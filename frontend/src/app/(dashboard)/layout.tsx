@@ -19,6 +19,7 @@ import {
   HelpCircle,
   Eye,
   EyeOff,
+  MoreHorizontal,
 } from "lucide-react";
 import { PrivacyProvider, usePrivacy } from "@/context/PrivacyContext";
 
@@ -213,6 +214,18 @@ const DashboardLayoutContent = ({
   router: any;
 }) => {
   const { hideAmount, tempShow } = usePrivacy();
+  const [isMoreOpen, setIsMoreOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isMoreOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMoreOpen]);
 
   // Clone element to pass a prop. This updates the element reference, which forces React to re-render in-place without remounting!
   const renderedChildren = React.useMemo(() => {
@@ -312,25 +325,45 @@ const DashboardLayoutContent = ({
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-1 left-2 right-2 z-50 bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between px-1 h-16">
+      <nav className="md:hidden fixed bottom-1 left-2 right-2 z-40 bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between px-1 h-16">
         {[
           { label: "Home", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-          { label: "History", href: "/history", icon: <Clock3 className="h-5 w-5" /> },
+          { label: "Wallets", href: "/wallets", icon: <Wallet2 className="h-5 w-5" /> },
           { label: "Action", href: "/quick-deduct", icon: <Zap className="h-6 w-6" />, center: true },
           { label: "Partners", href: "/partners", icon: <Users className="h-5 w-5" /> },
-          { label: "Profile", href: "/profile", icon: <Settings className="h-5 w-5" /> },
+          { label: "More", href: "#", icon: <MoreHorizontal className="h-5 w-5" />, isMore: true },
         ].map((item) => {
-          const active = isActive(pathname, null, item.href);
-
           if (item.center) {
             return (
-              <Link key={item.label} href={item.href} scroll={false} className="relative -top-5 flex flex-col items-center group z-50">
+              <Link key={item.label} href={item.href} scroll={false} className="relative -top-5 flex flex-col items-center group z-40">
                 <div className="h-14 w-14 rounded-full bg-note-yellow text-ink-black flex items-center justify-center shadow-lg border-4 border-[#FFFBEB] transform transition-transform duration-200 group-active:scale-95">
                   {item.icon}
                 </div>
               </Link>
             )
           }
+
+          if (item.isMore) {
+            return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => setIsMoreOpen((prev) => !prev)}
+                className={`flex flex-col items-center justify-center w-[4.5rem] h-full gap-1 transition-colors cursor-pointer ${
+                  isMoreOpen ? "text-[#D97706]" : "text-pencil-gray hover:text-ink-black"
+                }`}
+              >
+                <div className={`transition-transform duration-200 ${isMoreOpen ? "-translate-y-0.5" : ""}`}>
+                  {item.icon}
+                </div>
+                <span className={`text-[10px] font-medium leading-none ${isMoreOpen ? "opacity-100" : "opacity-80"}`}>
+                  {item.label}
+                </span>
+              </button>
+            )
+          }
+
+          const active = isActive(pathname, null, item.href);
 
           return (
             <Link
@@ -351,6 +384,110 @@ const DashboardLayoutContent = ({
           );
         })}
       </nav>
+
+      {/* Mobile Bottom Sheet Overlay Backdrop */}
+      {isMoreOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/45 backdrop-blur-sm transition-opacity duration-300"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsMoreOpen(false);
+          }}
+        />
+      )}
+
+      {/* Mobile Bottom Sheet Menu container */}
+      <div
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-[#FFFBEB] rounded-t-3xl border-t border-note-yellow/20 shadow-2xl p-6 pb-8 transition-transform duration-300 transform ${
+          isMoreOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxHeight: "80vh", overflowY: "auto" }}
+      >
+        {/* Pull handle bar */}
+        <div className="mx-auto w-12 h-1.5 bg-pencil-gray/20 rounded-full mb-6" />
+
+        <h3 className="text-lg font-bold text-ink-black mb-4 text-center">Menu</h3>
+
+        <div className="space-y-3">
+          {[
+            {
+              label: "Internal Transfer",
+              description: "Chuyển tiền qua lại giữa các ví của bạn",
+              href: "/transfer",
+              icon: <ArrowLeftRight className="h-5 w-5 text-[#D97706]" />,
+            },
+            {
+              label: "Transaction History",
+              description: "Xem chi tiết và lọc lịch sử giao dịch",
+              href: "/history",
+              icon: <Clock3 className="h-5 w-5 text-[#D97706]" />,
+            },
+            {
+              label: "User Guide",
+              description: "Hướng dẫn sử dụng hệ thống quản lý nợ",
+              href: "/help",
+              icon: <HelpCircle className="h-5 w-5 text-[#D97706]" />,
+            },
+            {
+              label: "Profile & Settings",
+              description: "Quản lý thông tin cá nhân và chế độ riêng tư",
+              href: "/profile",
+              icon: <Settings className="h-5 w-5 text-[#D97706]" />,
+            },
+          ].map((item) => {
+            const active = isActive(pathname, null, item.href);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setIsMoreOpen(false)}
+                className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 ${
+                  active
+                    ? "bg-note-yellow/20 border-note-yellow/40 shadow-sm"
+                    : "bg-white border-gray-100 hover:bg-note-yellow/5"
+                }`}
+              >
+                <div className="flex-shrink-0 p-3 rounded-xl bg-note-yellow/10">
+                  {item.icon}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-sm text-ink-black">{item.label}</p>
+                  <p className="text-xs text-pencil-gray mt-0.5">{item.description}</p>
+                </div>
+                <svg
+                  className="h-5 w-5 text-pencil-gray/40"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsMoreOpen(false);
+              clearAuthToken();
+              router.push("/login");
+            }}
+            className="flex w-full items-center gap-4 p-4 rounded-2xl border border-red-100 bg-red-50/50 hover:bg-red-50 transition-colors mt-6 cursor-pointer"
+          >
+            <div className="flex-shrink-0 p-3 rounded-xl bg-red-100/50">
+              <LogOut className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-semibold text-sm text-red-600">Sign Out</p>
+              <p className="text-xs text-red-600/70 mt-0.5">Đăng xuất khỏi tài khoản của bạn</p>
+            </div>
+          </button>
+        </div>
+      </div>
 
       <Toaster />
     </div>
