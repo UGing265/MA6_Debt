@@ -43,16 +43,3 @@ This project is indexed by GitNexus as **MA6_Debt** (9197 symbols, 16294 relatio
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
-
-<!-- custom:start -->
-# Custom Project Instructions
-
-These instructions are maintained manually for MA6 Debt. Keep them outside the GitNexus-managed block above so GitNexus updates do not overwrite project-specific rules.
-
-## Always Do
-
-- **MUST prioritize GitNexus before other code discovery tools.** For codebase scanning, locating files/symbols, tracing flows, finding callers/usages, dependency checks, debugging paths, refactoring research, or impact questions, start with GitNexus (`query`, `context`, `impact`, `trace`, `cypher`, or resources). Use direct file reads, terminal search, or other tools only after GitNexus identifies targets, when GitNexus lacks coverage for the artifact type, or to verify exact source/test/build behavior.
-- **MUST read and follow the split canonical design-system files before planning or coding.** For frontend/UI/UX work, read `docs/docs/frontend/design-system.md`. For backend/API/domain/persistence work, read `docs/docs/backend/design-system.md`. For full-stack work, read both files. `docs/docs/design-system.md` is legacy/general context only and must not override the split canonical files. If a requested change conflicts with the relevant design system, call it out and ask for explicit approval or update the design system in the same docs-scoped change.
-- **MUST always write code, UI labels, descriptions, and comments in English.**
-
-<!-- custom:end -->
