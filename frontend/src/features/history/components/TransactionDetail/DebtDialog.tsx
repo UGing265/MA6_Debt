@@ -10,8 +10,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PayerMode } from "../../types/history";
+import { PayerMode } from "@/features/transaction/types/transaction";
 import { formatVnd } from "@/lib/utils";
+import { PartnerSelect } from "@/features/transaction/components/QuickDebt/PartnerSelect";
 import { handleNumericKeyDown, parseNumericInput } from "@/lib/utils/numericInput";
 
 interface Partner {
@@ -70,22 +71,14 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Partner */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Partner</label>
-            <select
-              value={debtPartnerId}
-              onChange={(e) => onPartnerChange(e.target.value)}
-              className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-            >
-              <option value="">Select partner</option>
-              {partners.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({formatVnd(p.balance)})
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Partner - Hybrid Search Combobox */}
+          <PartnerSelect
+            value={debtPartnerId}
+            onChange={(val) => onPartnerChange(val)}
+            partners={partners}
+            isLoading={false}
+            disabled={isSaving}
+          />
 
           {/* Payer Mode */}
           <div className="space-y-1.5">

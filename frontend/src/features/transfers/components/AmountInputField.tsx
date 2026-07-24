@@ -6,10 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import type { UseFormReturn } from "react-hook-form";
 import type { TransferFormValues } from "../types/transferForm";
 import { handleNumericKeyDown } from "@/lib/utils/numericInput";
+import { cn } from "@/lib/utils";
 
 interface AmountInputFieldProps {
   form: UseFormReturn<TransferFormValues>;
@@ -24,10 +24,10 @@ export const AmountInputField: React.FC<AmountInputFieldProps> = ({ form, disabl
       name="amount"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-gray-700 font-medium">Amount</FormLabel>
+          <FormLabel className="block text-center text-sm font-bold text-ink-black">Amount</FormLabel>
           <FormControl>
             <div className="relative">
-              <Input
+              <input
                 type="text"
                 inputMode="numeric"
                 placeholder="0"
@@ -43,9 +43,13 @@ export const AmountInputField: React.FC<AmountInputFieldProps> = ({ form, disabl
                   field.onChange(raw === "" ? undefined : Number(raw));
                 }}
                 onKeyDown={handleNumericKeyDown}
-                className="h-10 pr-16 text-right"
+                className={cn(
+                  "h-14 w-full rounded-xl border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-bold text-ink-black outline-none transition-all placeholder:text-pencil-gray/60 focus:border-amber-400 focus:ring-2 focus:ring-note-yellow/30 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
+                )}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-pencil-gray">VND</span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-pencil-gray/80">
+                VND
+              </span>
             </div>
           </FormControl>
           <FormMessage />

@@ -135,7 +135,11 @@ Palette rules:
 - Standard: every input needs a visible label or accessible label, inline validation message, and clear helper text when a format matters.
 - Standard: use Zod schemas with React Hook Form for user-entered data.
 - Standard: form errors should appear near the field and may also trigger a toast for global failures.
-- Standard: financial amount inputs must make currency, sign, and decimal expectations explicit.
+- Standard: **Hero Amount Input**: Financial amount inputs must make currency, sign, and decimal expectations explicit. The primary top amount input (`Total` / `Amount`) is the hero element of the form and ALWAYS features a permanent yellow border (`border-2 border-note-yellow bg-white font-bold text-2xl text-center shadow-xs`) to serve as the primary visual anchor.
+- Standard: **Hybrid Search Combobox**: For wallet, partner, or entity selectors, use the **Hybrid Search Combobox** pattern (`WalletSelect`, `PartnerSelect`). Never use native HTML `<select>` elements for entity choices. Support both click/scroll selection and inline text search. Omit redundant parent group headers from dropdown lists for flat, fast scanning. Include a clear (`X`) affordance to reset selection.
+- Standard: **Dropdown Popover Container**: Floating dropdown popover containers (`WalletSelect`, `PartnerSelect`, `HistoryWalletDropdown`, `PageSizeDropdown`, `WalletSearchSort`, `SpendingChart`) MUST use a crisp pure white background (`bg-white border border-gray-200 shadow-xl rounded-xl`) for maximum contrast and legibility. Never use tinted or yellowish backgrounds for popover menus.
+- Standard: **Secondary Inputs & Selectors**: Secondary inputs, comboboxes, and filter controls (`Child Wallet`, `Partner`, `Debt Amount`, `Note`, `Search`, etc.) MUST use a clean neutral gray border (`border border-gray-200 bg-white text-ink-black`) by default. Secondary controls ONLY display a bold note-yellow border (`border-2 border-note-yellow`) WHILE actively clicked, focused, or open. Once focus is lost or selection is completed, the yellow border MUST TURN OFF and return to a clean neutral gray border (`border border-gray-200`) to prevent visual clutter and yellow color fatigue.
+- Standard: **Toggle Buttons & Filter Pills**: Unselected toggle buttons, page controls, and filter pills (`PayerModeToggle`, Tag pills, `Newest first` sort, `10 / page` dropdown) MUST use light neutral borders (`border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50 font-medium`). Active/Selected buttons fill with note yellow (`bg-note-yellow text-ink-black border-2 border-note-yellow font-bold shadow-xs`).
 
 ### Modals and dialogs
 
@@ -153,6 +157,8 @@ Palette rules:
 ### Tables and lists
 
 - Implementation requirement: tables/lists must support dense financial scanning, readable numbers, clear empty states, and accessible row actions.
+- Standard: **Page Level Container**: Main page views (e.g. `/history`) MUST wrap search filters and transaction list components inside a clean **White Card Container (`bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-6`)** to isolate content cleanly from the paper background.
+- Standard: **Row Item Cards**: Individual transaction items (`HistoryRow`) MUST be rendered as crisp white card rows (`bg-white rounded-xl border border-gray-200 px-4 py-3 shadow-xs hover:border-amber-300 hover:shadow-md transition-all`), providing clear visual separation between transactions.
 - Standard: provide mobile alternatives for wide tables through stacked rows, horizontal containment within a card, or prioritized columns without page-level horizontal scroll.
 - Standard: align currency values consistently, preserve debt/receivable color semantics, and avoid color-only status communication.
 - Standard: filters and search controls belong close to the list they affect and must show loading/error feedback.

@@ -246,12 +246,14 @@ const DashboardLayoutContent = ({
       >
         <div className="px-4 py-5 border-b border-note-yellow/20">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold">
-              G
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-ink-black">MA6 Debt</p>
-              <p className="text-sm text-pencil-gray">Hello, {displayName}</p>
+            <img
+              src="/MA6.png"
+              alt="MA6 Debt Logo"
+              className="h-10 w-10 rounded-xl object-contain shadow-xs bg-white p-0.5 border border-note-yellow/40 shrink-0"
+            />
+            <div className="min-w-0">
+              <p className="text-2xl font-bold text-ink-black truncate">MA6 Debt</p>
+              <p className="text-sm text-pencil-gray truncate">Hello, {displayName}</p>
             </div>
           </div>
         </div>
@@ -414,25 +416,25 @@ const DashboardLayoutContent = ({
           {[
             {
               label: "Internal Transfer",
-              description: "Chuyển tiền qua lại giữa các ví của bạn",
+              description: "Transfer money between your wallets",
               href: "/transfer",
               icon: <ArrowLeftRight className="h-5 w-5 text-[#D97706]" />,
             },
             {
               label: "Transaction History",
-              description: "Xem chi tiết và lọc lịch sử giao dịch",
+              description: "View and filter transaction history",
               href: "/history",
               icon: <Clock3 className="h-5 w-5 text-[#D97706]" />,
             },
             {
               label: "User Guide",
-              description: "Hướng dẫn sử dụng hệ thống quản lý nợ",
+              description: "Learn how to use MA6 Debt",
               href: "/help",
               icon: <HelpCircle className="h-5 w-5 text-[#D97706]" />,
             },
             {
               label: "Profile & Settings",
-              description: "Quản lý thông tin cá nhân và chế độ riêng tư",
+              description: "Manage your profile and privacy settings",
               href: "/profile",
               icon: <Settings className="h-5 w-5 text-[#D97706]" />,
             },
@@ -483,7 +485,7 @@ const DashboardLayoutContent = ({
             </div>
             <div className="flex-1 text-left">
               <p className="font-semibold text-sm text-red-600">Sign Out</p>
-              <p className="text-xs text-red-600/70 mt-0.5">Đăng xuất khỏi tài khoản của bạn</p>
+              <p className="text-xs text-red-600/70 mt-0.5">Log out from your account</p>
             </div>
           </button>
         </div>

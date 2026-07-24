@@ -48,7 +48,22 @@ export const getMonthlyStats = async (months: number = 6): Promise<MonthlyStatsD
 
   return response.json();
 };
+export interface SpendingStatsDto {
+  label: string;
+  amount: number;
+}
 
+export const getSpendingStats = async (period: string = "day", limit: number = 30): Promise<SpendingStatsDto[]> => {
+  const response = await apiFetch(`/api/transactions/spending-stats?period=${period}&limit=${limit}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get spending stats");
+  }
+
+  return response.json();
+};
 export const getHistory = async (params: {
   search?: string;
   walletId?: string | null;

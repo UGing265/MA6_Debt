@@ -11,8 +11,9 @@ import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useCashAdjustmentSubmit } from "../hooks/useTransactionSubmit";
 import { AdjustmentSchema, mapAdjustmentToPayload } from "../model";
 import { AdjustmentDirection } from "../types/transaction";
-import { formatVnd } from "@/lib/utils";
+import { formatVnd, cn } from "@/lib/utils";
 import type { Wallet } from "@/features/wallet/types/wallet";
+import { WalletSelect } from "./QuickDebt/WalletSelect";
 
 type AdjustmentFormInput = z.infer<typeof AdjustmentSchema>;
 
@@ -183,11 +184,10 @@ export const AdjustmentForm = () => {
             type="button"
             disabled={isSubmitting}
             onClick={() => form.setValue("direction", AdjustmentDirection.Credit, { shouldValidate: true })}
-            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              form.watch("direction") === AdjustmentDirection.Credit
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${form.watch("direction") === AdjustmentDirection.Credit
                 ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                 : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-            }`}
+              }`}
           >
             Add Money
           </button>
@@ -195,11 +195,10 @@ export const AdjustmentForm = () => {
             type="button"
             disabled={isSubmitting}
             onClick={() => form.setValue("direction", AdjustmentDirection.Debit, { shouldValidate: true })}
-            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              form.watch("direction") === AdjustmentDirection.Debit
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${form.watch("direction") === AdjustmentDirection.Debit
                 ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                 : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-            }`}
+              }`}
           >
             Subtract Money
           </button>
@@ -209,42 +208,16 @@ export const AdjustmentForm = () => {
         )}
       </div>
 
-      {/* Child Wallet */}
-      <div className="space-y-1.5">
-        <label className="block text-left text-xs font-medium text-pencil-gray">
-          Child Wallet
-        </label>
-        <select
-          data-testid="adj-wallet"
-          value={form.watch("walletId") ?? ""}
-          onChange={(e) => form.setValue("walletId", e.target.value, { shouldValidate: true })}
-          disabled={isSubmitting || walletsLoading || childWallets.length === 0}
-          className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="">
-            {walletsLoading
-              ? "Loading..."
-              : childWallets.length === 0
-              ? "No child wallets"
-              : "Select wallet"}
-          </option>
-          {groupedWallets.map((group, idx) => (
-            <optgroup
-              key={group.parent?.id ?? `orphan-${idx}`}
-              label={group.parent?.name ?? "Other"}
-            >
-              {group.children.map((child) => (
-                <option key={child.id} value={child.id}>
-                  {child.name} ({formatVnd(child.balance)})
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-        {form.formState.errors.walletId && (
-          <p className="text-xs text-red-500">{form.formState.errors.walletId.message}</p>
-        )}
-      </div>
+      {/* Child Wallet - Hybrid Search Combobox */}
+      <WalletSelect
+        value={form.watch("walletId") ?? ""}
+        onChange={(val) => form.setValue("walletId", val, { shouldValidate: true })}
+        groupedWallets={groupedWallets}
+        isLoading={walletsLoading}
+        hasWallets={childWallets.length > 0}
+        disabled={isSubmitting}
+        error={form.formState.errors.walletId?.message}
+      />
       {/* Note */}
       <div className="space-y-1.5">
         <label className="block text-left text-xs font-medium text-pencil-gray">

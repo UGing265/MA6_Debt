@@ -53,5 +53,6 @@ These instructions are maintained manually for MA6 Debt. Keep them outside the G
 ## Always Do
 
 - **MUST read and follow the split canonical design-system files before planning or coding.** For frontend/UI/UX work, read `docs/docs/frontend/design-system.md`. For backend/API/domain/persistence work, read `docs/docs/backend/design-system.md`. For full-stack work, read both files. `docs/docs/design-system.md` is legacy/general context only and must not override the split canonical files. If a requested change conflicts with the relevant design system, call it out and ask for explicit approval or update the design system in the same docs-scoped change.
+- **MUST always write code, UI labels, descriptions, and comments in English.**
 
 <!-- custom:end -->

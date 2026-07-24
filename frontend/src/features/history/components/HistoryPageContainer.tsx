@@ -7,6 +7,7 @@ import { getHistory, PagedResult, subscribeToHistoryRefresh } from "../api/histo
 import { HistoryDto } from "../types/history";
 import { useHistoryQueryState } from "../hooks/useHistoryQueryState";
 import { getHistoryKind, HistoryKindTag } from "../utils/historyKind";
+import { Card } from "@/components/ui/card";
 
 export const HistoryPageContainer: React.FC = () => {
   const { currentSearch, currentWalletId, currentPartnerId, currentKind, currentPage, currentPageSize } = useHistoryQueryState();
@@ -92,7 +93,7 @@ export const HistoryPageContainer: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-4" data-testid="history-page-container">
+    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-6" data-testid="history-page-container">
       <HistoryFilters />
       <HistoryList
         items={items}
@@ -105,7 +106,7 @@ export const HistoryPageContainer: React.FC = () => {
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
       />
-    </div>
+    </Card>
   );
 };
 

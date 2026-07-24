@@ -16,7 +16,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({ value, onChange, disab
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-center text-sm font-medium text-ink-black">Total</label>
+      <label className="block text-center text-sm font-bold text-ink-black">Total</label>
       <div className="relative">
         <input
           data-testid="qd-total"
@@ -27,13 +27,13 @@ export const AmountInput: React.FC<AmountInputProps> = ({ value, onChange, disab
           value={value ? Number(value).toLocaleString("en-US") : ""}
           onChange={handleChange}
           onKeyDown={handleNumericKeyDown}
-          className="h-14 w-full rounded-lg border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-semibold text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-amber-500 focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-14 w-full rounded-xl border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-bold text-ink-black outline-none transition-all placeholder:text-pencil-gray/60 focus:border-amber-400 focus:ring-2 focus:ring-note-yellow/30 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
         />
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-pencil-gray">
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-pencil-gray/80">
           vnd
         </span>
       </div>
-      {error && <p className="text-center text-xs text-red-500">{error}</p>}
+      {error && <p className="text-center text-xs font-semibold text-red-500">{error}</p>}
     </div>
   );
 };

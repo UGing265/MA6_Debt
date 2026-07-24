@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import { useUpdateWallet } from "@/features/wallet/hooks/useWallets";
 import { Wallet2, Loader2 } from "lucide-react";
+import { WalletSelect } from "@/features/transaction/components/QuickDebt/WalletSelect";
 
 interface AttachWalletModalProps {
   isOpen: boolean;
@@ -85,21 +86,14 @@ export function AttachWalletModal({
             </div>
           ) : (
             <>
-              <div>
-                <select
-                  value={selectedWalletId}
-                  onChange={(e) => setSelectedWalletId(e.target.value)}
-                  className="w-full rounded-md border border-note-yellow/30 bg-white px-3 py-2 text-sm text-ink-black focus:outline-none focus:ring-2 focus:ring-note-yellow"
-                  data-testid="attach-child-select"
-                >
-                  <option value="">Select a wallet to attach</option>
-                  {eligibleWallets.map((wallet) => (
-                    <option key={wallet.id} value={wallet.id}>
-                      {wallet.name} - ${(wallet.balance || 0).toLocaleString()}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <WalletSelect
+                value={selectedWalletId}
+                onChange={(val) => setSelectedWalletId(val)}
+                groupedWallets={[{ parent: null, children: eligibleWallets }]}
+                isLoading={false}
+                hasWallets={eligibleWallets.length > 0}
+                disabled={isPending}
+              />
 
               <div className="flex justify-end gap-3">
                 <Button
