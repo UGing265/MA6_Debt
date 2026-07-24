@@ -9,7 +9,6 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { LoginSchema, LoginInput } from "../types/auth";
 import { login } from "../api/auth";
 import { parseErrorResponse } from "../utils/errorParser";
-import { setAuthToken } from "@/lib/authToken";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -27,7 +26,7 @@ export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginInput>({
-    resolver: zodResolver(LoginSchema as any),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -37,11 +36,10 @@ export const LoginForm = () => {
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
-      const response = await login(data);
-      setAuthToken(response.token);
+      await login(data);
       toast.success("Welcome!");
       router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       const parsedError = parseErrorResponse(error);
       
       if (parsedError.general) {

@@ -1,6 +1,55 @@
-import { getAuthToken, clearAuthToken } from "./authToken";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
+const AUTH_REFRESH_URL = `${API_URL}/api/auth/refresh`;
+const AUTH_ENDPOINT_PATHS = new Set([
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/refresh",
+  "/api/auth/logout",
+]);
+
+export interface ApiFetchOptions extends RequestInit {
+  skipAuthRefresh?: boolean;
+}
+
+let refreshPromise: Promise<void> | null = null;
+
+const buildFullUrl = (url: string) =>
+  url.startsWith("http") ? url : `${API_URL}${url}`;
+
+const isAuthEndpoint = (url: string) => {
+  const fullUrl = buildFullUrl(url);
+
+  try {
+    return AUTH_ENDPOINT_PATHS.has(new URL(fullUrl).pathname);
+  } catch {
+    return AUTH_ENDPOINT_PATHS.has(url.split("?")[0] ?? url);
+  }
+};
+
+const refreshSessionOnce = async () => {
+  if (!refreshPromise) {
+    refreshPromise = fetch(AUTH_REFRESH_URL, {
+      method: "POST",
+      credentials: "include",
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          await handleApiError(response);
+        }
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+};
+
+const redirectToLogin = () => {
+  if (typeof window !== "undefined") {
+    window.location.href = "/login";
+  }
+};
 
 /**
  * Centralized API client that handles authentication and error responses
@@ -8,42 +57,37 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
  */
 export async function apiFetch(
   url: string,
-  options: RequestInit = {}
+  options: ApiFetchOptions = {}
 ): Promise<Response> {
-  const token = getAuthToken();
-
-  // Build full URL if it's a relative path
-  const fullUrl = url.startsWith("http") ? url : `${API_URL}${url}`;
+  const { skipAuthRefresh = false, ...fetchOptions } = options;
+  const fullUrl = buildFullUrl(url);
 
   // Merge headers, prioritizing custom headers
   const headers = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
+    ...fetchOptions.headers,
   };
 
-  // Make the request with credentials
-  const response = await fetch(fullUrl, {
-    ...options,
+  const requestOptions: RequestInit = {
+    ...fetchOptions,
     headers,
     credentials: "include",
-  });
+  };
 
-  // Handle 401 Unauthorized - token expired or invalid
-  if (response.status === 401) {
-    // Clear the auth token
-    clearAuthToken();
+  const response = await fetch(fullUrl, requestOptions);
 
-    // Redirect to login page
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
+  if (response.status !== 401 || skipAuthRefresh || isAuthEndpoint(url)) {
+    return response;
+  }
 
-    // Throw an error to stop further processing
+  try {
+    await refreshSessionOnce();
+  } catch {
+    redirectToLogin();
     throw new Error("Session expired. Please log in again.");
   }
 
-  return response;
+  return fetch(fullUrl, requestOptions);
 }
 
 /**
@@ -51,10 +95,8 @@ export async function apiFetch(
  * @deprecated Use apiFetch instead
  */
 export const getAuthHeaders = () => {
-  const token = getAuthToken();
   return {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 

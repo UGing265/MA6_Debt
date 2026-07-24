@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
-import { getAuthToken, clearAuthToken } from "@/lib/authToken";
+import { logout } from "@/features/auth/api/auth";
 import { getProfile } from "@/features/user/api/userApi";
 import {
   ArrowLeftRight,
@@ -70,19 +71,19 @@ const PrivacyQuickToggle = () => {
       onMouseLeave={handleRelease}
       onTouchStart={handlePress}
       onTouchEnd={handleRelease}
-      aria-label="Nhấn giữ để xem số tiền"
-      title="Nhấn giữ để xem số tiền"
+      aria-label="Hold to reveal amounts"
+      title="Hold to reveal amounts"
       className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-note-yellow/40 bg-white hover:bg-note-yellow/10 text-ink-black transition-colors cursor-pointer select-none active:scale-95 duration-100"
     >
       {tempShow ? (
         <>
           <Eye className="h-4 w-4 text-note-yellow" />
-          <span className="hidden sm:inline">Xem tiền</span>
+          <span className="hidden sm:inline">Amounts visible</span>
         </>
       ) : (
         <>
           <EyeOff className="h-4 w-4 text-pencil-gray" />
-          <span className="hidden sm:inline">Giữ để xem</span>
+          <span className="hidden sm:inline">Hold to view</span>
         </>
       )}
     </button>
@@ -175,43 +176,20 @@ function isActive(pathname: string, searchTab: string | null, href: string) {
   return pathname === cleanHref;
 }
 
-function getDisplayNameFromToken(token: string | null): string {
-  if (!token) return "User";
-
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return "User";
-
-    const payloadBase64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = payloadBase64.padEnd(Math.ceil(payloadBase64.length / 4) * 4, "=");
-    const payload = JSON.parse(atob(padded)) as Record<string, string>;
-
-    const name = payload.name || payload.unique_name || payload.username;
-    if (name && name.trim().length > 0) return name;
-
-    const email = payload.email;
-    if (email && email.includes("@")) return email.split("@")[0];
-  } catch {
-    return "User";
-  }
-
-  return "User";
-}
-
 const DashboardLayoutContent = ({
   children,
   isSidebarOpen,
   setIsSidebarOpen,
   displayName,
   pathname,
-  router
+  onSignOut,
 }: {
   children: React.ReactNode;
   isSidebarOpen: boolean;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   displayName: string;
   pathname: string;
-  router: any;
+  onSignOut: () => void;
 }) => {
   const { hideAmount, tempShow } = usePrivacy();
   const [isMoreOpen, setIsMoreOpen] = React.useState(false);
@@ -231,7 +209,7 @@ const DashboardLayoutContent = ({
   const renderedChildren = React.useMemo(() => {
     return React.Children.map(children, child => {
       if (React.isValidElement(child)) {
-        return React.cloneElement(child as React.ReactElement<any>, { hideAmount, tempShow });
+        return React.cloneElement(child as React.ReactElement<Record<string, unknown>>, { hideAmount, tempShow });
       }
       return child;
     });
@@ -246,9 +224,11 @@ const DashboardLayoutContent = ({
       >
         <div className="px-4 py-5 border-b border-note-yellow/20">
           <div className="flex items-center gap-3">
-            <img
+            <Image
               src="/MA6.png"
               alt="MA6 Debt Logo"
+              width={56}
+              height={56}
               className="h-14 w-14 object-contain shrink-0"
             />
             <div className="min-w-0">
@@ -262,19 +242,20 @@ const DashboardLayoutContent = ({
           {navItems.map((item) => {
             const active = isActive(pathname, null, item.href);
             const placeholder = isPlaceholderNav(item.href);
+            let itemStateClass = "text-ink-black hover:bg-note-yellow/10";
+            if (active) {
+              itemStateClass = "bg-note-yellow/20 text-[#D97706]";
+            } else if (placeholder) {
+              itemStateClass = "text-pencil-gray/50 cursor-default";
+            }
+
             return (
               <Link
                 key={item.label}
                 href={item.href}
                 scroll={false}
                 data-testid={item.testId}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-note-yellow/20 text-[#D97706]"
-                    : placeholder
-                      ? "text-pencil-gray/50 cursor-default"
-                      : "text-ink-black hover:bg-note-yellow/10"
-                }`}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${itemStateClass}`}
               >
                 {item.icon}
                 {item.label}
@@ -289,10 +270,7 @@ const DashboardLayoutContent = ({
         <div className="mt-auto p-3">
           <button
             type="button"
-            onClick={() => {
-              clearAuthToken();
-              router.push("/login");
-            }}
+            onClick={onSignOut}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-black hover:bg-note-yellow/10"
           >
             <LogOut className="h-4 w-4" />
@@ -312,10 +290,7 @@ const DashboardLayoutContent = ({
           <button
             type="button"
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-            onClick={() => {
-              console.log("Toggle sidebar clicked. Current:", isSidebarOpen);
-              setIsSidebarOpen((prev) => !prev);
-            }}
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
             className="hidden md:block rounded-md p-1.5 text-ink-black transition-colors hover:bg-note-yellow/20 cursor-pointer"
           >
             <PanelLeft className="h-5 w-5" />
@@ -475,8 +450,7 @@ const DashboardLayoutContent = ({
             type="button"
             onClick={() => {
               setIsMoreOpen(false);
-              clearAuthToken();
-              router.push("/login");
+              onSignOut();
             }}
             className="flex w-full items-center gap-4 p-4 rounded-2xl border border-red-100 bg-red-50/50 hover:bg-red-50 transition-colors mt-6 cursor-pointer"
           >
@@ -505,14 +479,20 @@ export default function DashboardLayout({
   const router = useRouter();
   const [displayName, setDisplayName] = React.useState("User");
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const handleSignOut = React.useCallback(() => {
+    logout()
+      .catch(() => undefined)
+      .then(() => {
+        router.replace("/login");
+      });
+  }, [router]);
 
   React.useEffect(() => {
-    const token = getAuthToken();
-    setDisplayName(getDisplayNameFromToken(token));
-
     getProfile().then(data => {
-      if (data?.username) setDisplayName(data.username);
-    }).catch(console.error);
+      setDisplayName(data.name || data.username || "User");
+    }).catch(() => {
+      setDisplayName("User");
+    });
 
     const handleProfileUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -532,7 +512,7 @@ export default function DashboardLayout({
         setIsSidebarOpen={setIsSidebarOpen}
         displayName={displayName}
         pathname={pathname}
-        router={router}
+        onSignOut={handleSignOut}
       >
         {children}
       </DashboardLayoutContent>

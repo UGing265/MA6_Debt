@@ -17,12 +17,12 @@ export const RegisterSchema = z.object({
     .min(6, "Password must be at least 6 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one digit"),
+    .regex(/\d/, "Password must contain at least one digit"),
 });
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 
 export interface LoginResponse {
-  token: string;
-  expiration: string;
+  token?: string;
+  expiration?: string;
 }
