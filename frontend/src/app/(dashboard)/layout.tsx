@@ -249,7 +249,7 @@ const DashboardLayoutContent = ({
             <img
               src="/MA6.png"
               alt="MA6 Debt Logo"
-              className="h-10 w-10 rounded-xl object-contain shadow-xs bg-white p-0.5 border border-note-yellow/40 shrink-0"
+              className="h-14 w-14 object-contain shrink-0"
             />
             <div className="min-w-0">
               <p className="text-2xl font-bold text-ink-black truncate">MA6 Debt</p>

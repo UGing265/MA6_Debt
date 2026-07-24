@@ -9,12 +9,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div className="flex flex-col w-full space-y-6">
-      <div className="text-center space-y-2 flex flex-col items-center">
-        <img
-          src="/MA6.png"
-          alt="MA6 Debt Logo"
-          className="h-14 w-14 rounded-2xl object-contain shadow-md bg-white p-1 border-2 border-note-yellow/50 mb-1"
-        />
+      <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold font-patrick text-[#1F2937]">Sign In</h1>
         <p className="text-gray-600 font-quicksand">Welcome back! Sign in to your account.</p>
       </div>

@@ -3,13 +3,13 @@ import { Check, Menu } from "lucide-react";
 
 const Navbar = () => (
   <nav className="mx-auto mb-16 flex max-w-5xl items-center justify-between rounded-full border border-[#1F2937]/10 bg-[#FFFDF5]/90 px-6 py-3 backdrop-blur-sm md:mb-24 font-quicksand">
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-3.5">
       <img
         src="/MA6.png"
         alt="MA6 Debt Logo"
-        className="h-9 w-9 rounded-xl object-contain shadow-xs bg-white p-0.5 border border-[#1F2937]/20 shrink-0"
+        className="h-14 w-14 object-contain shrink-0 transition-transform hover:scale-105"
       />
-      <span className="font-bold font-patrick text-[#1F2937] text-xl">MA6 Debt</span>
+      <span className="font-bold font-patrick text-[#1F2937] text-2xl md:text-2.5xl">MA6 Debt</span>
     </div>
 
     <div className="hidden items-center gap-8 md:flex">
