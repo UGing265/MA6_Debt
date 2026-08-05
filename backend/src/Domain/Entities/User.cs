@@ -20,6 +20,10 @@ namespace Domain.Entities
 
         public Guid? DefaultPartnerId { get; set; }
 
+        public bool DailySpendingLimitEnabled { get; set; }
+
+        public decimal? DailySpendingLimitAmount { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
