@@ -3,13 +3,15 @@
 import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
-import { getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
+import { getDailySpendingLimit, getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
+import type { DailySpendingLimitDto } from "@/features/history/api/history";
 import { HistoryDto } from "@/features/history/types/history";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   SummaryCards,
   StatsCards,
   SpendingChart,
+  DailyLimitCard,
   WalletsPanel,
   RecentHistoryPanel,
 } from "./components";
@@ -29,10 +31,7 @@ const extractHistoryError = (error: unknown): string => {
   return "Failed to load recent history";
 };
 
-import { usePrivacy } from "@/context/PrivacyContext";
-
 export default function WalletDashboardPage() {
-  const { tempShow } = usePrivacy();
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
   const { partners, isLoading: partnersLoading, error: partnersError } = useDebtPartners();
 
@@ -40,6 +39,9 @@ export default function WalletDashboardPage() {
   const [recentHistory, setRecentHistory] = React.useState<HistoryDto[]>([]);
   const [recentHistoryLoading, setRecentHistoryLoading] = React.useState<boolean>(true);
   const [recentHistoryError, setRecentHistoryError] = React.useState<string | null>(null);
+  const [dailyLimit, setDailyLimit] = React.useState<DailySpendingLimitDto | null>(null);
+  const [dailyLimitLoading, setDailyLimitLoading] = React.useState<boolean>(true);
+  const [dailyLimitError, setDailyLimitError] = React.useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = React.useState<number>(0);
 
   // Load defaults from localStorage
@@ -61,14 +63,29 @@ export default function WalletDashboardPage() {
     }
   }, []);
 
+  const fetchDailyLimit = React.useCallback(async () => {
+    setDailyLimitLoading(true);
+    setDailyLimitError(null);
+    try {
+      setDailyLimit(await getDailySpendingLimit());
+    } catch (error) {
+      setDailyLimitError(extractHistoryError(error));
+      setDailyLimit(null);
+    } finally {
+      setDailyLimitLoading(false);
+    }
+  }, []);
+
   React.useEffect(() => {
     void fetchRecentHistory();
+    void fetchDailyLimit();
     const unsubscribe = subscribeToHistoryRefresh(() => {
       void fetchRecentHistory();
+      void fetchDailyLimit();
       setRefreshTrigger((prev) => prev + 1);
     });
     return unsubscribe;
-  }, [fetchRecentHistory]);
+  }, [fetchDailyLimit, fetchRecentHistory]);
 
   const isLoading = walletsLoading || partnersLoading;
   const error = walletsError || partnersError;
@@ -126,8 +143,10 @@ export default function WalletDashboardPage() {
 
       <StatsCards wallets={safeWallets} partners={partners} />
 
+      <DailyLimitCard dailyLimit={dailyLimit} isLoading={dailyLimitLoading} error={dailyLimitError} />
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <SpendingChart refreshTrigger={refreshTrigger} />
+        <SpendingChart refreshTrigger={refreshTrigger} dailyLimit={dailyLimit} />
         <WalletsPanel
           parentWallets={parentWallets}
           childWallets={childWallets}

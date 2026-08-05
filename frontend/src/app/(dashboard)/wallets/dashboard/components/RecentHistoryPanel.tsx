@@ -1,6 +1,8 @@
 import React from "react";
+import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Clock3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Clock3, ArrowRight } from "lucide-react";
 import { HistoryDto, PayerMode } from "@/features/history/types/history";
 import { getHistoryKindTag, getHistoryKindTagClasses, stripRepayMarker } from "@/features/history/utils/historyKind";
 import { formatVnd } from "@/lib/utils";
@@ -25,8 +27,8 @@ const formatHistoryDate = (dateInput: string): string => {
 
 const getPayerModeTag = (item: HistoryDto): string | null => {
   if (!item.partnerName) return null;
-  if (item.payerMode === PayerMode.ToiTra) return "Toi tra";
-  if (item.payerMode === PayerMode.PartnerTra) return "Partner tra";
+  if (item.payerMode === PayerMode.ToiTra) return "I paid";
+  if (item.payerMode === PayerMode.PartnerTra) return "Partner paid";
   return null;
 };
 
@@ -43,12 +45,20 @@ export const RecentHistoryPanel: React.FC<RecentHistoryPanelProps> = ({
 }) => {
   return (
     <Card data-testid="recent-history-section">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-4xl font-bold text-ink-black flex items-center gap-2">
-          <Clock3 className="h-6 w-6 text-note-yellow" />
-          Recent History
-        </CardTitle>
-        <p className="text-sm text-pencil-gray">Latest transactions from your account</p>
+      <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <CardTitle className="text-2xl font-bold text-ink-black flex items-center gap-2">
+            <Clock3 className="h-6 w-6 text-note-yellow" />
+            Recent History
+          </CardTitle>
+          <p className="text-sm text-pencil-gray">Latest transactions from your account</p>
+        </div>
+        <Link href="/history">
+          <Button variant="outline" className="border-note-yellow text-ink-black hover:bg-note-yellow/20 flex items-center gap-2 text-xs font-semibold cursor-pointer">
+            View All History
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        </Link>
       </CardHeader>
       <CardContent>
         {isLoading ? (

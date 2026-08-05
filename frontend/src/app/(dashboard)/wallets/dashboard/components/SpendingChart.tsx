@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, Cell } from "recharts";
 import { formatVnd, cn } from "@/lib/utils";
-import { getSpendingStats, SpendingStatsDto } from "@/features/history/api/history";
-import { ChevronDown } from "lucide-react";
+import { getSpendingStats, SpendingStatsDto, DailySpendingLimitDto } from "@/features/history/api/history";
+import { ChevronDown, AlertTriangle } from "lucide-react";
 
 interface SpendingChartProps {
   // Option to trigger a refetch from the parent if needed
   refreshTrigger?: number;
+  dailyLimit?: DailySpendingLimitDto | null;
 }
 
-export const SpendingChart: React.FC<SpendingChartProps> = ({ refreshTrigger = 0 }) => {
+export const SpendingChart: React.FC<SpendingChartProps> = ({ refreshTrigger = 0, dailyLimit }) => {
   const [period, setPeriod] = useState<"day" | "month" | "quarter">("day");
   const [limit, setLimit] = useState<number>(15);
   const [data, setData] = useState<SpendingStatsDto[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const dailyLimitAmount = dailyLimit?.enabled && dailyLimit.limitAmount ? dailyLimit.limitAmount : null;
+  const overLimitCount = period === "day" && dailyLimitAmount ? data.filter((d) => d.amount > dailyLimitAmount).length : 0;
 
   // Synchronize limit defaults when period changes
   useEffect(() => {
@@ -173,7 +177,15 @@ const ChartRangeDropdown: React.FC<{
     <Card className="xl:col-span-2" data-testid="chart-container">
       <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <CardTitle className="text-2xl font-bold text-ink-black">Spending Analysis</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-2xl font-bold text-ink-black">Spending Analysis</CardTitle>
+            {overLimitCount > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 border border-red-200">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {overLimitCount} {overLimitCount === 1 ? "day" : "days"} over limit
+              </span>
+            )}
+          </div>
           <p className="text-sm text-pencil-gray">Visualize your spending patterns and trends</p>
         </div>
 
@@ -231,7 +243,7 @@ const ChartRangeDropdown: React.FC<{
         ) : (
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
+              <ComposedChart data={data} margin={{ top: 15, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#fcd34d" opacity={0.15} />
                 <XAxis
                   dataKey="label"
@@ -249,8 +261,11 @@ const ChartRangeDropdown: React.FC<{
                   dx={-4}
                 />
                 <Tooltip
-                  formatter={(value) => [formatVnd(Number(value)), "Spending"]}
-                  labelFormatter={(label) => `Period: ${label}`}
+                  formatter={(value, name) => [
+                    formatVnd(Number(value)),
+                    name === "Spent Amount" ? "Spent Amount" : "Trend",
+                  ]}
+                  labelFormatter={(label) => `Date: ${formatXAxisLabel(String(label))}`}
                   contentStyle={{
                     backgroundColor: "#fffbeb",
                     border: "1px solid #fcd34d",
@@ -260,21 +275,47 @@ const ChartRangeDropdown: React.FC<{
                   labelStyle={{ fontWeight: "bold", color: "#1f2937" }}
                 />
                 <Legend />
+                {period === "day" && dailyLimitAmount ? (
+                  <ReferenceLine
+                    y={dailyLimitAmount}
+                    stroke="#ef4444"
+                    strokeDasharray="4 4"
+                    strokeWidth={2}
+                    label={{
+                      value: `Limit: ${formatVnd(dailyLimitAmount)}`,
+                      fill: "#ef4444",
+                      fontSize: 11,
+                      position: "top",
+                      fontWeight: 600,
+                    }}
+                  />
+                ) : null}
                 <Bar
                   dataKey="amount"
                   name="Spent Amount"
                   fill="#f59e0b"
-                  opacity={0.8}
+                  opacity={0.85}
                   barSize={period === "day" ? 18 : period === "month" ? 36 : 54}
                   radius={[6, 6, 0, 0]}
-                />
+                >
+                  {data.map((entry, index) => {
+                    const isOver = period === "day" && dailyLimitAmount && entry.amount > dailyLimitAmount;
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={isOver ? "#ef4444" : "#f59e0b"}
+                        opacity={isOver ? 0.95 : 0.85}
+                      />
+                    );
+                  })}
+                </Bar>
                 <Line
                   type="monotone"
                   dataKey="amount"
                   name="Trend"
-                  stroke="#ef4444"
-                  strokeWidth={2.5}
-                  dot={{ r: 3, fill: "#ef4444", strokeWidth: 1 }}
+                  stroke="#d97706"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: "#d97706", strokeWidth: 1 }}
                   activeDot={{ r: 5 }}
                 />
               </ComposedChart>
