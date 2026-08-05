@@ -4,6 +4,7 @@ using Application.Common;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.DeleteTransaction;
+using Application.Features.Transactions.GetDailySpendingLimit;
 using Application.Features.Transactions.GetMonthlyStats;
 using Application.Features.Transactions.GetSpendingStats;
 using Application.Features.Transactions.GetTransactionById;
@@ -215,6 +216,20 @@ namespace API.Controllers
                 UserId = GetCurrentUserId(),
                 Period = period,
                 Limit = limit
+            });
+
+            return Ok(result);
+        }
+
+        [HttpGet("daily-spending-limit")]
+        [ProducesResponseType(typeof(DailySpendingLimitDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<DailySpendingLimitDto>> GetDailySpendingLimit()
+        {
+            var result = await _mediator.Send(new GetDailySpendingLimitQuery
+            {
+                UserId = GetCurrentUserId()
             });
 
             return Ok(result);
