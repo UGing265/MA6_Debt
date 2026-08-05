@@ -64,6 +64,27 @@ export const getSpendingStats = async (period: string = "day", limit: number = 3
 
   return response.json();
 };
+
+export interface DailySpendingLimitDto {
+  date: string;
+  enabled: boolean;
+  limitAmount: number | null;
+  spentAmount: number;
+  remainingAmount: number | null;
+  overAmount: number | null;
+}
+
+export const getDailySpendingLimit = async (): Promise<DailySpendingLimitDto> => {
+  const response = await apiFetch("/api/transactions/daily-spending-limit", {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get daily spending limit");
+  }
+
+  return response.json();
+};
 export const getHistory = async (params: {
   search?: string;
   walletId?: string | null;
