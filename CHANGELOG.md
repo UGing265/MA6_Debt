@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-07
+
+### Added
+- Added English and Vietnamese language support across authentication, landing, dashboard, wallet, debt partner, money movement, and transaction history flows.
+- Added password visibility toggles to authentication forms so users can review hidden password input before submitting.
+- Added privacy controls for financial amounts, including a setting-driven amount hiding mode and a dashboard quick reveal control.
+- Added richer dashboard spending analytics with daily spending visibility and chart-based views for clearer daily expense tracking.
+- Added daily spending goal support so users can compare spending against a daily target.
+- Added mobile bottom navigation with direct access to key dashboard, wallet, quick deduct, partner, history, transfer, help, and profile flows.
+- Added refreshed MA6 logo and app icons for the browser, favicon, and dashboard shell.
+
+### Changed
+- Redesigned the dashboard shell with sidebar navigation, mobile bottom sheet navigation, profile greeting, and privacy-aware content rendering.
+- Improved form styling across authentication, debt partner, repayment, transaction, transfer, wallet, and history flows for a cleaner financial notebook look.
+- Improved Quick Deduct selectors and inputs with searchable wallet/partner controls, clearer active states, and stronger amount-entry guidance.
+- Improved transaction history filtering, row layout, detail dialogs, and debt display for faster scanning on desktop and mobile.
+- Removed hard-coded partner assumptions so partner-related flows use the selected/default partner state instead of fixed values.
+- Updated canonical frontend and backend design-system documentation to guide future implementation work.
+
+### Fixed
+- Fixed idle expired-session behavior so dashboard sessions are redirected to login after the shared authenticated profile check can no longer renew the session.
+- Fixed mobile navigation gaps where several important functions were difficult to reach from small screens.
+- Fixed logo sizing/cropping issues so the MA6 avatar displays consistently.
+
+### Security
+- Moved browser authentication flow to cookie-based session handling instead of relying on browser storage for auth state.
+- Added refresh-token based session renewal so authenticated API requests can recover from access-token expiry when the refresh session is still valid.
+- Added logout/session expiry behavior for refresh sessions configured to expire after 7 days.
+- Added automatic login redirect when dashboard auth checks detect an expired or invalid session.
+
 ## [1.0.2] - 2026-03-25
 
 ### Added
