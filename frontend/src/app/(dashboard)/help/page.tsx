@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -7,13 +9,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Wallet, Users, Zap, ArrowLeftRight, CheckCircle2, AlertCircle, Info, BookOpen } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function HelpPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-10">
       <PageHeader
-        title="User Guide"
-        description="Learn how MA6 Debt works and the logic behind your cash flows."
+        title={t.dashboard.help.page.title}
+        description={t.dashboard.help.page.description}
       />
 
       <div className="bg-white rounded-xl border border-gray-100/60 shadow-sm overflow-hidden p-6 space-y-8">
@@ -22,11 +27,8 @@ export default function HelpPage() {
         <div className="bg-indigo-50 text-indigo-800 p-4 rounded-lg flex items-start gap-3 border border-indigo-100/50">
           <Info className="w-5 h-5 mt-0.5 shrink-0" />
           <div className="text-sm leading-relaxed">
-            <p className="font-semibold mb-1">Welcome to MA6 Debt</p>
-            <p>
-              This guide explains the core logic behind wallets, debt partners, and transactions.
-              Understanding these will help you manage your personal finances and shared expenses perfectly.
-            </p>
+            <p className="font-semibold mb-1">{t.dashboard.help.page.welcomeTitle}</p>
+            <p>{t.dashboard.help.page.welcomeBody}</p>
           </div>
         </div>
 
@@ -39,31 +41,25 @@ export default function HelpPage() {
                   <Wallet className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-ink-black text-base">1. Wallet Architecture</h3>
-                  <p className="text-xs text-pencil-gray font-normal mt-0.5">Parent & Child Wallet Hierarchy</p>
+                  <h3 className="font-semibold text-ink-black text-base">{t.dashboard.help.sections.wallets.title}</h3>
+                  <p className="text-xs text-pencil-gray font-normal mt-0.5">{t.dashboard.help.sections.wallets.subtitle}</p>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-5 text-gray-600 space-y-4">
-              <p>
-                The system uses a nested wallet structure to help you budget money without losing track of your actual physical accounts.
-              </p>
+              <p>{t.dashboard.help.sections.wallets.body}</p>
               <div className="space-y-3">
                 <div className="flex gap-2 items-start">
                   <CheckCircle2 className="w-4 h-4 text-green-500 mt-1 shrink-0" />
-                  <div>
-                    <span className="font-medium text-ink-black">Parent Wallets</span> represent your physical money sources (e.g., "Techcombank", "Cash in Pocket").
-                  </div>
+                  <div>{t.dashboard.help.sections.wallets.parentWallets}</div>
                 </div>
                 <div className="flex gap-2 items-start">
                   <CheckCircle2 className="w-4 h-4 text-green-500 mt-1 shrink-0" />
-                  <div>
-                    <span className="font-medium text-ink-black">Child Wallets</span> are budget envelopes inside a Parent Wallet (e.g., "Grocery", "Gas").
-                  </div>
+                  <div>{t.dashboard.help.sections.wallets.childWallets}</div>
                 </div>
               </div>
               <div className="bg-white p-3 rounded border border-gray-200 text-sm mt-3">
-                <span className="font-semibold text-note-yellow">Net Worth Rule:</span> The overall balance of a Parent Wallet shown to you is actually <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">Parent Balance + Sum of all Child Balances</code>.
+                <span className="font-semibold text-note-yellow">{t.dashboard.help.sections.wallets.netWorthRule}</span> {t.dashboard.help.sections.wallets.netWorthRuleBody}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -76,27 +72,21 @@ export default function HelpPage() {
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-ink-black text-base">2. Debt Partners</h3>
-                  <p className="text-xs text-pencil-gray font-normal mt-0.5">Understanding Positive & Negative Balances</p>
+                  <h3 className="font-semibold text-ink-black text-base">{t.dashboard.help.sections.partners.title}</h3>
+                  <p className="text-xs text-pencil-gray font-normal mt-0.5">{t.dashboard.help.sections.partners.subtitle}</p>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-5 text-gray-600 space-y-4">
-              <p>
-                Partners are the people you share expenses with or loan money to. The most important metric is their <strong>Balance</strong>.
-              </p>
+              <p>{t.dashboard.help.sections.partners.body}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <div className="bg-green-50 border border-green-100 p-4 rounded-lg">
-                  <div className="font-bold text-green-700 mb-1">Balance &gt; 0 (Positive)</div>
-                  <p className="text-sm text-green-800">
-                    This means the partner <strong>owes you money</strong>. This is your Receivable asset.
-                  </p>
+                  <div className="font-bold text-green-700 mb-1">{t.dashboard.help.sections.partners.positiveLabel}</div>
+                  <p className="text-sm text-green-800">{t.dashboard.help.sections.partners.positiveBody}</p>
                 </div>
                 <div className="bg-red-50 border border-red-100 p-4 rounded-lg">
-                  <div className="font-bold text-red-700 mb-1">Balance &lt; 0 (Negative)</div>
-                  <p className="text-sm text-red-800">
-                    This means <strong>you owe money</strong> to the partner. This is your Payable debt.
-                  </p>
+                  <div className="font-bold text-red-700 mb-1">{t.dashboard.help.sections.partners.negativeLabel}</div>
+                  <p className="text-sm text-red-800">{t.dashboard.help.sections.partners.negativeBody}</p>
                 </div>
               </div>
             </AccordionContent>
@@ -110,47 +100,47 @@ export default function HelpPage() {
                   <Zap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-ink-black text-base">3. Transactions (Quick Deduct)</h3>
-                  <p className="text-xs text-pencil-gray font-normal mt-0.5">The core accounting logic</p>
+                  <h3 className="font-semibold text-ink-black text-base">{t.dashboard.help.sections.quickDeduct.title}</h3>
+                  <p className="text-xs text-pencil-gray font-normal mt-0.5">{t.dashboard.help.sections.quickDeduct.subtitle}</p>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-5 text-gray-600 space-y-4">
               <p>
-                This is where you log expenses that involve another person. The <span className="font-semibold text-ink-black">Who Paid?</span> toggle radically changes the logic:
+                {t.dashboard.help.sections.quickDeduct.body.replace("Who Paid?", t.dashboard.help.sections.quickDeduct.whoPaid)}
               </p>
 
               <div className="space-y-4">
                 <div className="border border-gray-200 rounded-lg p-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1 h-full bg-note-yellow"></div>
                   <h4 className="font-semibold text-ink-black mb-2 flex items-center gap-2">
-                    Case A: "I Pay" <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-normal">You paid the bill</span>
+                    {t.dashboard.help.sections.quickDeduct.caseATitle} <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-normal">{t.dashboard.help.sections.quickDeduct.caseASubtitle}</span>
                   </h4>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>Money is immediately <strong>deducted</strong> from your selected Wallet.</li>
-                    <li>The system records that the partner owes you that money.</li>
-                    <li>The Partner's Balance <strong>increases</strong> (Positive).</li>
+                    <li>{t.dashboard.help.sections.quickDeduct.caseAItem1}</li>
+                    <li>{t.dashboard.help.sections.quickDeduct.caseAItem2}</li>
+                    <li>{t.dashboard.help.sections.quickDeduct.caseAItem3}</li>
                   </ul>
                 </div>
 
                 <div className="border border-gray-200 rounded-lg p-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1 h-full bg-gray-400"></div>
                   <h4 className="font-semibold text-ink-black mb-2 flex items-center gap-2">
-                    Case B: "Partner Pays" <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-normal">They paid the bill</span>
+                    {t.dashboard.help.sections.quickDeduct.caseBTitle} <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-normal">{t.dashboard.help.sections.quickDeduct.caseBSubtitle}</span>
                   </h4>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>Money in your Wallet stays exactly the same (no deduction).</li>
-                    <li>The system records that you owe them money.</li>
-                    <li>The Partner's Balance <strong>decreases</strong> (turns Negative).</li>
+                    <li>{t.dashboard.help.sections.quickDeduct.caseBItem1}</li>
+                    <li>{t.dashboard.help.sections.quickDeduct.caseBItem2}</li>
+                    <li>{t.dashboard.help.sections.quickDeduct.caseBItem3}</li>
                   </ul>
                 </div>
               </div>
 
               <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
-                <h4 className="font-semibold text-sm text-ink-black mb-1">What is an Adjustment?</h4>
+                <h4 className="font-semibold text-sm text-ink-black mb-1">{t.dashboard.help.sections.quickDeduct.adjustmentTitle}</h4>
                 <p className="text-sm">
-                  Adjustments are tools to manually change a partner's balance without touching your wallets.
-                  Use this to forgive debt, settle up outside the app, or fix mistakes.
+                  {t.dashboard.help.sections.quickDeduct.adjustmentBody}
+                  {t.dashboard.help.sections.quickDeduct.adjustmentBody2}
                 </p>
               </div>
             </AccordionContent>
@@ -164,19 +154,17 @@ export default function HelpPage() {
                   <ArrowLeftRight className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-ink-black text-base">4. Internal Transfers</h3>
-                  <p className="text-xs text-pencil-gray font-normal mt-0.5">Moving money between your own wallets</p>
+                  <h3 className="font-semibold text-ink-black text-base">{t.dashboard.help.sections.transfer.title}</h3>
+                  <p className="text-xs text-pencil-gray font-normal mt-0.5">{t.dashboard.help.sections.transfer.subtitle}</p>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-5 text-gray-600 space-y-3">
-              <p>
-                An internal transfer moves money from one of your wallets to another (e.g., withdrawing cash from your bank account to put in your physical wallet).
-              </p>
+              <p>{t.dashboard.help.sections.transfer.body}</p>
               <div className="flex gap-2 items-start mt-2">
                 <AlertCircle className="w-5 h-5 text-purple-500 shrink-0" />
                 <p className="text-sm">
-                  <strong>Important Rule:</strong> Internal transfers do not change your total Net Worth. They only change the location of your money. Neither debt partners nor expenses are created.
+                  <strong>{t.dashboard.help.sections.transfer.importantRule}</strong> {t.dashboard.help.sections.transfer.importantRuleBody}
                 </p>
               </div>
             </AccordionContent>
@@ -190,8 +178,8 @@ export default function HelpPage() {
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-ink-black text-base">5. Real-World Scenarios (Practical Guide)</h3>
-                  <p className="text-xs text-pencil-gray font-normal mt-0.5">Common examples to understand the flow</p>
+                  <h3 className="font-semibold text-ink-black text-base">{t.dashboard.help.sections.scenarios.title}</h3>
+                  <p className="text-xs text-pencil-gray font-normal mt-0.5">{t.dashboard.help.sections.scenarios.subtitle}</p>
                 </div>
               </div>
             </AccordionTrigger>
@@ -201,67 +189,67 @@ export default function HelpPage() {
               <div>
                 <h4 className="font-semibold text-ink-black flex items-center gap-2 mb-2">
                   <span className="bg-rose-100 text-rose-700 w-5 h-5 flex items-center justify-center rounded-full text-xs">1</span>
-                  Eating out with a friend (You Paid)
+                  {t.dashboard.help.scenarios.one}
                 </h4>
-                <p className="text-sm mb-2">You go to dinner with John. The bill is 500k. You pay the restaurant. John owes you his half (250k).</p>
+                <p className="text-sm mb-2">{t.dashboard.help.sections.scenarios.oneBody}</p>
                 <div className="bg-white border text-sm border-gray-200 rounded-md p-3 space-y-1">
-                  <p><strong>Total:</strong> 500,000</p>
-                  <p><strong>Wallet:</strong> Select your spending wallet</p>
-                  <p><strong>Partner:</strong> John</p>
-                  <p><strong>Who Paid?:</strong> I Pay</p>
-                  <p><strong>Debt Amount:</strong> 250,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.total}:</strong> 500,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.wallet}:</strong> {t.dashboard.help.sections.scenarios.walletSelection}</p>
+                  <p><strong>{t.dashboard.help.scenarios.partner}:</strong> John</p>
+	                  <p><strong>{t.dashboard.help.scenarios.whoPaid}:</strong> {t.dashboard.help.sections.scenarios.iPay}</p>
+                  <p><strong>{t.dashboard.help.scenarios.debtAmount}:</strong> 250,000</p>
                 </div>
-                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>Result:</strong> Your wallet loses 500k. John's balance increases by +250k.</span></p>
+                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>{t.dashboard.help.scenarios.result}:</strong> {t.dashboard.help.sections.scenarios.oneResult}</span></p>
               </div>
 
               {/* Scenario 2 */}
               <div className="pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-ink-black flex items-center gap-2 mb-2">
                   <span className="bg-rose-100 text-rose-700 w-5 h-5 flex items-center justify-center rounded-full text-xs">2</span>
-                  Buying something for a friend
+                  {t.dashboard.help.scenarios.two}
                 </h4>
-                <p className="text-sm mb-2">You buy a coffee for John. The coffee is 50k. He owes you all of it.</p>
+                <p className="text-sm mb-2">{t.dashboard.help.sections.scenarios.twoBody}</p>
                 <div className="bg-white border text-sm border-gray-200 rounded-md p-3 space-y-1">
-                  <p><strong>Total:</strong> 50,000</p>
-                  <p><strong>Wallet:</strong> Select your spending wallet</p>
-                  <p><strong>Partner:</strong> John</p>
-                  <p><strong>Who Paid?:</strong> I Pay</p>
-                  <p><strong>Debt Amount:</strong> 50,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.total}:</strong> 50,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.wallet}:</strong> {t.dashboard.help.sections.scenarios.walletSelection}</p>
+                  <p><strong>{t.dashboard.help.scenarios.partner}:</strong> John</p>
+	                  <p><strong>{t.dashboard.help.scenarios.whoPaid}:</strong> {t.dashboard.help.sections.scenarios.iPay}</p>
+                  <p><strong>{t.dashboard.help.scenarios.debtAmount}:</strong> 50,000</p>
                 </div>
-                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>Result:</strong> Your wallet loses 50k. John's balance increases by +50k.</span></p>
+                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>{t.dashboard.help.scenarios.result}:</strong> {t.dashboard.help.sections.scenarios.twoResult}</span></p>
               </div>
 
               {/* Scenario 3 */}
               <div className="pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-ink-black flex items-center gap-2 mb-2">
                   <span className="bg-rose-100 text-rose-700 w-5 h-5 flex items-center justify-center rounded-full text-xs">3</span>
-                  Eating out (Friend Paid)
+                  {t.dashboard.help.scenarios.three}
                 </h4>
-                <p className="text-sm mb-2">You go to a cafe with John. The bill is 100k. John pays. You owe him your half (50k).</p>
+                <p className="text-sm mb-2">{t.dashboard.help.sections.scenarios.threeBody}</p>
                 <div className="bg-white border text-sm border-gray-200 rounded-md p-3 space-y-1">
-                  <p><strong>Total:</strong> 100,000</p>
-                  <p><strong>Wallet:</strong> (Does not matter, your wallet won't be charged)</p>
-                  <p><strong>Partner:</strong> John</p>
-                  <p><strong>Who Paid?:</strong> Partner Pays</p>
-                  <p><strong>Debt Amount:</strong> 50,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.total}:</strong> 100,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.wallet}:</strong> {t.dashboard.help.sections.scenarios.doesNotMatterWallet}</p>
+                  <p><strong>{t.dashboard.help.scenarios.partner}:</strong> John</p>
+	                  <p><strong>{t.dashboard.help.scenarios.whoPaid}:</strong> {t.dashboard.help.sections.scenarios.partnerPays}</p>
+                  <p><strong>{t.dashboard.help.scenarios.debtAmount}:</strong> 50,000</p>
                 </div>
-                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>Result:</strong> Your wallet stays exactly the same. John's balance decreases by -50k.</span></p>
+                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>{t.dashboard.help.scenarios.result}:</strong> {t.dashboard.help.sections.scenarios.threeResult}</span></p>
               </div>
 
               {/* Scenario 4 */}
               <div className="pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-ink-black flex items-center gap-2 mb-2">
                   <span className="bg-rose-100 text-rose-700 w-5 h-5 flex items-center justify-center rounded-full text-xs">4</span>
-                  Settling Debt (Debt Adjustment)
+                  {t.dashboard.help.scenarios.four}
                 </h4>
-                <p className="text-sm mb-2">John owed you 250k. He pays you back by buying you a gift, or you just want to erase his debt without logging an income transaction.</p>
+                <p className="text-sm mb-2">{t.dashboard.help.sections.scenarios.fourBody}</p>
                 <div className="bg-white border text-sm border-gray-200 rounded-md p-3 space-y-1">
-                  <p><strong>Tool:</strong> Go to the Adjustment Tab</p>
-                  <p><strong>Partner:</strong> John</p>
-                  <p><strong>Amount:</strong> 250,000</p>
-                  <p><strong>Action:</strong> Click "Adjust Down"</p>
+                  <p><strong>{t.dashboard.help.scenarios.tool}:</strong> {t.dashboard.help.sections.scenarios.goToAdjustmentTab}</p>
+                  <p><strong>{t.dashboard.help.scenarios.partner}:</strong> John</p>
+                  <p><strong>{t.dashboard.help.scenarios.amount}:</strong> 250,000</p>
+                  <p><strong>{t.dashboard.help.scenarios.action}:</strong> {t.dashboard.help.sections.scenarios.clickAdjustDown}</p>
                 </div>
-                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>Result:</strong> Your wallet is unchanged. John's balance decreases by 250k (back to zero).</span></p>
+                <p className="text-sm mt-3 flex gap-1.5 items-start text-pencil-gray"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="flex-1"><strong>{t.dashboard.help.scenarios.result}:</strong> {t.dashboard.help.sections.scenarios.fourResult}</span></p>
               </div>
 
             </AccordionContent>

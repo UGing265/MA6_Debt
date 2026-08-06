@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { HistoryRow } from "./HistoryRow";
 import { useHistoryQueryState, PAGE_SIZE_OPTIONS } from "../hooks/useHistoryQueryState";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 type HistoryListProps = {
   items?: HistoryDto[];
@@ -24,6 +25,7 @@ const PageSizeDropdown: React.FC<{
   currentPageSize: number;
   onSelect: (size: number) => void;
 }> = ({ currentPageSize, onSelect }) => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +51,7 @@ const PageSizeDropdown: React.FC<{
             : "border border-gray-200 hover:border-gray-300 font-semibold"
         )}
       >
-        <span>{currentPageSize} / page</span>
+        <span>{currentPageSize} / {t.common.page}</span>
         <ChevronDown className={cn("h-3.5 w-3.5 text-pencil-gray transition-transform duration-200", isOpen && "rotate-180")} />
       </button>
 
@@ -69,7 +71,7 @@ const PageSizeDropdown: React.FC<{
                   isSelected ? "bg-note-yellow font-bold text-ink-black shadow-xs" : "text-ink-black hover:bg-amber-100/50 font-medium"
                 )}
               >
-                <span>{size} / page</span>
+                <span>{size} / {t.common.page}</span>
               </div>
             );
           })}
@@ -91,6 +93,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
   onSortChange,
 }) => {
   const { setPage, setPageSize } = useHistoryQueryState();
+  const { t } = useLanguage();
 
   const toggleSort = () => {
     onSortChange(sortOrder === "newest" ? "oldest" : "newest");
@@ -116,7 +119,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
     return (
       <Card className="border-red-200 bg-red-50/50">
         <CardContent className="py-8 text-center text-sm font-semibold text-red-600">
-          Failed to load transaction history. Please try again.
+          {t.history.page.failedToLoad}
         </CardContent>
       </Card>
     );
@@ -126,7 +129,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
     return (
       <Card className="border-2 border-note-yellow/30 bg-[#FFFDF7] shadow-sm">
         <CardContent className="py-12 text-center text-sm font-medium text-pencil-gray">
-          No transactions found.
+          {t.history.page.noTransactions}
         </CardContent>
       </Card>
     );
@@ -137,18 +140,18 @@ export const HistoryList: React.FC<HistoryListProps> = ({
       {/* Top bar: Sort toggle & Page size */}
       <div className="flex items-center justify-between text-xs text-pencil-gray px-1">
         <div>
-          Showing <span className="font-bold text-ink-black">{items.length}</span> of{" "}
-          <span className="font-bold text-ink-black">{totalCount}</span> transactions
+          {t.history.page.showing} <span className="font-bold text-ink-black">{items.length}</span> {t.history.page.of}{" "}
+          <span className="font-bold text-ink-black">{totalCount}</span> {t.history.page.transactions}
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={toggleSort}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 hover:border-gray-300 rounded-xl bg-white text-ink-black font-semibold cursor-pointer shadow-xs transition-all"
-            aria-label="Toggle sort order"
+            aria-label={t.history.page.sortOrder}
           >
             <ArrowUpDown className="h-4 w-4 text-pencil-gray" />
-            {sortOrder === "newest" ? "Newest first" : "Oldest first"}
+            {sortOrder === "newest" ? t.history.page.newestFirst : t.history.page.oldestFirst}
           </button>
 
           <PageSizeDropdown
@@ -169,7 +172,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           <div className="text-xs text-pencil-gray font-medium">
-            Page <span className="font-bold text-ink-black">{currentPage}</span> of{" "}
+            {t.history.page.pageOf} <span className="font-bold text-ink-black">{currentPage}</span> {t.history.page.of}{" "}
             <span className="font-bold text-ink-black">{totalPages}</span>
           </div>
 
@@ -179,7 +182,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
               disabled={currentPage <= 1}
               onClick={() => handlePageChange(1)}
               className="p-2 text-sm rounded-lg border border-gray-200 bg-white hover:bg-amber-50 text-ink-black disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              title="First Page"
+              title={t.history.page.firstPage}
             >
               <ChevronsLeft className="h-4 w-4" />
             </button>
@@ -189,7 +192,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
               disabled={currentPage <= 1}
               onClick={() => handlePageChange(currentPage - 1)}
               className="p-2 text-sm rounded-lg border border-gray-200 bg-white hover:bg-amber-50 text-ink-black disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              title="Previous Page"
+              title={t.history.page.previousPage}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -199,7 +202,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
               disabled={currentPage >= totalPages}
               onClick={() => handlePageChange(currentPage + 1)}
               className="p-2 text-sm rounded-lg border border-gray-200 bg-white hover:bg-amber-50 text-ink-black disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              title="Next Page"
+              title={t.history.page.nextPage}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -209,7 +212,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
               disabled={currentPage >= totalPages}
               onClick={() => handlePageChange(totalPages)}
               className="p-2 text-sm rounded-lg border border-gray-200 bg-white hover:bg-amber-50 text-ink-black disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              title="Last Page"
+              title={t.history.page.lastPage}
             >
               <ChevronsRight className="h-4 w-4" />
             </button>

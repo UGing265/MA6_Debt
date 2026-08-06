@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import { useUpdateWallet } from "@/features/wallet/hooks/useWallets";
 import { AlertTriangle, Loader2, Wallet2 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DetachWalletModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export function DetachWalletModal({
 }: DetachWalletModalProps) {
   const [isPending, setIsPending] = useState(false);
   const { mutateAsync: updateWallet } = useUpdateWallet();
+  const { t } = useLanguage();
 
   const handleDetach = async () => {
     if (!wallet) return;
@@ -56,11 +58,10 @@ export function DetachWalletModal({
         <DialogHeader>
           <DialogTitle className="text-ink-black flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-500" />
-            Detach Sub-wallet
+            {t.wallets.page.editChild}
           </DialogTitle>
           <DialogDescription className="text-pencil-gray">
-            Are you sure you want to detach this sub-wallet? It will become a
-            standalone parent wallet.
+            {t.wallets.page.dialog.updateNameAndDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -85,7 +86,7 @@ export function DetachWalletModal({
             disabled={isPending}
             className="border-gray-200"
           >
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             onClick={handleDetach}
@@ -96,10 +97,10 @@ export function DetachWalletModal({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Detaching...
+                {t.common.updating}
               </>
             ) : (
-              "Detach Wallet"
+              t.wallets.page.update
             )}
           </Button>
         </div>

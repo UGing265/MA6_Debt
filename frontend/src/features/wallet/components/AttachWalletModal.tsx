@@ -13,6 +13,7 @@ import type { Wallet } from "@/features/wallet/types/wallet";
 import { useUpdateWallet } from "@/features/wallet/hooks/useWallets";
 import { Wallet2, Loader2 } from "lucide-react";
 import { WalletSelect } from "@/features/transaction/components/QuickDebt/WalletSelect";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AttachWalletModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function AttachWalletModal({
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
   const [isPending, setIsPending] = useState(false);
   const { mutateAsync: updateWallet } = useUpdateWallet();
+  const { t } = useLanguage();
 
   const handleAttach = async () => {
     if (!selectedWalletId) return;
@@ -66,10 +68,10 @@ export function AttachWalletModal({
         <DialogHeader>
           <DialogTitle className="text-ink-black flex items-center gap-2">
             <Wallet2 className="h-5 w-5 text-note-yellow" />
-            Attach Sub-wallet
+            {t.wallets.page.createChild}
           </DialogTitle>
           <DialogDescription className="text-pencil-gray">
-            Select a wallet to attach as a sub-wallet to this parent wallet.
+            {t.wallets.page.dialog.createParentDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -77,12 +79,8 @@ export function AttachWalletModal({
           {eligibleWallets.length === 0 ? (
             <div className="text-center py-6">
               <Wallet2 className="h-10 w-10 text-pencil-gray mx-auto mb-3" />
-              <p className="text-pencil-gray text-sm">
-                No eligible wallets available
-              </p>
-              <p className="text-xs text-pencil-gray mt-1">
-                All available wallets are already attached
-              </p>
+                <p className="text-pencil-gray text-sm">{t.wallets.page.empty.noWalletsFound}</p>
+              <p className="text-xs text-pencil-gray mt-1">{t.wallets.page.empty.createParentToBegin}</p>
             </div>
           ) : (
             <>
@@ -102,7 +100,7 @@ export function AttachWalletModal({
                   disabled={isPending}
                   className="border-gray-200"
                 >
-                  Cancel
+                  {t.common.cancel}
                 </Button>
                 <Button
                   onClick={handleAttach}
@@ -113,10 +111,10 @@ export function AttachWalletModal({
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Attaching...
+                      {t.common.creating}
                     </>
                   ) : (
-                    "Attach Wallet"
+                    t.wallets.page.createChild
                   )}
                 </Button>
               </div>

@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useCreateWallet, useUpdateWallet } from "../hooks/useWallets";
 import type { Wallet } from "../types/wallet";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Validation schema
 const walletFormSchema = z.object({
@@ -45,6 +46,7 @@ export const WalletForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const createMutation = useCreateWallet();
   const updateMutation = useUpdateWallet();
+  const { t } = useLanguage();
 
   const form = useForm<WalletFormInput>({
     resolver: zodResolver(walletFormSchema),
@@ -117,10 +119,10 @@ export const WalletForm = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-700">Wallet Name</FormLabel>
+              <FormLabel className="text-gray-700">{t.wallets.page.form.walletName}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="e.g., Cash Wallet, Bank Account"
+                  placeholder={t.wallets.page.form.walletNamePlaceholder}
                   {...field}
                   disabled={isLoading}
                   className="bg-white border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
@@ -136,10 +138,10 @@ export const WalletForm = ({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-700">Description (Optional)</FormLabel>
+              <FormLabel className="text-gray-700">{t.wallets.page.form.descriptionOptional}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Brief description of this wallet"
+                  placeholder={t.wallets.page.form.descriptionPlaceholder}
                   {...field}
                   disabled={isLoading}
                   className="bg-white border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]"
@@ -159,12 +161,12 @@ export const WalletForm = ({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {mode === "create" ? "Creating..." : "Updating..."}
+                {mode === "create" ? t.wallets.page.creating : t.wallets.page.updating}
               </>
             ) : mode === "create" ? (
-              "Create Wallet"
+              t.wallets.page.create
             ) : (
-              "Update Wallet"
+              t.wallets.page.update
             )}
           </Button>
           {onCancel && (
@@ -175,7 +177,7 @@ export const WalletForm = ({
               disabled={isLoading}
               className="flex-1"
             >
-              Cancel
+              {t.common.cancel}
             </Button>
           )}
         </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowLeftRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface TransferFormActionsProps {
   isSubmitting: boolean;
@@ -15,6 +16,8 @@ export const TransferFormActions: React.FC<TransferFormActionsProps> = ({
   canSwap,
   onSwap,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* Swap Button */}
@@ -26,8 +29,8 @@ export const TransferFormActions: React.FC<TransferFormActionsProps> = ({
           disabled={isDisabled || !canSwap}
           data-testid="transfer-swap"
           className="h-10 w-10 p-0 rounded-full border-note-yellow/30 hover:bg-note-yellow/20 hover:border-note-yellow"
-          aria-label="Swap wallets"
-          title="Swap wallets"
+          aria-label={t.transfer.page.swapWallets}
+          title={t.transfer.page.swapWallets}
         >
           <ArrowLeftRight className="h-4 w-4" />
         </Button>
@@ -42,6 +45,8 @@ export const TransferSubmitButton: React.FC<{ isSubmitting: boolean; disabled: b
   isSubmitting,
   disabled,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <Button
       type="submit"
@@ -52,10 +57,10 @@ export const TransferSubmitButton: React.FC<{ isSubmitting: boolean; disabled: b
       {isSubmitting ? (
         <>
           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          Transferring...
+          {t.common.updating}
         </>
       ) : (
-        "Transfer"
+        t.transfer.page.title
       )}
     </Button>
   );

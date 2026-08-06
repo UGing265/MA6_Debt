@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Wallet2, Pencil, Trash2, Star } from "lucide-react";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ParentWalletCardProps {
   wallet: Wallet;
@@ -25,6 +28,8 @@ export const ParentWalletCard: React.FC<ParentWalletCardProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <Link href={`/wallets/${wallet.id}`} data-testid={`parent-wallet-card-${wallet.id}`}>
       <Card
@@ -46,12 +51,12 @@ export const ParentWalletCard: React.FC<ParentWalletCardProps> = ({
                   {hasDefaultChild && (
                     <span className="inline-flex items-center gap-1 bg-yellow-300 text-yellow-900 text-xs font-semibold px-2 py-0.5 rounded-full">
                       <Star className="h-3 w-3 fill-current" />
-                      Has Default
+                      {t.wallets.page.card.hasDefault}
                     </span>
                   )}
                 </div>
                 <p className="text-sm text-pencil-gray">
-                  {wallet.description || "No description"} · {childCount} sub-wallet{childCount !== 1 ? "s" : ""}
+                  {wallet.description || t.wallets.page.card.noDescription} · {t.wallets.page.detail.subWalletCount.replace("{count}", String(childCount)).replace("{suffix}", childCount !== 1 ? "s" : "")}
                 </p>
               </div>
             </div>
@@ -67,7 +72,7 @@ export const ParentWalletCard: React.FC<ParentWalletCardProps> = ({
                   e.preventDefault();
                   onEdit(wallet);
                 }}
-                aria-label={`Edit ${wallet.name}`}
+                aria-label={t.wallets.page.card.editAria.replace("{name}", wallet.name)}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -81,7 +86,7 @@ export const ParentWalletCard: React.FC<ParentWalletCardProps> = ({
                   e.preventDefault();
                   onDelete(wallet);
                 }}
-                aria-label={`Delete ${wallet.name}`}
+                aria-label={t.wallets.page.card.deleteAria.replace("{name}", wallet.name)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

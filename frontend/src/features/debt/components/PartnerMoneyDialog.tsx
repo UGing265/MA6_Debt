@@ -12,6 +12,7 @@ import {
 import { DebtPartnerForm } from "./DebtPartnerForm";
 import type { DebtPartnerFormMode } from "./DebtPartnerForm";
 import type { DebtPartner } from "../types/debtPartner";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PartnerMoneyDialogProps {
   open: boolean;
@@ -21,6 +22,7 @@ interface PartnerMoneyDialogProps {
 }
 
 export function PartnerMoneyDialog({ open, partner, onOpenChange, onSubmit }: PartnerMoneyDialogProps) {
+  const { t } = useLanguage();
   // Adapter to align with DebtPartnerForm's onSubmit(data, mode?) signature
   const handleSubmit = async (
     data: { name: string; balance?: number },
@@ -36,10 +38,8 @@ export function PartnerMoneyDialog({ open, partner, onOpenChange, onSubmit }: Pa
       <DialogContent>
         <DialogClose onClose={() => onOpenChange(false)} />
         <DialogHeader>
-          <DialogTitle>Edit Debt Partner Balance</DialogTitle>
-          <DialogDescription>
-            Adjust the partner's balance. Name remains unchanged in this dialog.
-          </DialogDescription>
+          <DialogTitle>{t.partners.page.updatePartnerTitle}</DialogTitle>
+          <DialogDescription>{t.partners.page.moneyDialog.description}</DialogDescription>
         </DialogHeader>
         {partner ? (
           <DebtPartnerForm

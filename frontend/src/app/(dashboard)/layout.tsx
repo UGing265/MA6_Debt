@@ -23,16 +23,29 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { PrivacyProvider, usePrivacy } from "@/context/PrivacyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 type NavItem = {
-  label: string;
+  key: keyof typeof navTextMap;
   href: string;
   icon: React.ReactNode;
   testId?: string;
 };
 
+const navTextMap = {
+  dashboard: true,
+  wallets: true,
+  quickDeduct: true,
+  partners: true,
+  history: true,
+  transfer: true,
+  help: true,
+  profile: true,
+} as const;
+
 const PrivacyQuickToggle = () => {
   const { hideAmount, tempShow, setTempShow } = usePrivacy();
+  const { t } = useLanguage();
   const pathname = usePathname();
 
   // Condition 1: Must be turned on in settings
@@ -64,26 +77,26 @@ const PrivacyQuickToggle = () => {
   };
 
   return (
-    <button
+      <button
       type="button"
       onMouseDown={handlePress}
       onMouseUp={handleRelease}
       onMouseLeave={handleRelease}
       onTouchStart={handlePress}
       onTouchEnd={handleRelease}
-      aria-label="Hold to reveal amounts"
-      title="Hold to reveal amounts"
+      aria-label={t.a11y.holdToRevealAmounts}
+      title={t.a11y.holdToRevealAmounts}
       className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-note-yellow/40 bg-white hover:bg-note-yellow/10 text-ink-black transition-colors cursor-pointer select-none active:scale-95 duration-100"
     >
       {tempShow ? (
         <>
           <Eye className="h-4 w-4 text-note-yellow" />
-          <span className="hidden sm:inline">Amounts visible</span>
+          <span className="hidden sm:inline">{t.dashboard.shell.amountsVisible}</span>
         </>
       ) : (
         <>
           <EyeOff className="h-4 w-4 text-pencil-gray" />
-          <span className="hidden sm:inline">Hold to view</span>
+          <span className="hidden sm:inline">{t.dashboard.shell.amountsHidden}</span>
         </>
       )}
     </button>
@@ -92,49 +105,49 @@ const PrivacyQuickToggle = () => {
 
 const navItems: NavItem[] = [
   {
-    label: "Dashboard",
+    key: "dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard className="h-4 w-4" />,
     testId: "nav-wallet-dashboard",
   },
   {
-    label: "Wallets",
+    key: "wallets",
     href: "/wallets",
     icon: <Wallet2 className="h-4 w-4" />,
     testId: "nav-wallets",
   },
   {
-    label: "Quick Deduct",
+    key: "quickDeduct",
     href: "/quick-deduct",
     icon: <Zap className="h-4 w-4" />,
     testId: "nav-quick-deduct",
   },
   {
-    label: "Partners",
+    key: "partners",
     href: "/partners",
     icon: <Users className="h-4 w-4" />,
     testId: "nav-partners",
   },
   {
-    label: "History",
+    key: "history",
     href: "/history",
     icon: <Clock3 className="h-4 w-4" />,
     testId: "nav-history",
   },
   {
-    label: "Transfer",
+    key: "transfer",
     href: "/transfer",
     icon: <ArrowLeftRight className="h-4 w-4" />,
     testId: "nav-transfer",
   },
   {
-    label: "User Guide",
+    key: "help",
     href: "/help",
     icon: <HelpCircle className="h-4 w-4" />,
     testId: "nav-help",
   },
   {
-    label: "Profile",
+    key: "profile",
     href: "/profile",
     icon: <Settings className="h-4 w-4" />,
     testId: "nav-profile",
@@ -183,6 +196,7 @@ const DashboardLayoutContent = ({
   displayName,
   pathname,
   onSignOut,
+  t,
 }: {
   children: React.ReactNode;
   isSidebarOpen: boolean;
@@ -190,6 +204,7 @@ const DashboardLayoutContent = ({
   displayName: string;
   pathname: string;
   onSignOut: () => void;
+  t: ReturnType<typeof useLanguage>["t"];
 }) => {
   const { hideAmount, tempShow } = usePrivacy();
   const [isMoreOpen, setIsMoreOpen] = React.useState(false);
@@ -226,14 +241,14 @@ const DashboardLayoutContent = ({
           <div className="flex items-center gap-3">
             <Image
               src="/MA6.png"
-              alt="MA6 Debt Logo"
+              alt={t.dashboard.shell.logoAlt}
               width={56}
               height={56}
               className="h-14 w-14 object-contain shrink-0"
             />
             <div className="min-w-0">
-              <p className="text-2xl font-bold text-ink-black truncate">MA6 Debt</p>
-              <p className="text-sm text-pencil-gray truncate">Hello, {displayName}</p>
+              <p className="text-2xl font-bold text-ink-black truncate">{t.dashboard.shell.appName}</p>
+              <p className="text-sm text-pencil-gray truncate">{t.dashboard.shell.hello.replace("{name}", displayName)}</p>
             </div>
           </div>
         </div>
@@ -251,16 +266,16 @@ const DashboardLayoutContent = ({
 
             return (
               <Link
-                key={item.label}
+                key={String(item.key)}
                 href={item.href}
                 scroll={false}
                 data-testid={item.testId}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${itemStateClass}`}
               >
                 {item.icon}
-                {item.label}
+                {t.nav[item.key]}
                 {placeholder ? (
-                  <span className="ml-auto text-[10px] rounded-full bg-pencil-gray/10 px-1.5 py-0.5 text-pencil-gray/60">Soon</span>
+                  <span className="ml-auto text-[10px] rounded-full bg-pencil-gray/10 px-1.5 py-0.5 text-pencil-gray/60">{t.common.soon}</span>
                 ) : null}
               </Link>
             );
@@ -274,7 +289,7 @@ const DashboardLayoutContent = ({
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-black hover:bg-note-yellow/10"
           >
             <LogOut className="h-4 w-4" />
-            Sign Out
+            {t.dashboard.shell.signOut}
           </button>
         </div>
       </aside>
@@ -283,13 +298,13 @@ const DashboardLayoutContent = ({
         <header className="sticky top-0 z-20 h-14 border-b border-note-yellow/20 bg-[#FFFBEB]/95 backdrop-blur flex items-center px-4 md:px-6 justify-between md:justify-start">
           <div className="flex md:hidden items-center gap-2">
             <div className="h-8 w-8 rounded-xl bg-note-yellow text-ink-black flex items-center justify-center font-bold text-sm">
-              G
+              {t.dashboard.shell.g}
             </div>
-            <span className="font-bold text-ink-black text-lg">MA6 Debt</span>
+            <span className="font-bold text-ink-black text-lg">{t.dashboard.shell.appName}</span>
           </div>
           <button
             type="button"
-            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            aria-label={isSidebarOpen ? t.a11y.closeSidebar : t.a11y.openSidebar}
             onClick={() => setIsSidebarOpen((prev) => !prev)}
             className="hidden md:block rounded-md p-1.5 text-ink-black transition-colors hover:bg-note-yellow/20 cursor-pointer"
           >
@@ -304,15 +319,15 @@ const DashboardLayoutContent = ({
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-1 left-2 right-2 z-40 bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between px-1 h-16">
         {[
-          { label: "Home", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-          { label: "Wallets", href: "/wallets", icon: <Wallet2 className="h-5 w-5" /> },
-          { label: "Action", href: "/quick-deduct", icon: <Zap className="h-6 w-6" />, center: true },
-          { label: "Partners", href: "/partners", icon: <Users className="h-5 w-5" /> },
-          { label: "More", href: "#", icon: <MoreHorizontal className="h-5 w-5" />, isMore: true },
+          { key: "dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
+          { key: "wallets", href: "/wallets", icon: <Wallet2 className="h-5 w-5" /> },
+          { key: "quickDeduct", href: "/quick-deduct", icon: <Zap className="h-6 w-6" />, center: true },
+          { key: "partners", href: "/partners", icon: <Users className="h-5 w-5" /> },
+          { key: "more", href: "#", icon: <MoreHorizontal className="h-5 w-5" />, isMore: true },
         ].map((item) => {
           if (item.center) {
             return (
-              <Link key={item.label} href={item.href} scroll={false} className="relative -top-5 flex flex-col items-center group z-40">
+              <Link key={String(item.key)} href={item.href} scroll={false} className="relative -top-5 flex flex-col items-center group z-40">
                 <div className="h-14 w-14 rounded-full bg-note-yellow text-ink-black flex items-center justify-center shadow-lg border-4 border-[#FFFBEB] transform transition-transform duration-200 group-active:scale-95">
                   {item.icon}
                 </div>
@@ -323,7 +338,7 @@ const DashboardLayoutContent = ({
           if (item.isMore) {
             return (
               <button
-                key={item.label}
+                key={String(item.key)}
                 type="button"
                 onClick={() => setIsMoreOpen((prev) => !prev)}
                 className={`flex flex-col items-center justify-center w-[4.5rem] h-full gap-1 transition-colors cursor-pointer ${
@@ -334,7 +349,7 @@ const DashboardLayoutContent = ({
                   {item.icon}
                 </div>
                 <span className={`text-[10px] font-medium leading-none ${isMoreOpen ? "opacity-100" : "opacity-80"}`}>
-                  {item.label}
+                  {t.nav.more}
                 </span>
               </button>
             )
@@ -344,7 +359,7 @@ const DashboardLayoutContent = ({
 
           return (
             <Link
-              key={item.label}
+              key={String(item.key)}
               href={item.href}
               scroll={false}
               className={`flex flex-col items-center justify-center w-[4.5rem] h-full gap-1 transition-colors ${
@@ -355,7 +370,7 @@ const DashboardLayoutContent = ({
                 {item.icon}
               </div>
               <span className={`text-[10px] font-medium leading-none ${active ? "opacity-100" : "opacity-80"}`}>
-                {item.label}
+                {t.nav[item.key as keyof typeof t.nav]}
               </span>
             </Link>
           );
@@ -385,31 +400,31 @@ const DashboardLayoutContent = ({
         {/* Pull handle bar */}
         <div className="mx-auto w-12 h-1.5 bg-pencil-gray/20 rounded-full mb-6" />
 
-        <h3 className="text-lg font-bold text-ink-black mb-4 text-center">Menu</h3>
+        <h3 className="text-lg font-bold text-ink-black mb-4 text-center">{t.dashboard.shell.menu}</h3>
 
         <div className="space-y-3">
           {[
             {
-              label: "Internal Transfer",
-              description: "Transfer money between your wallets",
+              key: "transfer",
+              description: t.nav.internalTransfer,
               href: "/transfer",
               icon: <ArrowLeftRight className="h-5 w-5 text-[#D97706]" />,
             },
             {
-              label: "Transaction History",
-              description: "View and filter transaction history",
+              key: "history",
+              description: t.nav.transactionHistory,
               href: "/history",
               icon: <Clock3 className="h-5 w-5 text-[#D97706]" />,
             },
             {
-              label: "User Guide",
-              description: "Learn how to use MA6 Debt",
+              key: "help",
+              description: t.nav.help,
               href: "/help",
               icon: <HelpCircle className="h-5 w-5 text-[#D97706]" />,
             },
             {
-              label: "Profile & Settings",
-              description: "Manage your profile and privacy settings",
+              key: "profile",
+              description: t.nav.profileSettings,
               href: "/profile",
               icon: <Settings className="h-5 w-5 text-[#D97706]" />,
             },
@@ -417,7 +432,7 @@ const DashboardLayoutContent = ({
             const active = isActive(pathname, null, item.href);
             return (
               <Link
-                key={item.label}
+                key={String(item.key)}
                 href={item.href}
                 onClick={() => setIsMoreOpen(false)}
                 className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 ${
@@ -430,7 +445,7 @@ const DashboardLayoutContent = ({
                   {item.icon}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-semibold text-sm text-ink-black">{item.label}</p>
+                  <p className="font-semibold text-sm text-ink-black">{t.nav[item.key as keyof typeof t.nav]}</p>
                   <p className="text-xs text-pencil-gray mt-0.5">{item.description}</p>
                 </div>
                 <svg
@@ -458,8 +473,8 @@ const DashboardLayoutContent = ({
               <LogOut className="h-5 w-5 text-red-600" />
             </div>
             <div className="flex-1 text-left">
-              <p className="font-semibold text-sm text-red-600">Sign Out</p>
-              <p className="text-xs text-red-600/70 mt-0.5">Log out from your account</p>
+              <p className="font-semibold text-sm text-red-600">{t.dashboard.shell.signOut}</p>
+              <p className="text-xs text-red-600/70 mt-0.5">{t.dashboard.shell.logOutDescription}</p>
             </div>
           </button>
         </div>
@@ -479,6 +494,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [displayName, setDisplayName] = React.useState("User");
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const { t } = useLanguage();
   const handleSignOut = React.useCallback(() => {
     logout()
       .catch(() => undefined)
@@ -513,6 +529,7 @@ export default function DashboardLayout({
         displayName={displayName}
         pathname={pathname}
         onSignOut={handleSignOut}
+        t={t}
       >
         {children}
       </DashboardLayoutContent>

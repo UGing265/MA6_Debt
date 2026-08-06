@@ -1,6 +1,7 @@
 import React from "react";
 import { PayerMode } from "../../types/transaction";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PayerModeToggleProps {
   value: PayerMode;
@@ -9,9 +10,11 @@ interface PayerModeToggleProps {
 }
 
 export const PayerModeToggle: React.FC<PayerModeToggleProps> = ({ value, onChange, disabled }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-1.5">
-      <label className="block text-left text-xs font-semibold text-ink-black">Who Paid?</label>
+      <label className="block text-left text-xs font-semibold text-ink-black">{t.quickDeduct.page.whoPaid}</label>
       <div className="flex gap-2">
         <button
           type="button"
@@ -24,7 +27,7 @@ export const PayerModeToggle: React.FC<PayerModeToggleProps> = ({ value, onChang
               : "bg-white text-pencil-gray border border-gray-200 hover:bg-gray-50 hover:text-ink-black font-medium"
           )}
         >
-          I Pay
+          {t.quickDeduct.page.payerMode.toiTra}
         </button>
         <button
           type="button"
@@ -37,7 +40,7 @@ export const PayerModeToggle: React.FC<PayerModeToggleProps> = ({ value, onChang
               : "bg-white text-pencil-gray border border-gray-200 hover:bg-gray-50 hover:text-ink-black font-medium"
           )}
         >
-          Partner Pays
+          {t.quickDeduct.page.payerMode.partnerTra}
         </button>
       </div>
     </div>

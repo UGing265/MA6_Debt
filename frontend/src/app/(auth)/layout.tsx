@@ -1,12 +1,17 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { Toaster } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div 
       className="relative min-h-screen flex flex-col items-center justify-center p-4 font-quicksand"
@@ -21,7 +26,7 @@ export default function AuthLayout({
             className="h-30 w-30 sm:h-30 sm:w-30 object-contain transition-transform duration-200 group-hover:scale-105"
           />
           <span className="text-xs sm:text-sm font-semibold text-pencil-gray tracking-wide font-quicksand group-hover:text-ink-black transition-colors">
-            Track your money, made simple
+            {t.auth.layout.tagline}
           </span>
         </Link>
       </div>

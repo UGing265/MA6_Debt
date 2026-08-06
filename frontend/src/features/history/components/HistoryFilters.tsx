@@ -13,55 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-const TAG_OPTIONS: { value: HistoryKindTag; label: string }[] = [
-  { value: "salary", label: "Salary" },
-  { value: "bill", label: "Bill" },
-  { value: "repay", label: "Repay" },
-  { value: "consume", label: "Consume" },
-];
-
-const TAG_HELP: Record<HistoryKindTag, { title: string; description: string; usage: string[] }> = {
-  salary: {
-    title: "Salary (Income)",
-    description: "Transactions with positive amount (+), money flowing into your wallet.",
-    usage: [
-      "Monthly salary, bonuses",
-      "Money transferred in",
-      "Refunds, cashback",
-      "Sales, revenue",
-    ],
-  },
-  bill: {
-    title: "Bill (Shared Bills)",
-    description: "Transactions related to partners, used to split bills with others.",
-    usage: [
-      "Dining together, splitting costs",
-      "Shared shopping",
-      "Expenses to be split",
-      "Auto-calculates debt between 2 people",
-    ],
-  },
-  repay: {
-    title: "Repay (Debt Repayment)",
-    description: "Debt repayment transactions for partners, auto-marked when note contains keyword.",
-    usage: [
-      "Repay debt to partner",
-      "Note contains repayment keyword",
-      "Reduces debt balance between 2 people",
-    ],
-  },
-  consume: {
-    title: "Consume (Personal Spending)",
-    description: "Transactions with negative amount (-), money flowing out of your wallet.",
-    usage: [
-      "Personal shopping",
-      "Bill payments",
-      "Withdrawals, transfers out",
-      "Daily expenses",
-    ],
-  },
-};
+import { useLanguage } from "@/context/LanguageContext";
 
 type WalletItem = {
   id: string;
@@ -71,8 +23,9 @@ type WalletItem = {
 const HistoryWalletDropdown: React.FC<{
   currentWalletId: string;
   allWallets: WalletItem[];
+  allLabel: string;
   onSelect: (id: string) => void;
-}> = ({ currentWalletId, allWallets, onSelect }) => {
+}> = ({ currentWalletId, allWallets, allLabel, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +53,7 @@ const HistoryWalletDropdown: React.FC<{
             : "border border-gray-200 hover:border-gray-300 font-medium"
         )}
       >
-        <span className="truncate">{selectedWallet ? selectedWallet.name : "All Wallets"}</span>
+        <span className="truncate">{selectedWallet ? selectedWallet.name : allLabel}</span>
         <ChevronDown className={cn("h-4 w-4 text-pencil-gray transition-transform duration-200 ml-2 shrink-0", isOpen && "rotate-180")} />
       </button>
 
@@ -116,7 +69,7 @@ const HistoryWalletDropdown: React.FC<{
               !currentWalletId ? "bg-note-yellow font-bold text-ink-black shadow-xs" : "text-ink-black hover:bg-amber-100/50 font-medium"
             )}
           >
-            All Wallets
+              {allLabel}
           </div>
           {allWallets.map((w) => {
             const isSelected = w.id === currentWalletId;
@@ -147,6 +100,37 @@ export const HistoryFilters: React.FC = () => {
   const { data: wallets } = useWallets();
   const [helpOpen, setHelpOpen] = useState(false);
   const [selectedHelp, setSelectedHelp] = useState<HistoryKindTag | null>(null);
+  const { t } = useLanguage();
+
+  const TAG_OPTIONS: { value: HistoryKindTag; label: string }[] = [
+    { value: "salary", label: t.history.page.tagHelp.salary.title },
+    { value: "bill", label: t.history.page.tagHelp.bill.title },
+    { value: "repay", label: t.history.page.tagHelp.repay.title },
+    { value: "consume", label: t.history.page.tagHelp.consume.title },
+  ];
+
+  const TAG_HELP: Record<HistoryKindTag, { title: string; description: string; usage: readonly string[] }> = {
+    salary: {
+      title: t.history.page.tagHelp.salary.title,
+      description: t.history.page.tagHelp.salary.description,
+      usage: t.history.page.tagHelp.salary.usage,
+    },
+    bill: {
+      title: t.history.page.tagHelp.bill.title,
+      description: t.history.page.tagHelp.bill.description,
+      usage: t.history.page.tagHelp.bill.usage,
+    },
+    repay: {
+      title: t.history.page.tagHelp.repay.title,
+      description: t.history.page.tagHelp.repay.description,
+      usage: t.history.page.tagHelp.repay.usage,
+    },
+    consume: {
+      title: t.history.page.tagHelp.consume.title,
+      description: t.history.page.tagHelp.consume.description,
+      usage: t.history.page.tagHelp.consume.usage,
+    },
+  };
 
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -174,10 +158,10 @@ export const HistoryFilters: React.FC = () => {
             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-pencil-gray" />
             <input
               type="text"
-              placeholder="Search by note, partner, wallet..."
+              placeholder={t.history.page.searchPlaceholder}
               value={inputValue ?? ""}
               onChange={onSearchChange}
-              aria-label="Search history"
+              aria-label={t.history.page.searchAria}
               className="w-full pl-11 pr-4 py-3 border border-gray-200 hover:border-gray-300 rounded-xl bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-note-yellow/30 text-ink-black font-medium placeholder:text-pencil-gray/70 shadow-xs transition-all"
             />
           </div>
@@ -186,6 +170,7 @@ export const HistoryFilters: React.FC = () => {
           <HistoryWalletDropdown
             currentWalletId={currentWalletId ?? ""}
             allWallets={allWallets}
+            allLabel={t.common.all}
             onSelect={(id) => setWalletId(id)}
           />
         </div>
@@ -202,7 +187,7 @@ export const HistoryFilters: React.FC = () => {
                 : "bg-white text-pencil-gray border border-gray-200 hover:bg-gray-50 hover:text-ink-black font-medium"
             )}
           >
-            All
+            {t.common.all}
           </button>
           {TAG_OPTIONS.map((opt) => {
             const isSelected = currentKind === opt.value;
@@ -229,7 +214,7 @@ export const HistoryFilters: React.FC = () => {
                       ? "bg-note-yellow text-ink-black border-2 border-l-0 border-note-yellow hover:bg-amber-400"
                       : "bg-white text-pencil-gray border border-l-0 border-gray-200 hover:bg-gray-50 hover:text-ink-black"
                   )}
-                  title={`Help for ${opt.label}`}
+                  title={`${t.history.page.commonUsage} ${opt.label}`}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </button>
@@ -256,7 +241,7 @@ export const HistoryFilters: React.FC = () => {
               </p>
 
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-ink-black uppercase tracking-wider">Common Usage:</h4>
+                <h4 className="text-xs font-bold text-ink-black uppercase tracking-wider">{t.history.page.commonUsage}</h4>
                 <ul className="list-disc list-inside text-sm font-medium text-pencil-gray space-y-1">
                   {TAG_HELP[selectedHelp]?.usage.map((item, idx) => (
                     <li key={idx}>{item}</li>
@@ -273,7 +258,7 @@ export const HistoryFilters: React.FC = () => {
               onClick={() => setHelpOpen(false)}
               className="bg-note-yellow text-ink-black border-2 border-note-yellow font-bold hover:bg-amber-400 rounded-xl"
             >
-              Close
+              {t.common.close}
             </Button>
           </div>
         </DialogContent>

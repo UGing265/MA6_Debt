@@ -10,6 +10,7 @@ import type { Wallet } from "@/features/wallet/types/wallet";
 import { ArrowLeft, WalletIcon } from "lucide-react";
 import { getUserPreferences, updateDefaultWallet } from "@/features/user/api/userApi";
 import { WalletHeader, WalletOverviewCard, ChildWalletList, WalletDialogs } from "@/features/wallet/components/WalletDetail";
+import { useLanguage } from "@/context/LanguageContext";
 
 const isMountedRef = { current: true };
 
@@ -17,6 +18,7 @@ export default function WalletDetailPage() {
   const params = useParams();
   const walletId = params.id as string;
   const { data: wallets, isLoading, error, refetch } = useWallets();
+  const { t } = useLanguage();
 
   const [isCreateChildModalOpen, setIsCreateChildModalOpen] = useState(false);
   const [isDetachModalOpen, setIsDetachModalOpen] = useState(false);
@@ -127,15 +129,15 @@ export default function WalletDetailPage() {
         <Link href="/wallets">
           <Button variant="outline" className="border-note-yellow">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Wallets
+            {t.wallets.page.backToWallets}
           </Button>
         </Link>
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
-            <p className="text-red-600">Failed to load wallet: {String(error)}</p>
+            <p className="text-red-600">{t.wallets.page.errorLoad.replace("{error}", String(error))}</p>
             <div className="pt-4">
               <Button variant="outline" onClick={() => void refetch()}>
-                Retry
+                {t.wallets.page.retry}
               </Button>
             </div>
           </CardContent>
@@ -151,14 +153,14 @@ export default function WalletDetailPage() {
         <Link href="/wallets">
           <Button variant="outline" className="border-note-yellow">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Wallets
+            {t.wallets.page.backToWallets}
           </Button>
         </Link>
         <Card className="border-dashed border-2 border-note-yellow/30">
           <CardContent className="p-12 text-center">
             <WalletIcon className="h-12 w-12 text-pencil-gray mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-ink-black mb-2">Wallet not found</h3>
-            <p className="text-pencil-gray">The wallet you are looking for does not exist</p>
+            <h3 className="text-lg font-semibold text-ink-black mb-2">{t.wallets.page.walletNotFound}</h3>
+            <p className="text-pencil-gray">{t.wallets.page.walletNotFoundDescription}</p>
           </CardContent>
         </Card>
       </div>

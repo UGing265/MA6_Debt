@@ -10,6 +10,7 @@ import type { UseFormReturn } from "react-hook-form";
 import type { TransferFormValues } from "../types/transferForm";
 import { handleNumericKeyDown } from "@/lib/utils/numericInput";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AmountInputFieldProps {
   form: UseFormReturn<TransferFormValues>;
@@ -18,19 +19,21 @@ interface AmountInputFieldProps {
 }
 
 export const AmountInputField: React.FC<AmountInputFieldProps> = ({ form, disabled, fromWalletId }) => {
+  const { t } = useLanguage();
+
   return (
     <FormField
       control={form.control}
       name="amount"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="block text-center text-sm font-bold text-ink-black">Amount</FormLabel>
+          <FormLabel className="block text-center text-sm font-bold text-ink-black">{t.transfer.page.amount}</FormLabel>
           <FormControl>
             <div className="relative">
               <input
                 type="text"
                 inputMode="numeric"
-                placeholder="0"
+                placeholder={t.transfer.page.amountPlaceholder}
                 data-testid="transfer-amount"
                 disabled={disabled || !fromWalletId}
                 value={

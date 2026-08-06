@@ -10,6 +10,7 @@ import {
 } from "../api/wallets";
 import type { Wallet, CreateWalletRequest, UpdateWalletRequest } from "../types/wallet";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { useLanguage } from "@/context/LanguageContext";
 
 type WalletsListener = () => void;
 
@@ -20,6 +21,7 @@ export const triggerWalletsRefresh = () => {
 };
 
 export const useWallets = () => {
+  const { t } = useLanguage();
   const [data, setData] = useState<Wallet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,15 +41,15 @@ export const useWallets = () => {
 
       if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setData(wallets);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       const parsedError = parseErrorResponse(err);
-      setError(parsedError.general || "Failed to load wallets");
+      setError(parsedError.general || t.toast.failedToLoadWallets);
     } finally {
       if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setIsLoading(false);
     }
-  }, []);
+  }, [t.toast.failedToLoadWallets]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -73,15 +75,18 @@ export const useWallets = () => {
 };
 
 export const useCreateWallet = () => {
+  const { t } = useLanguage();
+
   return {
     mutateAsync: async (data: CreateWalletRequest) => {
       try {
         const result = await createWallet(data);
-        toast.success("Wallet created successfully!");
+        toast.success(t.toast.walletCreated);
         triggerWalletsRefresh();
         return result;
-      } catch (error: any) {
-        const message = error.general || "Failed to create wallet";
+      } catch (error: unknown) {
+        const parsedError = parseErrorResponse(error);
+        const message = parsedError.general || t.toast.failedToSaveWallet;
         toast.error(message);
         throw error;
       }
@@ -90,15 +95,18 @@ export const useCreateWallet = () => {
 };
 
 export const useUpdateWallet = () => {
+  const { t } = useLanguage();
+
   return {
     mutateAsync: async ({ id, data }: { id: string; data: UpdateWalletRequest }) => {
       try {
         const result = await updateWallet(id, data);
-        toast.success("Wallet updated successfully!");
+        toast.success(t.toast.walletUpdated);
         triggerWalletsRefresh();
         return result;
-      } catch (error: any) {
-        const message = error.general || "Failed to update wallet";
+      } catch (error: unknown) {
+        const parsedError = parseErrorResponse(error);
+        const message = parsedError.general || t.toast.failedToSaveWallet;
         toast.error(message);
         throw error;
       }
@@ -107,14 +115,17 @@ export const useUpdateWallet = () => {
 };
 
 export const useDeleteWallet = () => {
+  const { t } = useLanguage();
+
   return {
     mutateAsync: async (id: string) => {
       try {
         await deleteWallet(id);
-        toast.success("Wallet deleted successfully!");
+        toast.success(t.toast.walletDeleted);
         triggerWalletsRefresh();
-      } catch (error: any) {
-        const message = error.general || "Failed to delete wallet";
+      } catch (error: unknown) {
+        const parsedError = parseErrorResponse(error);
+        const message = parsedError.general || t.toast.failedToSaveWallet;
         toast.error(message);
         throw error;
       }

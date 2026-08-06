@@ -7,6 +7,7 @@ import { getDailySpendingLimit, getHistory, subscribeToHistoryRefresh } from "@/
 import type { DailySpendingLimitDto } from "@/features/history/api/history";
 import { HistoryDto } from "@/features/history/types/history";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   SummaryCards,
   StatsCards,
@@ -32,6 +33,7 @@ const extractHistoryError = (error: unknown): string => {
 };
 
 export default function WalletDashboardPage() {
+  const { t } = useLanguage();
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
   const { partners, isLoading: partnersLoading, error: partnersError } = useDebtPartners();
 
@@ -104,7 +106,7 @@ export default function WalletDashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6" data-testid="wallet-dashboard-summary">
-        <PageHeader title="Dashboard" description="Financial overview of your wallets" />
+        <PageHeader title={t.dashboard.page.title} description={t.dashboard.page.description} />
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((item) => (
             <Card key={item} className="animate-pulse">
@@ -125,14 +127,14 @@ export default function WalletDashboardPage() {
   if (error) {
     return (
       <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-lg">
-        {typeof error === "string" ? error : "An error occurred while loading dashboard"}
+        {typeof error === "string" ? error : t.dashboard.page.dashboardError}
       </div>
     );
   }
 
   return (
     <div className="space-y-6" data-testid="wallet-dashboard-summary">
-      <PageHeader title="Dashboard" description="Financial overview of your wallets" className="mb-2 pb-3" />
+      <PageHeader title={t.dashboard.page.title} description={t.dashboard.page.description} className="mb-2 pb-3" />
 
       <SummaryCards
         netWorth={netWorth}
