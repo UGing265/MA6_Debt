@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - name: Generate Contributors Grid
         uses: akhilmhdh/contributors-readme-action@v2.3.10
