@@ -238,6 +238,19 @@ Frontend runs at: `http://localhost:3000`
 ## Contributors
 
 <!-- readme: collaborators,contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/UGing265">
+                    <img src="https://avatars.githubusercontent.com/u/110150477?v=4" width="100;" alt="UGing265"/>
+                    <br />
+                    <sub><b>MShiroru Thai</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: collaborators,contributors -end -->
 
 ---
