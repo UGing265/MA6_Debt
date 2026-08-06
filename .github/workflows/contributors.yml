@@ -17,6 +17,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate Contributors Grid
-        uses: jaywcjlove/github-action-contributors@main
+        uses: akhilmhdh/contributors-readme-action@v2.3.10
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
