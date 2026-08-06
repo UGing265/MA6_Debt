@@ -4,6 +4,8 @@ using Application.Features.Auth.Login;
 using Application.Features.Auth.Logout;
 using Application.Features.Auth.Refresh;
 using Application.Features.Auth.Register;
+using Application.Features.Auth.ForgotPassword;
+using Application.Features.Auth.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -110,6 +112,29 @@ public class AuthController : ControllerBase
             Name = request.Name
         };
         var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(typeof(ForgotPasswordResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var command = new ForgotPasswordCommand { EmailOrUsername = request.EmailOrUsername };
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("reset-password")]
+    [ProducesResponseType(typeof(ResetPasswordResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResetPasswordResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ResetPasswordResponse>> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var command = new ResetPasswordCommand { Token = request.Token, NewPassword = request.NewPassword };
+        var result = await _mediator.Send(command);
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
         return Ok(result);
     }
 
