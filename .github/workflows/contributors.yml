@@ -1,0 +1,22 @@
+name: Generate Contributors
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+jobs:
+  contrib:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Contributors Grid
+        uses: jaywcjlove/github-action-contributors@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

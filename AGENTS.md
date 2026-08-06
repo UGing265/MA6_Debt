@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **MA6_Debt** (9197 symbols, 16294 relationships, 219 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **MA6_Debt** (9893 symbols, 17589 relationships, 260 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 
@@ -54,5 +54,6 @@ These instructions are maintained manually for MA6 Debt. Keep them outside the G
 - **MUST prioritize GitNexus before other code discovery tools.** For codebase scanning, locating files/symbols, tracing flows, finding callers/usages, dependency checks, debugging paths, refactoring research, or impact questions, start with GitNexus (`query`, `context`, `impact`, `trace`, `cypher`, or resources). Use direct file reads, terminal search, or other tools only after GitNexus identifies targets, when GitNexus lacks coverage for the artifact type, or to verify exact source/test/build behavior.
 - **MUST read and follow the split canonical design-system files before planning or coding.** For frontend/UI/UX work, read `docs/docs/frontend/design-system.md`. For backend/API/domain/persistence work, read `docs/docs/backend/design-system.md`. For full-stack work, read both files. `docs/docs/design-system.md` is legacy/general context only and must not override the split canonical files. If a requested change conflicts with the relevant design system, call it out and ask for explicit approval or update the design system in the same docs-scoped change.
 - **MUST always write code, UI labels, descriptions, and comments in English.**
+- **MUST route user-facing UI copy through the i18n dictionaries.** When adding or changing labels, descriptions, placeholders, button text, toasts, or validation messages in the frontend, update the typed dictionaries in `frontend/src/lib/i18n.ts` and consume them through `useLanguage()` instead of hard-coding component strings.
 
 <!-- custom:end -->
