@@ -11,8 +11,9 @@ import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useCashAdjustmentSubmit } from "../hooks/useTransactionSubmit";
 import { AdjustmentSchema, mapAdjustmentToPayload } from "../model";
 import { AdjustmentDirection } from "../types/transaction";
-import { formatVnd } from "@/lib/utils";
 import type { Wallet } from "@/features/wallet/types/wallet";
+import { WalletSelect } from "./QuickDebt/WalletSelect";
+import { useLanguage } from "@/context/LanguageContext";
 
 type AdjustmentFormInput = z.infer<typeof AdjustmentSchema>;
 
@@ -51,6 +52,7 @@ const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 };
 
 export const AdjustmentForm = () => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: wallets, isLoading: walletsLoading, error: walletsError } = useWallets();
   const cashAdjustmentSubmit = useCashAdjustmentSubmit({
@@ -104,7 +106,7 @@ export const AdjustmentForm = () => {
     try {
       const payload = mapAdjustmentToPayload(values);
       await cashAdjustmentSubmit.mutateAsync(payload);
-      toast.success("Adjustment submitted!");
+      toast.success(t.toast.adjustmentSubmitted);
       form.reset(defaultValues);
     } catch (error: unknown) {
       const parsedError = parseErrorResponse(error);
@@ -135,7 +137,7 @@ export const AdjustmentForm = () => {
       });
 
       if (!hasHandledFieldError || hasUnknownFieldError) {
-        toast.error(parsedError.general || "Failed to submit adjustment");
+        toast.error(parsedError.general || t.toast.failedToSubmitAdjustment);
       }
     } finally {
       setIsSubmitting(false);
@@ -147,7 +149,7 @@ export const AdjustmentForm = () => {
       {/* Amount - on top */}
       <div className="space-y-1.5">
         <label className="block text-center text-sm font-medium text-ink-black">
-          Amount
+          {t.quickDeduct.page.amount}
         </label>
         <div className="relative">
           <input
@@ -164,9 +166,7 @@ export const AdjustmentForm = () => {
             onKeyDown={handleNumericKeyDown}
             className="h-14 w-full rounded-lg border-2 border-note-yellow bg-white px-4 py-3 text-center text-2xl font-semibold text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-amber-500 focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
           />
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-pencil-gray">
-            vnd
-          </span>
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-pencil-gray">vnd</span>
         </div>
         {form.formState.errors.amount && (
           <p className="text-center text-xs text-red-500">{form.formState.errors.amount.message}</p>
@@ -176,32 +176,30 @@ export const AdjustmentForm = () => {
       {/* Direction - Add/Subtract Money */}
       <div className="space-y-1.5">
         <label className="block text-left text-xs font-medium text-pencil-gray">
-          Direction
+          {t.quickDeduct.page.direction}
         </label>
         <div className="flex gap-2">
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => form.setValue("direction", AdjustmentDirection.Credit, { shouldValidate: true })}
-            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              form.watch("direction") === AdjustmentDirection.Credit
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${form.watch("direction") === AdjustmentDirection.Credit
                 ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                 : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-            }`}
+              }`}
           >
-            Add Money
+            {t.quickDeduct.page.addMoney}
           </button>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => form.setValue("direction", AdjustmentDirection.Debit, { shouldValidate: true })}
-            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              form.watch("direction") === AdjustmentDirection.Debit
+            className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${form.watch("direction") === AdjustmentDirection.Debit
                 ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                 : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-            }`}
+              }`}
           >
-            Subtract Money
+            {t.quickDeduct.page.subtractMoney}
           </button>
         </div>
         {form.formState.errors.direction && (
@@ -209,51 +207,25 @@ export const AdjustmentForm = () => {
         )}
       </div>
 
-      {/* Child Wallet */}
-      <div className="space-y-1.5">
-        <label className="block text-left text-xs font-medium text-pencil-gray">
-          Child Wallet
-        </label>
-        <select
-          data-testid="adj-wallet"
-          value={form.watch("walletId") ?? ""}
-          onChange={(e) => form.setValue("walletId", e.target.value, { shouldValidate: true })}
-          disabled={isSubmitting || walletsLoading || childWallets.length === 0}
-          className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="">
-            {walletsLoading
-              ? "Loading..."
-              : childWallets.length === 0
-              ? "No child wallets"
-              : "Select wallet"}
-          </option>
-          {groupedWallets.map((group, idx) => (
-            <optgroup
-              key={group.parent?.id ?? `orphan-${idx}`}
-              label={group.parent?.name ?? "Other"}
-            >
-              {group.children.map((child) => (
-                <option key={child.id} value={child.id}>
-                  {child.name} ({formatVnd(child.balance)})
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-        {form.formState.errors.walletId && (
-          <p className="text-xs text-red-500">{form.formState.errors.walletId.message}</p>
-        )}
-      </div>
+      {/* Child Wallet - Hybrid Search Combobox */}
+      <WalletSelect
+        value={form.watch("walletId") ?? ""}
+        onChange={(val) => form.setValue("walletId", val, { shouldValidate: true })}
+        groupedWallets={groupedWallets}
+        isLoading={walletsLoading}
+        hasWallets={childWallets.length > 0}
+        disabled={isSubmitting}
+        error={form.formState.errors.walletId?.message}
+      />
       {/* Note */}
       <div className="space-y-1.5">
         <label className="block text-left text-xs font-medium text-pencil-gray">
-          Note
+          {t.quickDeduct.page.note}
         </label>
         <input
           data-testid="adj-note"
           disabled={isSubmitting}
-          placeholder="e.g. Cash adjustment"
+          placeholder={t.quickDeduct.page.notePlaceholder}
           value={form.watch("note") ?? ""}
           onChange={(e) => form.setValue("note", e.target.value, { shouldValidate: true })}
           className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
@@ -274,12 +246,12 @@ export const AdjustmentForm = () => {
         {isSubmitting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Processing...
+            {t.quickDeduct.page.processing}
           </>
         ) : (
           <>
             <Settings2 className="h-4 w-4" />
-            Submit Adjustment
+            {t.quickDeduct.page.formSubmit}
           </>
         )}
       </button>

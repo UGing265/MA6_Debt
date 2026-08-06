@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { HybridBalanceInput } from "./HybridBalanceInput";
 import type { DebtPartner } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 export type DebtPartnerFormMode = "default" | "name-only" | "money-only";
 
@@ -48,7 +50,7 @@ interface DebtPartnerFormProps {
  * Form component for creating/editing debt partners
  * Features:
  * - Name input with validation
- * - Hybrid balance input (guided + direct modes)
+ * - Balance adjustment input
  * - Loading states
  * - Error handling with field-level messages
  */
@@ -60,6 +62,7 @@ export function DebtPartnerForm({
 }: DebtPartnerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceInputValid, setIsBalanceInputValid] = useState(true);
+  const { t } = useLanguage();
 
   // Choose schema based on mode
   const currentSchema = mode === "name-only" ? DebtPartnerFormSchemaNameOnly : DebtPartnerFormSchemaDefault;
@@ -115,33 +118,38 @@ export function DebtPartnerForm({
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-700 font-medium">
-                  Partner Name
+              <FormItem className="space-y-2">
+                <FormLabel className="text-ink-black font-semibold text-sm">
+                  {t.partners.page.title}
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter partner name"
+                    placeholder={t.partners.page.searchPlaceholder}
                     {...field}
                     disabled={isLoading}
-                    className="bg-[#FDFCFB] border-[#4A2C2A]/10 focus:border-note-yellow focus:ring-note-yellow"
+                    className={cn(
+                      "h-11 w-full rounded-xl bg-white px-4 py-2.5 text-sm text-ink-black outline-none transition-all placeholder:text-pencil-gray/70 focus:border-amber-400 focus:ring-2 focus:ring-note-yellow/30 shadow-xs",
+                      field.value && field.value.trim() !== ""
+                        ? "border-2 border-note-yellow font-semibold"
+                        : "border border-gray-200 hover:border-gray-300 focus:border-2"
+                    )}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs font-medium text-red-500" />
               </FormItem>
             )}
           />
         ) : null}
 
-        {/* Balance (Hybrid Input) */}
+        {/* Balance (Adjustment Input) */}
         {showBalance ? (
           <FormField
             control={form.control}
             name="balance"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-700 font-medium">
-                  Balance
+              <FormItem className="space-y-2">
+                <FormLabel className="text-ink-black font-semibold text-sm">
+                  {t.wallets.page.detail.balanceAdjustment}
                 </FormLabel>
                 <FormControl>
                   <HybridBalanceInput
@@ -152,37 +160,37 @@ export function DebtPartnerForm({
                     onValidityChange={(isValid) => setIsBalanceInputValid(isValid)}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs font-medium text-red-500" />
               </FormItem>
             )}
           />
         ) : null}
 
         {/* Form Actions */}
-        <div className="flex gap-3 justify-end pt-4">
+        <div className="flex gap-3 justify-end pt-4 border-t border-note-yellow/20">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="border-gray-300 hover:bg-gray-100"
+            className="h-11 px-5 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 text-ink-black font-semibold cursor-pointer transition-all shadow-xs"
           >
-            Cancel
+              {t.common.cancel}
           </Button>
           <Button
             type="submit"
             disabled={isLoading || !isBalanceInputValid}
-            className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-bold"
+            className="h-11 px-6 rounded-xl bg-note-yellow hover:bg-note-yellow/90 border-2 border-note-yellow text-ink-black font-bold shadow-xs transition-all active:scale-[0.98] cursor-pointer"
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {partner ? "Updating..." : "Creating..."}
+                {partner ? t.wallets.page.updating : t.wallets.page.creating}
               </>
             ) : partner ? (
-              "Update Partner"
+              t.partners.page.updatePartnerTitle
             ) : (
-              "Create Partner"
+              t.partners.page.createPartnerTitle
             )}
           </Button>
         </div>

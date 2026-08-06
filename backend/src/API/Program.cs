@@ -1,3 +1,4 @@
+using API.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -21,12 +22,19 @@ namespace API
 
             // Add services to the container.
 
+            var configuredOrigins = builder.Configuration["Cors:Origins"];
+            var allowedOrigins = configuredOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                ?? new[] { "http://localhost:3000" };
+            var trustedOrigins = allowedOrigins
+                .Select(origin => origin.TrimEnd('/'))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var accessTokenCookieName = AuthCookieOptions.GetAccessTokenName(builder.Configuration);
+
             builder.Services.AddCors(options =>
             {
-                var allowedOrigins = builder.Configuration["Cors:Origins"];
                 options.AddPolicy("AllowReactApp",
                     builder => builder
-                        .WithOrigins(allowedOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new[] { "http://localhost:3000" })
+                        .WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -76,6 +84,21 @@ namespace API
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero
                     };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var hasBearerHeader = context.Request.Headers.Authorization
+                                .Any(value => value?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true);
+
+                            if (!hasBearerHeader && context.Request.Cookies.TryGetValue(accessTokenCookieName, out var accessToken))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             var app = builder.Build();
@@ -114,9 +137,35 @@ namespace API
                 app.MapScalarApiReference();
             }
 
-            app.UseCors("AllowReactApp");
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowReactApp");
+
+            app.Use(async (context, next) =>
+            {
+                if (HttpMethods.IsPost(context.Request.Method)
+                    || HttpMethods.IsPut(context.Request.Method)
+                    || HttpMethods.IsPatch(context.Request.Method)
+                    || HttpMethods.IsDelete(context.Request.Method))
+                {
+                    var origin = context.Request.Headers.Origin.ToString();
+                    var referer = context.Request.Headers.Referer.ToString();
+
+                    if (!IsTrustedRequestOrigin(origin, referer, trustedOrigins))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return;
+                    }
+                }
+
+                await next();
+            });
+
 
             app.UseExceptionHandler();
 
@@ -127,6 +176,21 @@ namespace API
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static bool IsTrustedRequestOrigin(string origin, string referer, IReadOnlySet<string> trustedOrigins)
+        {
+            if (!string.IsNullOrWhiteSpace(origin))
+            {
+                return trustedOrigins.Contains(origin.TrimEnd('/'));
+            }
+
+            if (Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+            {
+                return trustedOrigins.Contains(refererUri.GetLeftPart(UriPartial.Authority).TrimEnd('/'));
+            }
+
+            return false;
         }
     }
 }

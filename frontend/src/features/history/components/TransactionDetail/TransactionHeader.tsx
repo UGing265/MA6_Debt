@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface TransactionHeaderProps {
   isLocked: boolean;
@@ -9,6 +12,8 @@ interface TransactionHeaderProps {
 }
 
 export const TransactionHeader: React.FC<TransactionHeaderProps> = ({ isLocked, lockReason }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -17,7 +22,7 @@ export const TransactionHeader: React.FC<TransactionHeaderProps> = ({ isLocked, 
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold text-ink-black">Transaction Details</h1>
+        <h1 className="text-3xl font-bold text-ink-black">{t.history.page.detail.title}</h1>
       </div>
       <div className="flex items-center gap-2">
         {isLocked && (
@@ -26,7 +31,7 @@ export const TransactionHeader: React.FC<TransactionHeaderProps> = ({ isLocked, 
             title={lockReason}
           >
             <Lock className="h-4 w-4" />
-            Locked
+            {t.history.page.detail.lockedBadge}
           </span>
         )}
       </div>

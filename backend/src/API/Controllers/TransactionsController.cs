@@ -4,7 +4,9 @@ using Application.Common;
 using Application.Features.Transactions;
 using Application.Features.Transactions.CashAdjustment;
 using Application.Features.Transactions.DeleteTransaction;
+using Application.Features.Transactions.GetDailySpendingLimit;
 using Application.Features.Transactions.GetMonthlyStats;
+using Application.Features.Transactions.GetSpendingStats;
 using Application.Features.Transactions.GetTransactionById;
 using Application.Features.Transactions.GetTransactions;
 using Application.Features.Transactions.QuickDeduct;
@@ -193,6 +195,41 @@ namespace API.Controllers
             {
                 UserId = GetCurrentUserId(),
                 Months = Math.Min(Math.Max(months, 1), 12)  // Clamp between 1-12
+            });
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get spending statistics for dashboard chart.
+        /// </summary>
+        [HttpGet("spending-stats")]
+        [ProducesResponseType(typeof(List<SpendingStatsDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<SpendingStatsDto>>> GetSpendingStats(
+            [FromQuery] string period = "day",
+            [FromQuery] int limit = 30)
+        {
+            var result = await _mediator.Send(new GetSpendingStatsQuery
+            {
+                UserId = GetCurrentUserId(),
+                Period = period,
+                Limit = limit
+            });
+
+            return Ok(result);
+        }
+
+        [HttpGet("daily-spending-limit")]
+        [ProducesResponseType(typeof(DailySpendingLimitDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<DailySpendingLimitDto>> GetDailySpendingLimit()
+        {
+            var result = await _mediator.Send(new GetDailySpendingLimitQuery
+            {
+                UserId = GetCurrentUserId()
             });
 
             return Ok(result);

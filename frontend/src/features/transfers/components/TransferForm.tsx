@@ -21,6 +21,7 @@ import { AmountInputField } from "./AmountInputField";
 import { NoteInputField } from "./NoteInputField";
 import { TransferSubmitButton } from "./TransferFormActions";
 import { SelectedWalletBalance } from "./SelectedWalletBalance";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ParsedLikeError = {
   general?: string;
@@ -53,6 +54,7 @@ const isParsedLikeError = (value: unknown): value is ParsedLikeError => {
 };
 
 export const TransferForm: React.FC = () => {
+  const { t } = useLanguage();
   const [wallets, setWallets] = useState<WalletDto[]>([]);
   const [isWalletsLoading, setIsWalletsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -170,7 +172,7 @@ export const TransferForm: React.FC = () => {
           note: values.note || null,
         });
 
-        toast.success("Transfer successful");
+        toast.success(t.toast.transferSuccessful);
         form.reset({
           fromWalletId: "",
           toWalletId: "",
@@ -204,8 +206,8 @@ export const TransferForm: React.FC = () => {
       <div className="lg:col-span-2">
         <div className="bg-white rounded-xl border border-note-yellow/20 shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-note-yellow/10 to-note-yellow/5 px-4 py-3 border-b border-note-yellow/20">
-            <h3 className="font-semibold text-ink-black">Internal Transfer</h3>
-            <p className="text-xs text-pencil-gray mt-1">Transfer between your wallets</p>
+            <h3 className="font-semibold text-ink-black">{t.transfer.page.title}</h3>
+            <p className="text-xs text-pencil-gray mt-1">{t.transfer.page.description}</p>
           </div>
 
           <div className="p-6">
@@ -215,8 +217,8 @@ export const TransferForm: React.FC = () => {
                   <WalletSelectField
                     form={form}
                     name="fromWalletId"
-                    label="From Wallet"
-                    placeholder="Select source wallet"
+                    label={t.transfer.page.fromWallet}
+                    placeholder={t.transfer.page.sourceWalletPlaceholder}
                     groupedWallets={groupedWallets}
                     disabled={isDisabled}
                     testId="transfer-from-wallet"
@@ -229,8 +231,8 @@ export const TransferForm: React.FC = () => {
                       disabled={isDisabled || (!fromWalletId && !toWalletId)}
                       data-testid="transfer-swap"
                       className="h-10 w-10 p-0 rounded-full border border-note-yellow/30 hover:bg-note-yellow/20 hover:border-note-yellow flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label="Swap wallets"
-                      title="Swap wallets"
+                      aria-label={t.transfer.page.swapWallets}
+                      title={t.transfer.page.swapWallets}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -254,8 +256,8 @@ export const TransferForm: React.FC = () => {
                   <WalletSelectField
                     form={form}
                     name="toWalletId"
-                    label="To Wallet"
-                    placeholder="Select destination wallet"
+                    label={t.transfer.page.toWallet}
+                    placeholder={t.transfer.page.destinationWalletPlaceholder}
                     groupedWallets={groupedWallets}
                     disabled={isDisabled}
                     testId="transfer-to-wallet"

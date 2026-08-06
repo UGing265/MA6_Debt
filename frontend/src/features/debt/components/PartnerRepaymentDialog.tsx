@@ -18,6 +18,8 @@ import { PayerMode } from "@/features/transaction/types/transaction";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { withRepayMarker } from "@/features/history/utils/historyKind";
 import type { DebtPartner } from "../types/debtPartner";
+import { WalletSelect } from "@/features/transaction/components/QuickDebt/WalletSelect";
+import { useLanguage } from "@/context/LanguageContext";
 
 type PartnerRepaymentDialogProps = {
   open: boolean;
@@ -49,8 +51,10 @@ const getProjectedBalance = (currentBalance: number, amount: number, payerMode: 
 };
 
 export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerRepaymentDialogProps) {
+  const { t } = useLanguage();
   const { data: wallets, isLoading: isWalletsLoading } = useWallets();
   const quickDeductSubmit = useQuickDeductSubmit();
+  const repaymentText = t.partners.page.repaymentDialog;
 
   const childWallets = React.useMemo(
     () => wallets.filter((wallet) => wallet.parentWalletId != null),
@@ -113,23 +117,23 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
     setGeneralError(null);
 
     if (!walletId) {
-      setWalletError("Please select a wallet");
+      setWalletError(t.validation.requiredWallet);
       return;
     }
     if (amount <= 0) {
-      setAmountError("Amount must be greater than 0");
+        setAmountError(t.validation.amountPositive);
       return;
     }
     if (outstanding <= 0) {
-      setAmountError("This partner has no outstanding debt");
+        setAmountError(t.validation.noOutstandingDebt);
       return;
     }
     if (amount > outstanding) {
-      setAmountError(`Amount cannot exceed outstanding debt (${formatVnd(outstanding)})`);
+        setAmountError(t.validation.amountExceedsOutstanding.replace("{amount}", formatVnd(outstanding)));
       return;
     }
     if (projectedOutstanding >= outstanding) {
-      setAmountError("Selected payer mode does not reduce current debt. Please switch who paid.");
+        setAmountError(t.validation.payerModeDoesNotReduce);
       return;
     }
 
@@ -146,7 +150,7 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
       onOpenChange(false);
     } catch (error) {
       const parsedError = parseErrorResponse(error);
-      setGeneralError(parsedError.general || "Failed to submit repayment");
+        setGeneralError(parsedError.general || t.toast.failedToSubmitRepayment);
     } finally {
       setIsSubmitting(false);
     }
@@ -157,9 +161,9 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
       <DialogContent>
         <DialogClose onClose={() => onOpenChange(false)} />
         <DialogHeader>
-          <DialogTitle>Repay Debt</DialogTitle>
+          <DialogTitle>{t.partners.page.repayDebt}</DialogTitle>
           <DialogDescription>
-            Record a repayment for {partner?.name ?? "this partner"} with amount, note, and who paid.
+            {repaymentText.description.replace("{name}", partner?.name ?? repaymentText.thisPartner)}
           </DialogDescription>
         </DialogHeader>
 
@@ -167,32 +171,22 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
           <form className="space-y-4" onSubmit={submit}>
             <div className="rounded-md border border-note-yellow/30 bg-note-yellow/10 px-3 py-2 text-sm">
               <p className="text-ink-black">
-                Outstanding: <span className="font-semibold">{formatVnd(outstanding)}</span>
+                {repaymentText.outstanding}: <span className="font-semibold">{formatVnd(outstanding)}</span>
               </p>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-pencil-gray">Child Wallet</label>
-              <select
-                disabled={isSubmitting || isWalletsLoading || childWallets.length === 0}
-                value={walletId}
-                onChange={(event) => setWalletId(event.target.value)}
-                className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">
-                  {isWalletsLoading ? "Loading..." : childWallets.length === 0 ? "No child wallets" : "Select wallet"}
-                </option>
-                {childWallets.map((wallet) => (
-                  <option key={wallet.id} value={wallet.id}>
-                    {wallet.name} ({formatVnd(wallet.balance)})
-                  </option>
-                ))}
-              </select>
-              {walletError ? <p className="text-xs text-red-500">{walletError}</p> : null}
-            </div>
+            <WalletSelect
+              value={walletId}
+              onChange={(val) => setWalletId(val)}
+              groupedWallets={[{ parent: null, children: childWallets }]}
+              isLoading={isWalletsLoading}
+              hasWallets={childWallets.length > 0}
+              disabled={isSubmitting}
+              error={walletError ?? undefined}
+            />
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-pencil-gray">Amount Repaid</label>
+              <label className="block text-xs font-medium text-pencil-gray">{repaymentText.amountRepaid}</label>
               <div className="relative">
                 <input
                   disabled={isSubmitting}
@@ -214,45 +208,43 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-pencil-gray">Who Paid?</label>
+              <label className="block text-xs font-medium text-pencil-gray">{repaymentText.whoPaid}</label>
               <div className="flex gap-2">
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setPayerMode(PayerMode.ToiTra)}
-                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    payerMode === PayerMode.ToiTra
+                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${payerMode === PayerMode.ToiTra
                       ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                       : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
-                  I Paid
+                  {t.quickDeduct.page.payerMode.toiTra}
                 </button>
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setPayerMode(PayerMode.PartnerTra)}
-                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    payerMode === PayerMode.PartnerTra
+                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${payerMode === PayerMode.PartnerTra
                       ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                       : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
-                  Partner Paid
+                  {t.quickDeduct.page.payerMode.partnerTra}
                 </button>
               </div>
               <p className="text-xs text-pencil-gray">
-                Default is auto-suggested by current balance, but you can choose manually.
+                {repaymentText.defaultSuggestion}
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-pencil-gray">Note</label>
+              <label className="block text-xs font-medium text-pencil-gray">{repaymentText.note}</label>
               <textarea
                 disabled={isSubmitting}
                 rows={3}
                 maxLength={300}
-                placeholder="Add repayment note"
+                placeholder={repaymentText.addRepaymentNote}
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors placeholder:text-pencil-gray focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
@@ -260,11 +252,11 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
             </div>
 
             <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-pencil-gray">
-              Projected balance after submit: <span className="font-semibold text-ink-black">{formatVnd(projectedBalance)}</span>
+              {repaymentText.projectedBalance}: <span className="font-semibold text-ink-black">{formatVnd(projectedBalance)}</span>
             </div>
             {amount > 0 && projectedOutstanding >= outstanding ? (
               <p className="text-xs text-amber-700">
-                This payer choice increases debt instead of repaying it.
+                {repaymentText.debtIncreaseWarning}
               </p>
             ) : null}
 
@@ -272,16 +264,16 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
 
             <div className="flex justify-end gap-2 pt-1">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button type="submit" className="bg-note-yellow text-ink-black hover:bg-amber-400" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
+                    {repaymentText.submitting}
                   </>
                 ) : (
-                  "Submit Repayment"
+                  repaymentText.submitRepayment
                 )}
               </Button>
             </div>

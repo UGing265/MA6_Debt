@@ -10,56 +10,101 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432" # Chỉ cho phép localhost truỳ cập trực tiếp DB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT_DB}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - ma6_pgdata:/var/lib/postgresql/data
     networks:
       - ma6_network
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: ma6_pgadmin
+  dbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: ma6_dbeaver
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ma6.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "5050:80"
+      - "127.0.0.1:8081:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - ma6_network
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: shiroruct/ma6-backend:latest
+    build:  #xóa
+      context: ./backend  #xóa
+      dockerfile: Dockerfile  #xóa
     container_name: ma6_backend
     restart: always
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      # Replace 'db' with the postgres container name within the docker network
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - Cors__Origins=${CORS_ORIGINS}
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT}:8080" # Map linh hoạt OUT:IN(8080)
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT_BACKEND}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - ma6_network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: ma6_frontend
+    image: shiroruct/ma6-frontend:latest
+    build: #xóa
+      context: ./frontend  #xóa
+      dockerfile: Dockerfile #xóa
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} #xóa
+    container_name: ma6-frontend
     restart: always
     environment:
-      # Frontend tells the browser where to call the backend
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT}:3000" # Map linh hoạt OUT:IN(3000)
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT_FRONTEND}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     networks:
       - ma6_network
 

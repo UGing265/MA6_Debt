@@ -10,9 +10,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PayerMode } from "../../types/history";
-import { formatVnd } from "@/lib/utils";
+import { PayerMode } from "@/features/transaction/types/transaction";
+import { PartnerSelect } from "@/features/transaction/components/QuickDebt/PartnerSelect";
 import { handleNumericKeyDown, parseNumericInput } from "@/lib/utils/numericInput";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Partner {
   id: string;
@@ -49,6 +50,7 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
   onSave,
   onCancel,
 }) => {
+  const { t } = useLanguage();
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = parseNumericInput(e.target.value);
     onDebtAmountChange(raw);
@@ -61,35 +63,27 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
       <DialogContent>
         <DialogClose onClose={onCancel} />
         <DialogHeader>
-          <DialogTitle>{hasExistingDebt ? "Edit Debt Info" : "Add Debt Info"}</DialogTitle>
+          <DialogTitle>{hasExistingDebt ? t.history.page.detail.editDebtInfo : t.history.page.detail.addDebtInfo}</DialogTitle>
           <DialogDescription>
             {hasExistingDebt
-              ? "Update debt information for this transaction."
-              : "Add debt information to track who owes whom."}
+              ? t.history.page.detail.updateDebtDescription
+              : t.history.page.detail.addDebtDescription}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Partner */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Partner</label>
-            <select
-              value={debtPartnerId}
-              onChange={(e) => onPartnerChange(e.target.value)}
-              className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-            >
-              <option value="">Select partner</option>
-              {partners.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({formatVnd(p.balance)})
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Partner - Hybrid Search Combobox */}
+          <PartnerSelect
+            value={debtPartnerId}
+            onChange={(val) => onPartnerChange(val)}
+            partners={partners}
+            isLoading={false}
+            disabled={isSaving}
+          />
 
           {/* Payer Mode */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Who Paid?</label>
+            <label className="text-sm font-medium text-gray-700">{t.quickDeduct.page.whoPaid}</label>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -100,7 +94,7 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
                     : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
                 }`}
               >
-                I Paid
+                {t.quickDeduct.page.payerMode.toiTra}
               </button>
               <button
                 type="button"
@@ -111,7 +105,7 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
                     : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
                 }`}
               >
-                Partner Paid
+                {t.quickDeduct.page.payerMode.partnerTra}
               </button>
             </div>
           </div>
@@ -119,7 +113,7 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
           {/* Debt Amount */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-gray-700">
-              {debtPayerMode === PayerMode.ToiTra ? "Partner Owes Me" : "I Owe Partner"}
+              {debtPayerMode === PayerMode.ToiTra ? t.history.page.detail.partnerOwesYou : t.history.page.detail.youOwePartner}
             </label>
             <div className="relative">
               <input
@@ -138,7 +132,7 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
 
         <DialogFooter className="pt-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             type="button"
@@ -149,10 +143,10 @@ export const DebtDialog: React.FC<DebtDialogProps> = ({
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Saving...
+                {t.common.saving}
               </>
             ) : (
-              "Save"
+              t.common.save
             )}
           </Button>
         </DialogFooter>

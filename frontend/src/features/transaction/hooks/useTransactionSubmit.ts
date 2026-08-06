@@ -6,6 +6,7 @@ import { triggerWalletsRefresh } from "@/features/wallet/hooks/useWallets";
 import { triggerDebtPartnersRefresh } from "@/features/debt/hooks/useDebtPartners";
 import { triggerHistoryRefresh } from "@/features/history/api/history";
 import { createCashAdjustment, quickDeductTransaction } from "../api/transactions";
+import { useLanguage } from "@/context/LanguageContext";
 import type {
   CashAdjustmentRequest,
   QuickDeductRequest,
@@ -35,6 +36,7 @@ export const notifyTransactionSubmitSuccess = () => {
 
 export const useQuickDeductSubmit = (options: SubmitToastOptions = {}) => {
   const { showSuccessToast = true, showErrorToast = true } = options;
+  const { t } = useLanguage();
 
   return {
     mutateAsync: async (payload: QuickDeductRequest): Promise<QuickDeductResponse> => {
@@ -42,12 +44,12 @@ export const useQuickDeductSubmit = (options: SubmitToastOptions = {}) => {
         const result = await quickDeductTransaction(payload);
         notifyTransactionSubmitSuccess();
         if (showSuccessToast) {
-          toast.success("Transaction submitted successfully!");
+          toast.success(t.toast.transactionSubmitted);
         }
         return result;
       } catch (error) {
         if (showErrorToast) {
-          toast.error(getErrorMessage(error, "Failed to submit transaction"));
+          toast.error(getErrorMessage(error, t.toast.failedToRecordTransaction));
         }
         throw error;
       }
@@ -57,6 +59,7 @@ export const useQuickDeductSubmit = (options: SubmitToastOptions = {}) => {
 
 export const useCashAdjustmentSubmit = (options: SubmitToastOptions = {}) => {
   const { showSuccessToast = true, showErrorToast = true } = options;
+  const { t } = useLanguage();
 
   return {
     mutateAsync: async (payload: CashAdjustmentRequest): Promise<TransactionDto> => {
@@ -64,12 +67,12 @@ export const useCashAdjustmentSubmit = (options: SubmitToastOptions = {}) => {
         const result = await createCashAdjustment(payload);
         notifyTransactionSubmitSuccess();
         if (showSuccessToast) {
-          toast.success("Adjustment submitted successfully!");
+          toast.success(t.toast.adjustmentSubmitted);
         }
         return result;
       } catch (error) {
         if (showErrorToast) {
-          toast.error(getErrorMessage(error, "Failed to submit adjustment"));
+          toast.error(getErrorMessage(error, t.toast.failedToSubmitAdjustment));
         }
         throw error;
       }

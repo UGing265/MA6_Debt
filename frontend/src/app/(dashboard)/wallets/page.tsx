@@ -14,10 +14,15 @@ import {
   EmptyState,
 } from "@/features/wallet/components/WalletsPage";
 import { PageHeader } from "@/components/ui/page-header";
+import { useLanguage } from "@/context/LanguageContext";
 
 type SortOption = "name-asc" | "name-desc" | "balance-high" | "balance-low";
 
+import { usePrivacy } from "@/context/PrivacyContext";
+
 export default function WalletsPage() {
+  const { tempShow } = usePrivacy();
+  const { t } = useLanguage();
   const [isCreateParentOpen, setIsCreateParentOpen] = React.useState(false);
   const [editingWallet, setEditingWallet] = React.useState<Wallet | null>(null);
   const [deletingWallet, setDeletingWallet] = React.useState<Wallet | null>(null);
@@ -125,7 +130,7 @@ export default function WalletsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6" data-testid="parent-wallet-list">
-        <PageHeader title="Wallet Management" description="Parent and child wallets" />
+        <PageHeader title={t.wallets.page.title} description={t.wallets.page.description} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2].map((i) => (
             <Card key={i} className="animate-pulse h-24" />
@@ -144,13 +149,13 @@ export default function WalletsPage() {
   if (error) {
     return (
       <div className="space-y-6" data-testid="parent-wallet-list">
-        <PageHeader title="Wallet Management" description="Parent and child wallets" />
+        <PageHeader title={t.wallets.page.title} description={t.wallets.page.description} />
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-4 pb-4">
-            <p className="text-red-600">Failed to load wallets: {String(error)}</p>
+            <p className="text-red-600">{t.wallets.page.errorLoad.replace("{error}", String(error))}</p>
             <div className="pt-4">
               <Button variant="outline" onClick={() => void refetch()}>
-                Retry
+                {t.wallets.page.retry}
               </Button>
             </div>
           </CardContent>
@@ -163,14 +168,14 @@ export default function WalletsPage() {
 
   return (
     <div className="space-y-6" data-testid="parent-wallet-list">
-      <PageHeader title="Wallet Management" description="Parent and child wallets">
+      <PageHeader title={t.wallets.page.title} description={t.wallets.page.description}>
         <Button
           className="rounded-full bg-note-yellow text-ink-black hover:bg-note-yellow/90 font-semibold"
           disabled={isDeleting}
           onClick={() => setIsCreateParentOpen(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create Parent Wallet
+          {t.wallets.page.createParentWallet}
         </Button>
       </PageHeader>
 

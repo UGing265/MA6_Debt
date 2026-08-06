@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { useDeleteWallet } from "../hooks/useWallets";
 import type { Wallet } from "../types/wallet";
+import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface WalletListProps {
   wallets: Wallet[];
@@ -111,6 +113,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   const deleteMutation = useDeleteWallet();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [walletToDelete, setWalletToDelete] = useState<Wallet | null>(null);
+  const { t } = useLanguage();
 
   const handleDelete = async (wallet: Wallet) => {
     setDeletingId(wallet.id);
@@ -123,16 +126,13 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   };
 
   const formatBalance = (balance: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(balance);
+    return formatVnd(balance);
   };
 
   if (!wallets || wallets.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
-        <p>No wallets found. Create your first wallet to get started!</p>
+        <p>{t.wallets.page.empty.createFirstWallet}</p>
       </div>
     );
   }
@@ -155,7 +155,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
                 <h3 className="font-bold text-lg text-[#1F2937]">{node.wallet.name}</h3>
                 {isChild && (
                   <span className="text-xs px-2 py-0.5 bg-[#FCD34D]/20 text-[#D97706] rounded-full">
-                    Sub-wallet
+                    {t.wallets.page.detail.subWallet}
                   </span>
                 )}
               </div>
@@ -166,9 +166,9 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
                 {formatBalance(node.wallet.balance)}
               </p>
               {node.children.length > 0 && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Contains {node.children.length} sub-wallet{node.children.length > 1 ? 's' : ''}
-                </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t.wallets.page.detail.subWalletCount.replace("{count}", String(node.children.length)).replace("{suffix}", node.children.length > 1 ? "s" : "")}
+                  </p>
               )}
             </div>
 
@@ -222,9 +222,9 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <DialogTitle className="font-patrick lowercase text-center">delete wallet</DialogTitle>
+            <DialogTitle className="font-patrick lowercase text-center">{t.wallets.page.detail.deleteTitle}</DialogTitle>
             <DialogDescription className="text-center">
-              this action cannot be undone. wallet <span className="font-semibold text-[#1F2937]">{walletToDelete?.name}</span> will be removed.
+              {t.wallets.page.detail.deleteDescription.replace("{name}", walletToDelete?.name ?? "")}
             </DialogDescription>
           </DialogHeader>
 
@@ -235,7 +235,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
               onClick={() => setWalletToDelete(null)}
               disabled={Boolean(deletingId)}
             >
-              cancel
+              {t.partners.page.cancel}
             </Button>
             <Button
               type="button"
@@ -246,10 +246,10 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
               {deletingId ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  deleting...
+                  {t.wallets.page.detail.deleteing}
                 </>
               ) : (
-                "delete"
+                t.wallets.page.detail.deleteButton
               )}
             </Button>
           </div>

@@ -17,6 +17,7 @@ import { PartnerNameDialog } from "./PartnerNameDialog";
 import { PartnerMoneyDialog } from "./PartnerMoneyDialog";
 import type { DebtPartner } from "../types/debtPartner";
 import { cn, formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DebtPartnerListProps {
   partners: DebtPartner[];
@@ -36,6 +37,7 @@ export function DebtPartnerList({
   onUpdate,
   onDelete,
 }: DebtPartnerListProps) {
+  const { t } = useLanguage();
   const [nameDialogPartner, setNameDialogPartner] = useState<DebtPartner | null>(null);
   const [moneyDialogPartner, setMoneyDialogPartner] = useState<DebtPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<DebtPartner | null>(null);
@@ -44,22 +46,22 @@ export function DebtPartnerList({
   const getBadgeInfo = (balance: number) => {
     if (balance > 0) {
       return {
-        label: "Receivable",
-        description: "Partner owes me",
+        label: t.partners.page.receivable,
+        description: t.partners.page.theyOweMe,
         color: "bg-green-100 text-green-800 border-green-300",
         icon: TrendingUp,
       };
     } else if (balance < 0) {
       return {
-        label: "Payable",
-        description: "I owe partner",
+        label: t.partners.page.payable,
+        description: t.partners.page.iOweThem,
         color: "bg-red-100 text-red-800 border-red-300",
         icon: TrendingDown,
       };
     } else {
       return {
-        label: "Neutral",
-        description: "No debt",
+        label: t.partners.page.neutral,
+        description: t.partners.page.noDebt,
         color: "bg-gray-100 text-gray-800 border-gray-300",
         icon: Minus,
       };
@@ -110,7 +112,7 @@ export function DebtPartnerList({
                     <div className="flex gap-1 ml-2">
                     <button
                       type="button"
-                      aria-label={`Edit name for ${partner.name}`}
+                      aria-label={t.partners.page.editName.replace("{name}", partner.name)}
                       onClick={() => setNameDialogPartner(partner)}
                       className="p-2 inline-flex items-center justify-center rounded-md text-gray-600 hover:text-note-yellow hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                     >
@@ -118,7 +120,7 @@ export function DebtPartnerList({
                     </button>
                     <button
                       type="button"
-                      aria-label={`Edit balance for ${partner.name}`}
+                      aria-label={t.partners.page.editBalance.replace("{name}", partner.name)}
                       onClick={() => setMoneyDialogPartner(partner)}
                       className="p-2 inline-flex items-center justify-center rounded-md text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                     >
@@ -127,7 +129,7 @@ export function DebtPartnerList({
                     <button
                       type="button"
                       onClick={() => setDeletingPartner(partner)}
-                      aria-label={`Delete partner ${partner.name}`}
+                      aria-label={t.partners.page.deletePartner.replace("{name}", partner.name)}
                       className="p-2 inline-flex items-center justify-center rounded-md text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -189,10 +191,9 @@ export function DebtPartnerList({
         <DialogContent>
           <DialogClose onClose={() => setDeletingPartner(null)} />
           <DialogHeader>
-            <DialogTitle>Delete Debt Partner</DialogTitle>
+            <DialogTitle>{t.partners.page.deletePartnerTitle}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {deletingPartner?.name}? This action
-              cannot be undone.
+              {t.partners.page.deletePartnerDescription.replace("{name}", deletingPartner?.name ?? "")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
@@ -201,14 +202,14 @@ export function DebtPartnerList({
               onClick={() => setDeletingPartner(null)}
               className="border-gray-300"
             >
-              Cancel
+              {t.partners.page.cancel}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Delete Partner
+              {t.partners.page.delete}
             </Button>
           </DialogFooter>
         </DialogContent>

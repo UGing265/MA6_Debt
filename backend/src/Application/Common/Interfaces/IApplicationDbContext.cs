@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Application.Common.Interfaces;
 
@@ -32,6 +33,13 @@ public interface IApplicationDbContext
     /// Gets the DbSet for Transfers.
     /// </summary>
     DbSet<Transfer> Transfers { get; }
+
+    /// <summary>
+    /// Gets the DbSet for RefreshTokens.
+    /// </summary>
+    DbSet<RefreshToken> RefreshTokens { get; }
+
+    DatabaseFacade Database { get; }
 
     /// <summary>
     /// Saves changes asynchronously.

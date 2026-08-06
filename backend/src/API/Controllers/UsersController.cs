@@ -3,6 +3,7 @@ using Application.Features.Users.GetProfile;
 using Application.Features.Users.GetUserPreferences;
 using Application.Features.Users.UpdateDefaultWallet;
 using Application.Features.Users.UpdateDefaultPartner;
+using Application.Features.Users.UpdateDailySpendingLimit;
 using Application.Features.Users.UpdateProfile;
 using Application.Features.Users.ChangePassword;
 using MediatR;
@@ -110,6 +111,22 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("daily-spending-limit")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateDailySpendingLimit([FromBody] UpdateDailySpendingLimitRequest request)
+    {
+        await _mediator.Send(new UpdateDailySpendingLimitCommand
+        {
+            UserId = GetCurrentUserId(),
+            Enabled = request.Enabled,
+            Amount = request.Amount
+        });
+        return NoContent();
+    }
+
     private Guid GetCurrentUserId()
     {
         var value = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
@@ -123,5 +140,6 @@ public class UsersController : ControllerBase
 
 public record UpdateDefaultWalletRequest(Guid? WalletId);
 public record UpdateDefaultPartnerRequest(Guid? PartnerId);
+public record UpdateDailySpendingLimitRequest(bool Enabled, decimal? Amount);
 public record UpdateProfileRequest(string Username, string? Email);
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Dialog,
@@ -10,6 +12,7 @@ import {
 import { WalletForm } from "@/features/wallet/components/WalletForm";
 import { DetachWalletModal } from "@/features/wallet/components/DetachWalletModal";
 import type { Wallet } from "@/features/wallet/types/wallet";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface WalletDialogsProps {
   walletId: string;
@@ -42,6 +45,8 @@ export const WalletDialogs: React.FC<WalletDialogsProps> = ({
   onCloseDetach,
   onRefetch,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* Edit Parent Dialog */}
@@ -49,8 +54,8 @@ export const WalletDialogs: React.FC<WalletDialogsProps> = ({
         <DialogContent>
           <DialogClose onClose={onCloseEditParent} />
           <DialogHeader>
-            <DialogTitle>Edit Parent Wallet</DialogTitle>
-            <DialogDescription>Update parent wallet name and description.</DialogDescription>
+            <DialogTitle>{t.wallets.page.editParent}</DialogTitle>
+            <DialogDescription>{t.wallets.page.detail.editParentDescription}</DialogDescription>
           </DialogHeader>
           {parentWallet && (
             <WalletForm
@@ -71,8 +76,8 @@ export const WalletDialogs: React.FC<WalletDialogsProps> = ({
         <DialogContent>
           <DialogClose onClose={onCloseCreateChild} />
           <DialogHeader>
-            <DialogTitle>Create Child Wallet</DialogTitle>
-            <DialogDescription>Create a new child wallet under this parent wallet.</DialogDescription>
+            <DialogTitle>{t.wallets.page.createChild}</DialogTitle>
+            <DialogDescription>{t.wallets.page.detail.createChildDescription}</DialogDescription>
           </DialogHeader>
           <WalletForm
             mode="create"
@@ -96,8 +101,8 @@ export const WalletDialogs: React.FC<WalletDialogsProps> = ({
         <DialogContent>
           <DialogClose onClose={onCloseEditChild} />
           <DialogHeader>
-            <DialogTitle>Edit Child Wallet</DialogTitle>
-            <DialogDescription>Update child wallet name and description.</DialogDescription>
+            <DialogTitle>{t.wallets.page.editChild}</DialogTitle>
+            <DialogDescription>{t.wallets.page.detail.editChildDescription}</DialogDescription>
           </DialogHeader>
           {editingChildWallet && (
             <WalletForm

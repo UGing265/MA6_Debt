@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Pencil, Star } from "lucide-react";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface WalletOverviewCardProps {
   wallet: Wallet;
@@ -22,6 +25,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
   onSetDefault,
   onClearDefault,
 }) => {
+  const { t } = useLanguage();
   const isParent = !wallet.parentWalletId;
   const isDefault = defaultWalletId === wallet.id;
   const hasDefaultChild = isParent && defaultWalletId && childWallets.some((child) => defaultWalletId === child.id);
@@ -43,7 +47,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
           <div className="flex items-center justify-between w-full">
             <CardTitle className="text-lg font-semibold text-ink-black flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-note-yellow" />
-              Overview
+              {t.wallets.page.detail.overview}
             </CardTitle>
             <div className="flex items-center gap-2">
               {!isParent && (
@@ -56,7 +60,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
                       : "text-pencil-gray hover:text-note-yellow"
                   }`}
                   onClick={handleStarClick}
-                  aria-label={isDefault ? "Unset as default" : "Set as default"}
+                  aria-label={isDefault ? t.wallets.page.detail.unsetDefault : t.wallets.page.detail.setDefault}
                 >
                   <Star className="h-4 w-4" fill={isDefault ? "currentColor" : "none"} />
                 </Button>
@@ -64,7 +68,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
               {hasDefaultChild && (
                 <div className="flex items-center gap-1 bg-yellow-200 text-yellow-900 text-xs font-semibold px-2 py-1 rounded-full">
                   <Star className="h-3 w-3 fill-current" />
-                  Has Default
+                  {t.wallets.page.detail.hasDefault}
                 </div>
               )}
               <Button
@@ -83,7 +87,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
           <div className="space-y-4">
             <div>
               <p className="text-sm text-pencil-gray">
-                {isParent ? "Current Balance" : "Current Balance (Own)"}
+                {isParent ? t.wallets.page.detail.currentBalance : t.wallets.page.detail.currentBalanceOwn}
               </p>
               <p className="text-3xl font-bold text-ink-black">
                 {formatVnd(wallet.balance || 0)}
@@ -91,17 +95,17 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
             </div>
             {wallet.description && (
               <div>
-                <p className="text-sm text-pencil-gray">Description</p>
+                <p className="text-sm text-pencil-gray">{t.wallets.page.detail.description}</p>
                 <p className="text-ink-black">{wallet.description}</p>
               </div>
             )}
           </div>
           {isParent && (
             <div className="pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 md:pl-6">
-              <p className="text-sm text-pencil-gray">Sub-wallets</p>
+              <p className="text-sm text-pencil-gray">{t.wallets.page.detail.subWallets}</p>
               <p className="text-3xl font-bold text-blue-600">{childWallets.length}</p>
               <p className="text-xs text-pencil-gray mt-1">
-                {childWallets.length} wallet{childWallets.length !== 1 ? "s" : ""}
+                {t.wallets.page.detail.subWalletCount.replace("{count}", String(childWallets.length)).replace("{suffix}", childWallets.length !== 1 ? "s" : "")}
               </p>
             </div>
           )}

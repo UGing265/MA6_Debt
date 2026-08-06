@@ -1,39 +1,43 @@
-import { Star } from "lucide-react";
+"use client";
 
-const testimonials = [
-  {
-    name: "Sarah",
-    handle: "@sarah_student",
-    role: "Student",
-    quote: "I saved $500 in one month. So easy!",
-    date: "Feb 12, 2026",
-    shadowColor: "#E8A0BF",
-  },
-  {
-    name: "Mike",
-    handle: "@mike_worker",
-    role: "Worker",
-    quote: "Now I see where my money goes. Best app ever.",
-    date: "Jan 28, 2026",
-    shadowColor: "#48C78E",
-  },
-  {
-    name: "Lisa",
-    handle: "@lisa_teacher",
-    role: "Teacher",
-    quote: "I paid off my debt faster. Highly recommend!",
-    date: "Dec 15, 2025",
-    shadowColor: "#7B91F0",
-  },
-];
+import { Star } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const Testimonials = () => {
+  const { t } = useLanguage();
+  const testimonials = [
+    {
+      name: "Sarah",
+      handle: "@sarah_student",
+      role: "Student",
+      quote: t.home.testimonials.items.sarah,
+      date: "Feb 12, 2026",
+      shadowColor: "#E8A0BF",
+    },
+    {
+      name: "Mike",
+      handle: "@mike_worker",
+      role: "Worker",
+      quote: t.home.testimonials.items.mike,
+      date: "Jan 28, 2026",
+      shadowColor: "#48C78E",
+    },
+    {
+      name: "Lisa",
+      handle: "@lisa_teacher",
+      role: "Teacher",
+      quote: t.home.testimonials.items.lisa,
+      date: "Dec 15, 2025",
+      shadowColor: "#7B91F0",
+    },
+  ];
+
   return (
     <section className="bg-[#FFFBEB] py-24 sm:py-32 font-quicksand">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:mx-0">
           <h2 className="text-3xl font-bold tracking-tight text-[#1F2937] font-patrick sm:text-4xl">
-            What people say
+            {t.home.testimonials.title}
           </h2>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -53,9 +57,7 @@ export const Testimonials = () => {
                     <div className="text-sm text-[#4B5563]">{testimonial.handle}</div>
                   </div>
                 </div>
-                <p className="mt-4 text-lg leading-6 text-[#4B5563]">
-                  "{testimonial.quote}"
-                </p>
+                <p className="mt-4 text-lg leading-6 text-[#4B5563]">"{testimonial.quote}"</p>
               </div>
               <div className="mt-6 flex items-center justify-between border-t border-[#1F2937]/10 pt-4">
                 <div className="flex gap-x-1">

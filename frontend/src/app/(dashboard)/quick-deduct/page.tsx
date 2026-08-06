@@ -5,12 +5,17 @@ import { QuickDebtForm } from "@/features/transaction/components/QuickDebtForm";
 import { AdjustmentForm } from "@/features/transaction/components/AdjustmentForm";
 import { PageHeader } from "@/components/ui/page-header";
 
+import { usePrivacy } from "@/context/PrivacyContext";
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function QuickDeductPage() {
+  const { tempShow } = usePrivacy();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"quick-debt" | "adjustment">("quick-debt");
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <PageHeader title="Quick Deduct" description="Fast bill entry with debt tagging" />
+      <PageHeader title={t.dashboard.page.quickDeductTitle} description={t.dashboard.page.quickDeductDescription} />
       <div className="space-y-5">
         <div className="flex gap-2">
           <button
@@ -22,7 +27,7 @@ export default function QuickDeductPage() {
                 : "bg-gray-100 text-pencil-gray hover:bg-gray-200"
             }`}
           >
-            Quick Debt
+            {t.dashboard.page.quickDebtTab}
           </button>
           <button
             onClick={() => setActiveTab("adjustment")}
@@ -33,7 +38,7 @@ export default function QuickDeductPage() {
                 : "bg-gray-100 text-pencil-gray hover:bg-gray-200"
             }`}
           >
-            Adjustment
+            {t.dashboard.page.adjustmentTab}
           </button>
         </div>
         <div className="rounded-xl border border-note-yellow/30 bg-white p-5 shadow-sm">

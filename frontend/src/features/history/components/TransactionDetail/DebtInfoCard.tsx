@@ -1,8 +1,11 @@
+"use client";
+
 import React from "react";
 import { Users } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { HistoryDto, PayerMode } from "../../types/history";
 import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DebtInfoCardProps {
   transaction: HistoryDto;
@@ -10,6 +13,8 @@ interface DebtInfoCardProps {
 }
 
 export const DebtInfoCard: React.FC<DebtInfoCardProps> = ({ transaction, isRepay }) => {
+  const { t } = useLanguage();
+
   if (!transaction.partnerId) return null;
 
   return (
@@ -17,21 +22,20 @@ export const DebtInfoCard: React.FC<DebtInfoCardProps> = ({ transaction, isRepay
       <CardHeader className="pb-2">
         <CardTitle className={`text-lg flex items-center gap-2 ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>
           <Users className="h-5 w-5" />
-          {isRepay ? "Repayment" : "Debt Info"}
+          {isRepay ? t.history.page.detail.repayment : t.history.page.detail.debtInfo}
           {isRepay && (
             <span className="ml-auto text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded-full">
-              Repaid
+              {t.history.page.detail.repaid}
             </span>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Who owes whom */}
         <div className={`p-3 rounded-lg bg-white border ${isRepay ? "border-emerald-200" : "border-purple-200"}`}>
           {transaction.payerMode === PayerMode.ToiTra ? (
             <div>
               <p className="text-xs text-pencil-gray mb-1">
-                {isRepay ? "You repaid debt to" : "Partner owes you"}
+                {isRepay ? t.history.page.detail.youRepaidDebtTo : t.history.page.detail.partnerOwesYou}
               </p>
               <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>
                 {transaction.partnerName}
@@ -40,7 +44,7 @@ export const DebtInfoCard: React.FC<DebtInfoCardProps> = ({ transaction, isRepay
           ) : transaction.payerMode === PayerMode.PartnerTra ? (
             <div>
               <p className="text-xs text-pencil-gray mb-1">
-                {isRepay ? "Partner repaid debt to you" : "You owe partner"}
+                {isRepay ? t.history.page.detail.partnerRepaidDebtToYou : t.history.page.detail.youOwePartner}
               </p>
               <p className={`text-xl font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>
                 {transaction.partnerName}
@@ -53,11 +57,10 @@ export const DebtInfoCard: React.FC<DebtInfoCardProps> = ({ transaction, isRepay
           )}
         </div>
 
-        {/* Bill amounts */}
         <div className="grid grid-cols-2 gap-3">
           {transaction.totalAmount != null && (
             <div className="p-2 rounded-lg bg-white border border-gray-200">
-              <p className="text-xs text-pencil-gray">Total Bill</p>
+              <p className="text-xs text-pencil-gray">{t.history.page.detail.totalBill}</p>
               <p className="text-lg font-bold text-ink-black">{formatVnd(transaction.totalAmount)}</p>
             </div>
           )}
@@ -69,10 +72,10 @@ export const DebtInfoCard: React.FC<DebtInfoCardProps> = ({ transaction, isRepay
             >
               <p className={`text-xs ${isRepay ? "text-emerald-600" : "text-purple-600"}`}>
                 {isRepay
-                  ? "Amount Repaid"
+                  ? t.history.page.detail.amountRepaid
                   : transaction.payerMode === PayerMode.ToiTra
-                    ? `${transaction.partnerName} owes you`
-                    : `You owe ${transaction.partnerName}`}
+                    ? `${transaction.partnerName} ${t.history.page.detail.partnerOwesYou.toLowerCase()}`
+                    : `${t.history.page.detail.youOwePartner} ${transaction.partnerName}`}
               </p>
               <p className={`text-lg font-bold ${isRepay ? "text-emerald-700" : "text-purple-700"}`}>
                 {formatVnd(transaction.debtAmount)}
@@ -80,16 +83,15 @@ export const DebtInfoCard: React.FC<DebtInfoCardProps> = ({ transaction, isRepay
             </div>
           ) : (
             <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
-              <p className="text-xs text-amber-600">Debt Amount</p>
-              <p className="text-sm font-medium text-amber-700">/!\ Not set</p>
+              <p className="text-xs text-amber-600">{t.history.page.detail.debtAmount}</p>
+              <p className="text-sm font-medium text-amber-700">{t.history.page.detail.notSet}</p>
             </div>
           )}
         </div>
 
-        {/* Payer Mode */}
         {transaction.payerMode != null && (
           <div className="text-sm">
-            <span className="text-pencil-gray">{isRepay ? "Who repaid: " : "Who paid: "}</span>
+            <span className="text-pencil-gray">{isRepay ? t.history.page.detail.whoRepaid : t.history.page.detail.whoPaid}</span>
             <span className="font-semibold text-ink-black">
               {transaction.payerMode === PayerMode.ToiTra ? "You" : transaction.partnerName}
             </span>

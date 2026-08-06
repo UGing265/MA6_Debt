@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Calendar, FileText, Loader2 } from "lucide-react";
 import {
@@ -10,6 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface EditTransactionDialogProps {
   isOpen: boolean;
@@ -32,13 +35,15 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
   onSave,
   onCancel,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent>
         <DialogClose onClose={onCancel} />
         <DialogHeader>
-          <DialogTitle>Edit Transaction</DialogTitle>
-          <DialogDescription>Update the transaction details.</DialogDescription>
+          <DialogTitle>{t.history.page.detail.edit}</DialogTitle>
+          <DialogDescription>{t.history.page.detail.updateDescription}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -46,7 +51,7 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Transaction Date
+              {t.history.page.detail.transactionDate}
             </label>
             <input
               type="datetime-local"
@@ -60,14 +65,14 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Note
+              {t.history.page.detail.note}
             </label>
             <textarea
               value={noteDraft}
               onChange={(e) => onNoteChange(e.target.value)}
               rows={4}
               className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-note-yellow focus-visible:ring-2 focus-visible:ring-note-yellow/30"
-              placeholder="Add a note..."
+              placeholder={t.history.page.detail.notePlaceholder}
             />
           </div>
         </div>
@@ -85,10 +90,10 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Saving...
+                {t.common.saving}
               </>
             ) : (
-              "Save"
+              t.common.save
             )}
           </Button>
         </DialogFooter>

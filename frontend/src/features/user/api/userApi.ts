@@ -3,6 +3,8 @@ import { apiFetch } from "@/lib/apiClient";
 export interface UserPreferences {
   defaultWalletId: string | null;
   defaultPartnerId: string | null;
+  dailySpendingLimitEnabled: boolean;
+  dailySpendingLimitAmount: number | null;
 }
 
 export interface UserProfile {
@@ -75,5 +77,17 @@ export const updateDefaultPartner = async (partnerId: string | null): Promise<vo
 
   if (!response.ok) {
     throw new Error("Failed to update default partner");
+  }
+};
+
+export const updateDailySpendingLimit = async (data: { enabled: boolean; amount: number | null }): Promise<void> => {
+  const response = await apiFetch("/api/users/daily-spending-limit", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
   }
 };

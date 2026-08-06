@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 import type { MonthlyStatsDto } from "@/features/history/api/history";
 
 interface MonthlyChartProps {
@@ -10,19 +11,21 @@ interface MonthlyChartProps {
 }
 
 export const MonthlyChart: React.FC<MonthlyChartProps> = ({ monthlyStats, isLoading }) => {
+  const { t } = useLanguage();
+
   return (
     <Card className="xl:col-span-2" data-testid="chart-container">
       <CardHeader className="pb-2">
-        <CardTitle className="text-3xl font-bold text-ink-black">Monthly Overview</CardTitle>
-        <p className="text-sm text-pencil-gray">Expenses and debt activity over the last 6 months</p>
+        <CardTitle className="text-3xl font-bold text-ink-black">{t.wallets.page.stats.monthlyOverviewTitle}</CardTitle>
+        <p className="text-sm text-pencil-gray">{t.wallets.page.stats.monthlyOverviewDescription}</p>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="h-72 rounded-md border border-note-yellow/20 bg-gray-50 animate-pulse" />
         ) : monthlyStats.length === 0 ? (
           <div className="h-72 rounded-md border border-note-yellow/20 bg-gray-50 flex flex-col items-center justify-center gap-2">
-            <p className="text-pencil-gray">No data available</p>
-            <p className="text-xs text-pencil-gray/60">Make sure backend API is running and restarted</p>
+            <p className="text-pencil-gray">{t.wallets.page.stats.monthlyNoData}</p>
+            <p className="text-xs text-pencil-gray/60">{t.wallets.page.stats.monthlyRestartHint}</p>
           </div>
         ) : (
           <div className="h-72">
@@ -44,10 +47,10 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ monthlyStats, isLoad
                   }}
                 />
                 <Legend />
-                <Bar dataKey="expense" name="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="debtIncrease" name="New Debt" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="debtDecrease" name="Repaid" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expense" name={t.wallets.page.stats.expense} fill="#ef4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="income" name={t.wallets.page.stats.income} fill="#22c55e" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="debtIncrease" name={t.wallets.page.stats.newDebt} fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="debtDecrease" name={t.wallets.page.stats.repaid} fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

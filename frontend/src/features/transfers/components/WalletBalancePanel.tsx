@@ -1,6 +1,8 @@
 import React from "react";
 import { Loader2, Wallet2, ChevronRight } from "lucide-react";
 import type { WalletDto } from "../types/transfer";
+import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 type GroupedWallets = {
   parent: WalletDto | null;
@@ -8,7 +10,7 @@ type GroupedWallets = {
 };
 
 const formatBalance = (balance: number): string => {
-  return `${balance.toLocaleString("en-US")} VND`;
+  return formatVnd(balance);
 };
 
 interface WalletBalancePanelProps {
@@ -28,13 +30,15 @@ export const WalletBalancePanel: React.FC<WalletBalancePanelProps> = ({
   isLoading,
   getParentTotalBalance,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="lg:col-span-1">
       <div className="bg-white rounded-xl border border-note-yellow/20 shadow-sm overflow-hidden">
         <div className="bg-gradient-to-r from-note-yellow/10 to-note-yellow/5 px-4 py-3 border-b border-note-yellow/20">
           <h3 className="font-semibold text-ink-black flex items-center gap-2">
             <Wallet2 className="h-4 w-4 text-note-yellow" />
-            Wallet Balances
+            {t.wallets.page.title}
           </h3>
         </div>
 
@@ -47,7 +51,7 @@ export const WalletBalancePanel: React.FC<WalletBalancePanelProps> = ({
             <div className="space-y-4">
               {/* Total Balance */}
               <div className="bg-gradient-to-r from-note-yellow/20 to-note-yellow/5 rounded-lg p-3 mb-4">
-                <p className="text-xs text-pencil-gray mb-1">Total Balance</p>
+                <p className="text-xs text-pencil-gray mb-1">{t.wallets.page.stats.totalBalance}</p>
                 <p className="text-xl font-bold text-ink-black">{formatBalance(totalBalance)}</p>
               </div>
 
@@ -87,7 +91,7 @@ export const WalletBalancePanel: React.FC<WalletBalancePanelProps> = ({
               ))}
 
               {groupedWallets.length === 0 && (
-                <p className="text-center text-pencil-gray py-4">No wallets available</p>
+                <p className="text-center text-pencil-gray py-4">{t.transfer.page.noWalletsAvailable}</p>
               )}
             </div>
           )}

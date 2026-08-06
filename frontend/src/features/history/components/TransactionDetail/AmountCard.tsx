@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import { Edit2, Trash2, ArrowLeftRight, Banknote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HistoryDto, TransferDirection } from "../../types/history";
 import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AmountCardProps {
   transaction: HistoryDto;
@@ -22,6 +25,7 @@ export const AmountCard: React.FC<AmountCardProps> = ({
   onDelete,
   onAddDebt,
 }) => {
+  const { t } = useLanguage();
   const amount = transaction.amount ?? 0;
   const isTransfer = transaction.transferId != null;
   const direction = transaction.transferDirection ?? null;
@@ -37,8 +41,8 @@ export const AmountCard: React.FC<AmountCardProps> = ({
 
   const transferLabel = isTransfer
     ? direction === TransferDirection.Incoming
-      ? "Transfer In"
-      : "Transfer Out"
+      ? t.history.page.row.transferIn
+      : t.history.page.row.transferOut
     : "";
 
   const amountColor = isTransfer
@@ -54,7 +58,7 @@ export const AmountCard: React.FC<AmountCardProps> = ({
       <CardContent className="pt-6 pb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-pencil-gray">Amount</p>
+            <p className="text-sm text-pencil-gray">{t.history.page.detail.amount}</p>
             <p className={`text-4xl font-bold ${amountColor}`}>
               {sign}
               {formatVnd(absAmount)}
@@ -78,29 +82,29 @@ export const AmountCard: React.FC<AmountCardProps> = ({
                 className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 border border-note-yellow"
                 onClick={onAddDebt}
                 disabled={isLocked}
-                title={isLocked ? lockReason : transaction.partnerId ? "Edit debt info" : "Add debt info"}
+                title={isLocked ? lockReason : transaction.partnerId ? t.history.page.detail.editDebtInfo : t.history.page.detail.addDebtInfo}
               >
                 <Banknote className="h-4 w-4 mr-2" />
-                {transaction.partnerId ? "Edit Debt" : "Add Debt"}
+                {transaction.partnerId ? t.history.page.detail.editDebtInfo : t.history.page.detail.addDebtInfo}
               </Button>
             )}
             <Button
               className="bg-note-yellow text-ink-black hover:bg-note-yellow/90 border border-note-yellow"
               onClick={onEdit}
               disabled={isLocked}
-              title={isLocked ? lockReason : "Edit transaction"}
+              title={isLocked ? lockReason : t.history.page.detail.edit}
             >
               <Edit2 className="h-4 w-4 mr-2" />
-              Edit
+              {t.history.page.detail.edit}
             </Button>
             <Button
               variant="destructive"
               onClick={onDelete}
               disabled={isLocked}
-              title={isLocked ? lockReason : "Delete transaction"}
+              title={isLocked ? lockReason : t.history.page.detail.delete}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              {t.history.page.detail.delete}
             </Button>
           </div>
         </div>

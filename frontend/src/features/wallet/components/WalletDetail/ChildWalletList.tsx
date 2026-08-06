@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Plus, WalletIcon, Star, Pencil, Trash2 } from "lucide-react";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import { formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ChildWalletListProps {
   childWallets: Wallet[];
@@ -24,13 +27,15 @@ export const ChildWalletList: React.FC<ChildWalletListProps> = ({
   onSetDefault,
   onClearDefault,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <section data-testid="subwallet-section">
       <Card className="border-note-yellow/30" data-testid="child-wallet-management">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-lg font-semibold text-ink-black flex items-center gap-2">
             <Users className="h-5 w-5 text-note-yellow" />
-            Sub-wallets
+            {t.wallets.page.detail.subWallets}
           </CardTitle>
           <Button
             size="sm"
@@ -38,15 +43,15 @@ export const ChildWalletList: React.FC<ChildWalletListProps> = ({
             onClick={onCreate}
           >
             <Plus className="h-4 w-4 mr-1" />
-            Create
+            {t.wallets.page.create}
           </Button>
         </CardHeader>
         <CardContent>
           {childWallets.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-10 w-10 text-pencil-gray mx-auto mb-3" />
-              <p className="text-pencil-gray text-sm">No sub-wallets attached</p>
-              <p className="text-xs text-pencil-gray mt-1">Click Create Child Wallet to add sub-wallets</p>
+              <p className="text-pencil-gray text-sm">{t.wallets.page.detail.noSubWalletsAttached}</p>
+              <p className="text-xs text-pencil-gray mt-1">{t.wallets.page.detail.clickCreateChildWallet}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -68,7 +73,7 @@ export const ChildWalletList: React.FC<ChildWalletListProps> = ({
                           {isDefault && (
                             <span className="inline-flex items-center gap-1 bg-yellow-200 text-yellow-900 text-xs font-semibold px-2 py-0.5 rounded-full">
                               <Star className="h-3 w-3 fill-current" />
-                              Default
+                              {t.wallets.page.detail.default}
                             </span>
                           )}
                         </div>
@@ -93,7 +98,11 @@ export const ChildWalletList: React.FC<ChildWalletListProps> = ({
                             onSetDefault(child.id);
                           }
                         }}
-                        aria-label={isDefault ? "Unset as default" : `Set as default for ${child.name}`}
+                        aria-label={
+                          isDefault
+                            ? t.wallets.page.detail.unsetDefault
+                            : t.wallets.page.detail.setDefaultFor.replace("{name}", child.name)
+                        }
                       >
                         <Star className="h-4 w-4" fill={isDefault ? "currentColor" : "none"} />
                       </Button>
@@ -103,7 +112,7 @@ export const ChildWalletList: React.FC<ChildWalletListProps> = ({
                         className="text-ink-black hover:bg-note-yellow/10"
                         data-testid={`detail-child-edit-${child.id}`}
                         onClick={() => onEdit(child)}
-                        aria-label={`Edit ${child.name}`}
+                        aria-label={`${t.wallets.page.card.editAria.replace("{name}", child.name)}`}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -113,7 +122,7 @@ export const ChildWalletList: React.FC<ChildWalletListProps> = ({
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
                         data-testid={`detail-child-delete-${child.id}`}
                         onClick={() => onDelete(child)}
-                        aria-label={`Delete ${child.name}`}
+                        aria-label={`${t.wallets.page.card.deleteAria.replace("{name}", child.name)}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

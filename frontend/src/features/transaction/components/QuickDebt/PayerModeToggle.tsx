@@ -1,5 +1,7 @@
 import React from "react";
 import { PayerMode } from "../../types/transaction";
+import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PayerModeToggleProps {
   value: PayerMode;
@@ -8,33 +10,37 @@ interface PayerModeToggleProps {
 }
 
 export const PayerModeToggle: React.FC<PayerModeToggleProps> = ({ value, onChange, disabled }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-1.5">
-      <label className="block text-left text-xs font-medium text-pencil-gray">Who Paid?</label>
+      <label className="block text-left text-xs font-semibold text-ink-black">{t.quickDeduct.page.whoPaid}</label>
       <div className="flex gap-2">
         <button
           type="button"
           disabled={disabled}
           onClick={() => onChange(PayerMode.ToiTra)}
-          className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={cn(
+            "h-11 flex-1 rounded-xl px-4 py-2 text-sm font-bold transition-all shadow-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
             value === PayerMode.ToiTra
-              ? "bg-note-yellow text-ink-black hover:bg-amber-400"
-              : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-          }`}
+              ? "bg-note-yellow text-ink-black border-2 border-note-yellow hover:bg-amber-400"
+              : "bg-white text-pencil-gray border border-gray-200 hover:bg-gray-50 hover:text-ink-black font-medium"
+          )}
         >
-          I Pay
+          {t.quickDeduct.page.payerMode.toiTra}
         </button>
         <button
           type="button"
           disabled={disabled}
           onClick={() => onChange(PayerMode.PartnerTra)}
-          className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={cn(
+            "h-11 flex-1 rounded-xl px-4 py-2 text-sm font-bold transition-all shadow-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
             value === PayerMode.PartnerTra
-              ? "bg-note-yellow text-ink-black hover:bg-amber-400"
-              : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-          }`}
+              ? "bg-note-yellow text-ink-black border-2 border-note-yellow hover:bg-amber-400"
+              : "bg-white text-pencil-gray border border-gray-200 hover:bg-gray-50 hover:text-ink-black font-medium"
+          )}
         >
-          Partner Pays
+          {t.quickDeduct.page.payerMode.partnerTra}
         </button>
       </div>
     </div>
