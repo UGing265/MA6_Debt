@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
-import { logout, refreshSession } from "@/features/auth/api/auth";
+import { logout } from "@/features/auth/api/auth";
 import { getProfile } from "@/features/user/api/userApi";
 import {
   ArrowLeftRight,
@@ -545,7 +545,7 @@ export default function DashboardLayout({
       if (isRefreshing || hasRedirected) return;
 
       isRefreshing = true;
-      refreshSession()
+      getProfile()
         .catch(() => {
           handleExpiredSession();
         })
@@ -554,7 +554,6 @@ export default function DashboardLayout({
         });
     };
 
-    renewSession();
     const intervalId = window.setInterval(renewSession, SESSION_REFRESH_INTERVAL_MS);
 
     return () => {
