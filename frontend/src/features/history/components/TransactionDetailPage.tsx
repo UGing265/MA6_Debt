@@ -22,6 +22,7 @@ import {
   DeleteTransactionDialog,
   DebtDialog,
 } from "./TransactionDetail";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Utility functions
 const extractGeneralError = (e: unknown): string => {
@@ -55,6 +56,8 @@ const formatDateForInput = (dateStr: string): string => {
 };
 
 export const TransactionDetailPage: React.FC = () => {
+  const { t } = useLanguage();
+
   const params = useParams();
   const router = useRouter();
   const transactionId = params.id as string;
@@ -120,17 +123,17 @@ export const TransactionDetailPage: React.FC = () => {
         note: isRepayNote(transaction.note) ? withRepayMarker(noteDraft) : noteDraft || undefined,
         transactionDate: transactionDateDraft ? new Date(transactionDateDraft).toISOString() : transaction.transactionDate,
       });
-      toast.success("Updated successfully");
+      toast.success(t.toast.walletUpdated);
       setIsEditOpen(false);
       await fetchTransaction();
     } catch (e: unknown) {
       const msg = extractGeneralError(e);
       if (isLockLikeMessage(msg)) {
-        toast.error("This transaction is locked and can't be changed.");
+        toast.error(t.history.page.failedToLoad);
         await fetchTransaction();
         return;
       }
-      toast.error(msg || "Failed to update");
+      toast.error(msg || t.common.retry);
     } finally {
       setIsSaving(false);
     }
@@ -151,17 +154,17 @@ export const TransactionDetailPage: React.FC = () => {
         note: transaction.note ?? undefined,
         transactionDate: transaction.transactionDate,
       });
-      toast.success("Debt info updated");
+      toast.success(t.toast.partnerUpdated);
       setIsDebtOpen(false);
       await fetchTransaction();
     } catch (e: unknown) {
       const msg = extractGeneralError(e);
       if (isLockLikeMessage(msg)) {
-        toast.error("This transaction is locked and can't be changed.");
+        toast.error(t.history.page.failedToLoad);
         await fetchTransaction();
         return;
       }
-      toast.error(msg || "Failed to update debt info");
+      toast.error(msg || t.common.retry);
     } finally {
       setIsSavingDebt(false);
     }
@@ -172,16 +175,16 @@ export const TransactionDetailPage: React.FC = () => {
     setIsDeleting(true);
     try {
       await deleteHistoryItem(transaction.id);
-      toast.success("Transaction deleted");
+      toast.success(t.toast.transactionRecorded);
       router.push("/history");
     } catch (e: unknown) {
       const msg = extractGeneralError(e);
       if (isLockLikeMessage(msg)) {
-        toast.error("This transaction is locked and can't be changed.");
+        toast.error(t.history.page.failedToLoad);
         await fetchTransaction();
         return;
       }
-      toast.error(msg || "Failed to delete transaction");
+      toast.error(msg || t.common.retry);
     } finally {
       setIsDeleting(false);
     }
@@ -197,7 +200,7 @@ export const TransactionDetailPage: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-ink-black">Transaction Details</h1>
+          <h1 className="text-3xl font-bold text-ink-black">{t.history.page.title}</h1>
         </div>
         <Card className="animate-pulse h-64" />
       </div>
@@ -214,14 +217,14 @@ export const TransactionDetailPage: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-ink-black">Transaction Details</h1>
+          <h1 className="text-3xl font-bold text-ink-black">{t.history.page.title}</h1>
         </div>
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-4 pb-4">
-            <p className="text-red-600">{error || "Transaction not found"}</p>
+            <p className="text-red-600">{error || t.history.page.noTransactions}</p>
             <div className="pt-4">
               <Link href="/history">
-                <Button variant="outline">Back to History</Button>
+                <Button variant="outline">{t.history.page.title}</Button>
               </Link>
             </div>
           </CardContent>
@@ -233,7 +236,7 @@ export const TransactionDetailPage: React.FC = () => {
   // Computed values
   const isTransfer = transaction.transferId != null;
   const isLocked = Boolean(transaction.isLocked);
-  const lockReason = "This transaction is locked and can't be edited or deleted.";
+  const lockReason = t.history.page.failedToLoad;
   const isRepay = isRepayNote(transaction.note);
 
   return (
