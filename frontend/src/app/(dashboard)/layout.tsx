@@ -43,6 +43,8 @@ const navTextMap = {
   profile: true,
 } as const;
 
+const SESSION_REFRESH_INTERVAL_MS = 60_000 as const;
+
 const PrivacyQuickToggle = () => {
   const { hideAmount, tempShow, setTempShow } = usePrivacy();
   const { t } = useLanguage();
@@ -520,6 +522,45 @@ export default function DashboardLayout({
     window.addEventListener('profileUpdated', handleProfileUpdate);
     return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
   }, []);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    let isRefreshing = false;
+    let hasRedirected = false;
+
+    const handleExpiredSession = () => {
+      if (!isMounted || hasRedirected) return;
+
+      hasRedirected = true;
+      logout()
+        .catch(() => undefined)
+        .then(() => {
+          if (isMounted) {
+            router.replace("/login");
+          }
+        });
+    };
+
+    const renewSession = () => {
+      if (isRefreshing || hasRedirected) return;
+
+      isRefreshing = true;
+      getProfile()
+        .catch(() => {
+          handleExpiredSession();
+        })
+        .finally(() => {
+          isRefreshing = false;
+        });
+    };
+
+    const intervalId = window.setInterval(renewSession, SESSION_REFRESH_INTERVAL_MS);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, [router]);
 
   return (
     <PrivacyProvider>
