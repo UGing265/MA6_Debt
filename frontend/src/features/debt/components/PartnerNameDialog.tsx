@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { DebtPartnerForm } from "./DebtPartnerForm";
 import type { DebtPartner } from "../types/debtPartner";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PartnerNameDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function PartnerNameDialog({
   onOpenChange,
   onSubmit,
 }: PartnerNameDialogProps) {
+  const { t } = useLanguage();
   const handleSubmit = async (data: { name: string; balance?: number }) => {
     if (!partner) {
       return;
@@ -41,10 +43,8 @@ export function PartnerNameDialog({
       <DialogContent>
         <DialogClose onClose={() => onOpenChange(false)} />
         <DialogHeader>
-          <DialogTitle>Edit Partner Name</DialogTitle>
-          <DialogDescription>
-            Update partner name only. Current balance will remain unchanged.
-          </DialogDescription>
+          <DialogTitle>{t.partners.page.updatePartnerTitle}</DialogTitle>
+          <DialogDescription>{t.partners.page.nameDialog.description}</DialogDescription>
         </DialogHeader>
         {partner ? (
           <DebtPartnerForm

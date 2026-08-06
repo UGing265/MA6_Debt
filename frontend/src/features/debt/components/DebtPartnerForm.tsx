@@ -19,6 +19,7 @@ import { HybridBalanceInput } from "./HybridBalanceInput";
 import type { DebtPartner } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 export type DebtPartnerFormMode = "default" | "name-only" | "money-only";
 
@@ -61,6 +62,7 @@ export function DebtPartnerForm({
 }: DebtPartnerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceInputValid, setIsBalanceInputValid] = useState(true);
+  const { t } = useLanguage();
 
   // Choose schema based on mode
   const currentSchema = mode === "name-only" ? DebtPartnerFormSchemaNameOnly : DebtPartnerFormSchemaDefault;
@@ -118,11 +120,11 @@ export function DebtPartnerForm({
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <FormLabel className="text-ink-black font-semibold text-sm">
-                  Partner Name
+                  {t.partners.page.title}
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter partner name"
+                    placeholder={t.partners.page.searchPlaceholder}
                     {...field}
                     disabled={isLoading}
                     className={cn(
@@ -147,7 +149,7 @@ export function DebtPartnerForm({
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <FormLabel className="text-ink-black font-semibold text-sm">
-                  Balance Adjustment
+                  {t.wallets.page.detail.balanceAdjustment}
                 </FormLabel>
                 <FormControl>
                   <HybridBalanceInput
@@ -173,7 +175,7 @@ export function DebtPartnerForm({
             disabled={isLoading}
             className="h-11 px-5 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 text-ink-black font-semibold cursor-pointer transition-all shadow-xs"
           >
-            Cancel
+              {t.common.cancel}
           </Button>
           <Button
             type="submit"
@@ -183,12 +185,12 @@ export function DebtPartnerForm({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {partner ? "Updating..." : "Creating..."}
+                {partner ? t.wallets.page.updating : t.wallets.page.creating}
               </>
             ) : partner ? (
-              "Update Partner"
+              t.partners.page.updatePartnerTitle
             ) : (
-              "Create Partner"
+              t.partners.page.createPartnerTitle
             )}
           </Button>
         </div>

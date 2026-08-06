@@ -22,12 +22,14 @@ import {
 import type { DebtPartner } from "@/features/debt/types/debtPartner";
 import { getUserPreferences, updateDefaultPartner } from "@/features/user/api/userApi";
 import { PageHeader } from "@/components/ui/page-header";
+import { useLanguage } from "@/context/LanguageContext";
 
 const isMountedRef = { current: true };
 
 import { usePrivacy } from "@/context/PrivacyContext";
 
 export default function PartnersPage() {
+  const { t } = useLanguage();
   const { tempShow } = usePrivacy();
   const { partners, isLoading, error, createPartner, updatePartner, removePartner } = useDebtPartners();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -135,15 +137,15 @@ export default function PartnersPage() {
   return (
     <div data-testid="partners-page-root" className="space-y-6">
       <PageHeader
-        title="Debt Partners"
-        description="Manage receivables and payables by partner"
+        title={t.partners.page.title}
+        description={t.partners.page.description}
       >
         {/* Search Input */}
         <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-note-yellow" />
             <input
               type="text"
-              placeholder="Search partners..."
+              placeholder={t.partners.page.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full sm:w-64 pl-11 pr-4 py-2.5 border-2 border-note-yellow/50 rounded-lg bg-white focus:outline-none focus:border-note-yellow focus:ring-1 focus:ring-note-yellow text-ink-black font-medium placeholder:text-pencil-gray/70"
@@ -154,7 +156,7 @@ export default function PartnersPage() {
             onClick={() => setIsCreateOpen(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Partner
+            {t.partners.page.addPartner}
           </Button>
       </PageHeader>
 
@@ -169,7 +171,7 @@ export default function PartnersPage() {
       {error ? (
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
-            <p className="text-red-600">Failed to load partners: {error}</p>
+            <p className="text-red-600">{t.partners.page.failedLoad.replace("{error}", error)}</p>
           </CardContent>
         </Card>
       ) : null}
@@ -213,7 +215,7 @@ export default function PartnersPage() {
                               setAsDefault(partner.id);
                             }
                           }}
-                          aria-label={defaultPartnerId === partner.id ? "Unset default partner" : "Set as default partner"}
+                            aria-label={defaultPartnerId === partner.id ? t.partners.page.unsetDefault : t.partners.page.setDefault}
                         >
                           <Star className="h-4 w-4" fill={defaultPartnerId === partner.id ? "currentColor" : "none"} />
                         </button>
@@ -221,7 +223,7 @@ export default function PartnersPage() {
                           type="button"
                           className="p-2 inline-flex items-center justify-center rounded-md text-ink-black hover:bg-note-yellow/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                           onClick={() => setNameDialogPartner(partner)}
-                          aria-label={`Edit name for ${partner.name}`}
+                          aria-label={t.partners.page.editName.replace("{name}", partner.name)}
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
@@ -229,7 +231,7 @@ export default function PartnersPage() {
                           type="button"
                           className="p-2 inline-flex items-center justify-center rounded-md text-ink-black hover:bg-note-yellow/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                           onClick={() => setMoneyDialogPartner(partner)}
-                          aria-label={`Edit balance for ${partner.name}`}
+                          aria-label={t.partners.page.editBalance.replace("{name}", partner.name)}
                         >
                           <TrendingUp className="h-4 w-4" />
                         </button>
@@ -237,7 +239,7 @@ export default function PartnersPage() {
                           type="button"
                           className="p-2 inline-flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500"
                           onClick={() => setDeletingPartner(partner)}
-                          aria-label={`Delete ${partner.name}`}
+                          aria-label={t.partners.page.deletePartner.replace("{name}", partner.name)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -248,9 +250,9 @@ export default function PartnersPage() {
                       {receivable ? <TrendingUp className="h-4 w-4 text-green-500" /> : null}
                       {payable ? <TrendingDown className="h-4 w-4 text-red-500" /> : null}
                       <span className={receivable ? "text-green-600" : payable ? "text-red-600" : "text-pencil-gray"}>
-                        {receivable ? `They owe me: ${formatVnd(partner.balance)}` : null}
-                        {payable ? `I owe them: ${formatVnd(partner.balance)}` : null}
-                        {neutral ? "No debt" : null}
+                        {receivable ? t.partners.page.theyOweMe.replace("{amount}", formatVnd(partner.balance)) : null}
+                        {payable ? t.partners.page.iOweThem.replace("{amount}", formatVnd(partner.balance)) : null}
+                        {neutral ? t.partners.page.noDebt : null}
                       </span>
                     </div>
 
@@ -263,7 +265,7 @@ export default function PartnersPage() {
                         disabled={neutral}
                       >
                         <HandCoins className="mr-1 h-4 w-4" />
-                        Repay Debt
+                        {t.partners.page.repayDebt}
                       </Button>
                     </div>
                   </CardContent>
@@ -274,15 +276,15 @@ export default function PartnersPage() {
         ) : searchQuery.trim() && partners.length > 0 ? (
           <Card className="border-note-yellow/30">
             <CardContent className="p-6 text-center">
-              <p className="text-xl font-semibold text-ink-black">No partners found</p>
-              <p className="text-sm text-pencil-gray">No partners match your search "{searchQuery}"</p>
+              <p className="text-xl font-semibold text-ink-black">{t.partners.page.noPartnersFound}</p>
+              <p className="text-sm text-pencil-gray">{t.partners.page.noPartnersSearch.replace("{query}", searchQuery)}</p>
             </CardContent>
           </Card>
         ) : (
           <Card className="border-note-yellow/30">
             <CardContent className="p-6 text-center">
-              <p className="text-xl font-semibold text-ink-black">No partners yet</p>
-              <p className="text-sm text-pencil-gray">Add a partner to start tracking debts.</p>
+              <p className="text-xl font-semibold text-ink-black">{t.partners.page.noPartnersYet}</p>
+              <p className="text-sm text-pencil-gray">{t.partners.page.addPartnerHint}</p>
             </CardContent>
           </Card>
         )
@@ -292,8 +294,8 @@ export default function PartnersPage() {
         <DialogContent>
           <DialogClose onClose={() => setIsCreateOpen(false)} />
           <DialogHeader>
-            <DialogTitle>Create Partner</DialogTitle>
-            <DialogDescription>Add a partner with receivable or payable balance.</DialogDescription>
+            <DialogTitle>{t.partners.page.createPartnerTitle}</DialogTitle>
+            <DialogDescription>{t.partners.page.createPartnerDescription}</DialogDescription>
           </DialogHeader>
           <DebtPartnerForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
         </DialogContent>
@@ -327,17 +329,17 @@ export default function PartnersPage() {
         <DialogContent>
           <DialogClose onClose={() => setDeletingPartner(null)} />
           <DialogHeader>
-            <DialogTitle>Delete Partner</DialogTitle>
+            <DialogTitle>{t.partners.page.deletePartnerTitle}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {deletingPartner?.name}? This action cannot be undone.
+              {deletingPartner ? t.partners.page.deletePartnerDescription.replace("{name}", deletingPartner.name) : null}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setDeletingPartner(null)}>
-              Cancel
+              {t.partners.page.cancel}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Delete
+              {t.partners.page.delete}
             </Button>
           </DialogFooter>
         </DialogContent>

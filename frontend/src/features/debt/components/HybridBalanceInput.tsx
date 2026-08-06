@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { cn, formatVnd } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 export type BalanceDirection = "receivable" | "payable";
 
@@ -51,6 +52,7 @@ export function HybridBalanceInput({
   disabled = false,
   onValidityChange,
 }: HybridBalanceInputProps) {
+  const { t } = useLanguage();
   const [baseline, setBaseline] = useState<number>(value);
   const mountedRef = useRef(false);
   const lastNotifiedValueRef = useRef<number>(value);
@@ -103,7 +105,7 @@ export function HybridBalanceInput({
       setInternalError(null);
       onValidityChange?.(true);
     } else {
-      setInternalError("Invalid amount format");
+      setInternalError(t.validation.invalidAmountFormat);
       onValidityChange?.(false);
     }
   };
@@ -190,7 +192,7 @@ export function HybridBalanceInput({
                   : "bg-white text-ink-black/70 border border-gray-200 hover:bg-gray-50 active:scale-[0.98]"
               )}
             >
-              Partner owes me
+              {t.partners.page.receivable}
             </button>
             <button
               type="button"
@@ -203,12 +205,12 @@ export function HybridBalanceInput({
                   : "bg-white text-ink-black/70 border border-gray-200 hover:bg-gray-50 active:scale-[0.98]"
               )}
             >
-              I owe partner
+              {t.partners.page.payable}
             </button>
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          Enter amount to adjust balance. Choose direction to specify who owes whom.
+          {t.transaction.hybridBalance.helper}
         </p>
       </div>
 
@@ -223,7 +225,7 @@ export function HybridBalanceInput({
       {/* Current Value Preview */}
       <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
         <p className="text-sm text-gray-600">
-          <span className="font-semibold">Current Balance:</span>{" "}
+          <span className="font-semibold">{t.transaction.hybridBalance.currentBalance}</span>{" "}
           <span
             className={cn(
               "font-bold",
@@ -234,9 +236,9 @@ export function HybridBalanceInput({
           >
             {formatVnd(value)}
           </span>{" "}
-          {value > 0 && "(Receivable - Partner owes you)"}
-          {value < 0 && "(Payable - You owe this partner)"}
-          {value === 0 && "(Neutral)"}
+          {value > 0 && t.transaction.hybridBalance.receivable}
+          {value < 0 && t.transaction.hybridBalance.payable}
+          {value === 0 && t.transaction.hybridBalance.neutral}
         </p>
       </div>
     </div>

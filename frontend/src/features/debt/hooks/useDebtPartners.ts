@@ -14,6 +14,7 @@ import type {
   UpdateDebtPartnerRequest,
 } from "../types/debtPartner";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
+import { useLanguage } from "@/context/LanguageContext";
 
 type DebtPartnersListener = () => void;
 
@@ -41,6 +42,7 @@ interface UseDebtPartnersReturn {
  * Handles loading states, error handling, and automatic refetching
  */
 export function useDebtPartners(): UseDebtPartnersReturn {
+  const { t } = useLanguage();
   const [partners, setPartners] = useState<DebtPartner[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,12 +67,12 @@ export function useDebtPartners(): UseDebtPartnersReturn {
       if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       const parsedError = parseErrorResponse(err);
       setError(parsedError.general);
-      toast.error(parsedError.general || "Failed to load debt partners");
+      toast.error(parsedError.general || t.toast.failedToLoadPartners);
     } finally {
       if (!isMountedRef.current || requestId !== requestIdRef.current) return;
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Initial load
   useEffect(() => {
@@ -95,12 +97,12 @@ export function useDebtPartners(): UseDebtPartnersReturn {
   ): Promise<DebtPartner | null> => {
     try {
       const newPartner = await createDebtPartner(data);
-      toast.success("Partner created successfully!");
+      toast.success(t.toast.partnerCreated);
       triggerDebtPartnersRefresh();
       return newPartner;
     } catch (err: any) {
       const parsedError = parseErrorResponse(err);
-      toast.error(parsedError.general || "Failed to create partner");
+      toast.error(parsedError.general || t.toast.failedToCreatePartner);
       // Return error for form-level handling
       throw err;
     }
@@ -113,12 +115,12 @@ export function useDebtPartners(): UseDebtPartnersReturn {
   ): Promise<DebtPartner | null> => {
     try {
       const updatedPartner = await updateDebtPartner(id, data);
-      toast.success("Partner updated successfully!");
+      toast.success(t.toast.partnerUpdated);
       triggerDebtPartnersRefresh();
       return updatedPartner;
     } catch (err: any) {
       const parsedError = parseErrorResponse(err);
-      toast.error(parsedError.general || "Failed to update partner");
+      toast.error(parsedError.general || t.toast.failedToUpdatePartner);
       throw err;
     }
   };
@@ -127,12 +129,12 @@ export function useDebtPartners(): UseDebtPartnersReturn {
   const removePartner = async (id: string): Promise<boolean> => {
     try {
       await deleteDebtPartner(id);
-      toast.success("Partner deleted successfully!");
+      toast.success(t.toast.partnerDeleted);
       triggerDebtPartnersRefresh();
       return true;
     } catch (err: any) {
       const parsedError = parseErrorResponse(err);
-      toast.error(parsedError.general || "Failed to delete partner");
+      toast.error(parsedError.general || t.toast.failedToDeletePartner);
       return false;
     }
   };
