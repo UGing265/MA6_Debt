@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Patrick_Hand, Quicksand } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/components/Providers";
 
 const patrickHand = Patrick_Hand({
   weight: "400",
@@ -33,7 +34,7 @@ export default function RootLayout({
       <body
         className={`${patrickHand.variable} ${quicksand.variable} antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
