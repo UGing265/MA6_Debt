@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/form";
 import type { UseFormReturn } from "react-hook-form";
 import type { TransferFormValues } from "../types/transferForm";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface NoteInputFieldProps {
   form: UseFormReturn<TransferFormValues>;
@@ -15,16 +16,18 @@ interface NoteInputFieldProps {
 }
 
 export const NoteInputField: React.FC<NoteInputFieldProps> = ({ form, disabled }) => {
+  const { t } = useLanguage();
+
   return (
     <FormField
       control={form.control}
       name="note"
       render={({ field }) => (
         <FormItem className="space-y-1.5">
-          <FormLabel className="block text-left text-xs font-semibold text-ink-black">Note</FormLabel>
+          <FormLabel className="block text-left text-xs font-semibold text-ink-black">{t.transfer.page.note}</FormLabel>
           <FormControl>
             <input
-              placeholder="Add a note for this transfer..."
+            placeholder={t.transfer.page.notePlaceholder}
               data-testid="transfer-note"
               disabled={disabled}
               value={field.value ?? ""}

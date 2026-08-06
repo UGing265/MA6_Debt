@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import type { Wallet } from "@/features/wallet/types/wallet";
 import { formatVnd, cn } from "@/lib/utils";
 import { ChevronDown, X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 type GroupedWallets = {
   parent: Wallet | null;
@@ -29,6 +30,7 @@ export const WalletSelect: React.FC<WalletSelectProps> = ({
   disabled,
   error,
 }) => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,9 +62,9 @@ export const WalletSelect: React.FC<WalletSelectProps> = ({
   }, []);
 
   const getPlaceholder = () => {
-    if (isLoading) return "Loading...";
-    if (!hasWallets) return "No child wallets";
-    return "Select wallet or search...";
+    if (isLoading) return t.quickDeduct.page.loading;
+    if (!hasWallets) return t.quickDeduct.page.noChildWallets;
+    return t.quickDeduct.page.selectWalletOrSearch;
   };
 
   // Filter child wallets by search query
@@ -85,7 +87,7 @@ export const WalletSelect: React.FC<WalletSelectProps> = ({
 
   return (
     <div className="space-y-1.5 relative" ref={containerRef}>
-      <label className="block text-left text-xs font-semibold text-ink-black">Child Wallet</label>
+      <label className="block text-left text-xs font-semibold text-ink-black">{t.quickDeduct.page.childWallet}</label>
 
       {/* Hidden input for automated tests */}
       <input data-testid="qd-wallet" type="hidden" value={value ?? ""} />
@@ -123,7 +125,7 @@ export const WalletSelect: React.FC<WalletSelectProps> = ({
                 setSearchQuery("");
               }}
               className="p-1 hover:text-ink-black transition-colors rounded-full"
-              title="Clear selection"
+              title={t.quickDeduct.page.clearSelection}
             >
               <X className="h-3.5 w-3.5" />
             </button>

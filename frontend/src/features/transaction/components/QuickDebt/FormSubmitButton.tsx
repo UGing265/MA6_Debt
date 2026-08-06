@@ -1,5 +1,6 @@
 import React from "react";
 import { Loader2, Zap } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface FormSubmitButtonProps {
   isSubmitting: boolean;
@@ -7,6 +8,8 @@ interface FormSubmitButtonProps {
 }
 
 export const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({ isSubmitting, disabled }) => {
+  const { t } = useLanguage();
+
   return (
     <button
       data-testid="qd-submit"
@@ -17,12 +20,12 @@ export const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({ isSubmitting
       {isSubmitting ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" />
-          Processing...
+          {t.quickDeduct.page.processing}
         </>
       ) : (
         <>
           <Zap className="h-4 w-4" />
-          Submit
+          {t.quickDeduct.page.formSubmit}
         </>
       )}
     </button>

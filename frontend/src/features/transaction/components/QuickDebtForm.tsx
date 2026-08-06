@@ -21,17 +21,25 @@ import {
   NoteInput,
   FormSubmitButton,
 } from "./QuickDebt";
+import { useLanguage } from "@/context/LanguageContext";
 
-const quickDebtFormSchema = z.object({
-  walletId: z.string().min(1, "Please select a wallet"),
-  total: z.number().positive("Amount must be greater than 0"),
-  payerMode: z.nativeEnum(PayerMode),
-  partnerId: z.string().min(1, "Please select a partner"),
-  debtAmount: z.number().min(0, "Debt amount cannot be negative"),
-  note: z.string().trim().max(300, "Note max 300 characters").optional(),
-});
+const buildQuickDebtFormSchema = (messages: {
+  wallet: string;
+  amount: string;
+  partner: string;
+  debtAmount: string;
+  note: string;
+}) =>
+  z.object({
+    walletId: z.string().min(1, messages.wallet),
+    total: z.number().positive(messages.amount),
+    payerMode: z.nativeEnum(PayerMode),
+    partnerId: z.string().min(1, messages.partner),
+    debtAmount: z.number().min(0, messages.debtAmount),
+    note: z.string().trim().max(300, messages.note).optional(),
+  });
 
-type QuickDebtFormValues = z.infer<typeof quickDebtFormSchema>;
+type QuickDebtFormValues = z.infer<ReturnType<typeof buildQuickDebtFormSchema>>;
 
 type GroupedWallets = {
   parent: Wallet | null;
@@ -39,6 +47,7 @@ type GroupedWallets = {
 };
 
 export function QuickDebtForm() {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
   const { data: wallets, isLoading: isWalletsLoading } = useWallets();
@@ -74,6 +83,14 @@ export function QuickDebtForm() {
     if (typeof window === "undefined") return "";
     return localStorage.getItem("defaultWalletId") || "";
   };
+
+  const quickDebtFormSchema = buildQuickDebtFormSchema({
+    wallet: t.quickDeduct.page.selectWallet,
+    amount: t.quickDeduct.page.amountPositive,
+    partner: t.quickDeduct.page.selectPartner,
+    debtAmount: t.quickDeduct.page.debtAmountNonNegative,
+    note: t.quickDeduct.page.noteMax,
+  });
 
   const form = useForm<QuickDebtFormValues>({
     resolver: zodResolver(quickDebtFormSchema),
@@ -138,7 +155,7 @@ export function QuickDebtForm() {
         note: values.note?.trim() || undefined,
       });
 
-      toast.success("Transaction recorded");
+      toast.success(t.toast.transactionRecorded);
       setNotificationMessage(response.notification?.message ?? null);
       form.reset({
         walletId: getDefaultWalletId(),
@@ -179,7 +196,7 @@ export function QuickDebtForm() {
       });
 
       if (!hasHandledFieldError || hasUnknownFieldError) {
-        toast.error(parsedError.general || "Failed to record transaction");
+        toast.error(parsedError.general || t.toast.failedToRecordTransaction);
       }
     } finally {
       setIsSubmitting(false);

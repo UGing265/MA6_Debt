@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { formatVnd, cn } from "@/lib/utils";
 import { ChevronDown, X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Partner {
   id: string;
@@ -27,6 +28,7 @@ export const PartnerSelect: React.FC<PartnerSelectProps> = ({
   disabled,
   error,
 }) => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +67,7 @@ export const PartnerSelect: React.FC<PartnerSelectProps> = ({
 
   return (
     <div className="space-y-1.5 relative" ref={containerRef}>
-      <label className="block text-left text-xs font-semibold text-ink-black">Partner</label>
+      <label className="block text-left text-xs font-semibold text-ink-black">{t.quickDeduct.page.partner}</label>
 
       {/* Hidden input for automated tests */}
       <input data-testid="qd-partner" type="hidden" value={value ?? ""} />
@@ -75,7 +77,7 @@ export const PartnerSelect: React.FC<PartnerSelectProps> = ({
         <input
           type="text"
           disabled={isControlDisabled}
-          placeholder={isLoading ? "Loading..." : "Select partner or search..."}
+          placeholder={isLoading ? t.quickDeduct.page.loading : t.quickDeduct.page.selectPartnerPlaceholder}
           value={displayInputValue}
           onFocus={() => {
             setSearchQuery("");
@@ -103,7 +105,7 @@ export const PartnerSelect: React.FC<PartnerSelectProps> = ({
                 setSearchQuery("");
               }}
               className="p-1 hover:text-ink-black transition-colors rounded-full"
-              title="Clear selection"
+              title={t.quickDeduct.page.clearSelection}
             >
               <X className="h-3.5 w-3.5" />
             </button>
