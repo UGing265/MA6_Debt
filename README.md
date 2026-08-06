@@ -2,6 +2,7 @@
 
 A full-stack personal finance application for managing wallets, tracking debts with partners, and monitoring expenses.
 
+[![Var branch main](https://github.com/UGing265/MA6_Debt/actions/workflows/var-branch.yml/badge.svg?branch=dev)](https://github.com/UGing265/MA6_Debt/actions/workflows/var-branch.yml)
 ---
 
 ## Introduction
