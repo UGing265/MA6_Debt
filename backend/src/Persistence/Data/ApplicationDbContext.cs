@@ -16,6 +16,7 @@ namespace Persistence.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -87,7 +88,20 @@ namespace Persistence.Data
 
             modelBuilder.Entity<RefreshToken>()
                 .HasIndex(rt => rt.FamilyId);
-                
+
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasOne(prt => prt.User)
+                .WithMany()
+                .HasForeignKey(prt => prt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasIndex(prt => prt.Token)
+                .IsUnique();
+
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasIndex(prt => prt.UserId);
+
             modelBuilder.Entity<DebtPartner>().HasQueryFilter(dp => !dp.IsDeleted);
         }
     }

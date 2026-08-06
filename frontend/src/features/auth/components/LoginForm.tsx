@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { createLoginSchema, type LoginInput } from "../types/auth";
@@ -119,6 +120,14 @@ export const LoginForm = () => {
                   </button>
                 </div>
               </FormControl>
+              <div className="flex justify-end pt-1">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-blue-600 hover:underline font-medium"
+                >
+                  {t.auth.forgotPassword.title}
+                </Link>
+              </div>
               <FormMessage />
             </FormItem>
           )}

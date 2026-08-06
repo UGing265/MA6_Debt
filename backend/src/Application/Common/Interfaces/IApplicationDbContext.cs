@@ -39,6 +39,11 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<RefreshToken> RefreshTokens { get; }
 
+    /// <summary>
+    /// Gets the DbSet for PasswordResetTokens.
+    /// </summary>
+    DbSet<PasswordResetToken> PasswordResetTokens { get; }
+
     DatabaseFacade Database { get; }
 
     /// <summary>
