@@ -3,13 +3,15 @@
 import React from "react";
 import { useWallets } from "@/features/wallet/hooks/useWallets";
 import { useDebtPartners } from "@/features/debt/hooks/useDebtPartners";
-import { getHistory, subscribeToHistoryRefresh, getMonthlyStats, MonthlyStatsDto } from "@/features/history/api/history";
+import { getDailySpendingLimit, getHistory, subscribeToHistoryRefresh } from "@/features/history/api/history";
+import type { DailySpendingLimitDto } from "@/features/history/api/history";
 import { HistoryDto } from "@/features/history/types/history";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   SummaryCards,
   StatsCards,
-  MonthlyChart,
+  SpendingChart,
+  DailyLimitCard,
   WalletsPanel,
   RecentHistoryPanel,
 } from "./components";
@@ -37,8 +39,10 @@ export default function WalletDashboardPage() {
   const [recentHistory, setRecentHistory] = React.useState<HistoryDto[]>([]);
   const [recentHistoryLoading, setRecentHistoryLoading] = React.useState<boolean>(true);
   const [recentHistoryError, setRecentHistoryError] = React.useState<string | null>(null);
-  const [monthlyStats, setMonthlyStats] = React.useState<MonthlyStatsDto[]>([]);
-  const [monthlyStatsLoading, setMonthlyStatsLoading] = React.useState<boolean>(true);
+  const [dailyLimit, setDailyLimit] = React.useState<DailySpendingLimitDto | null>(null);
+  const [dailyLimitLoading, setDailyLimitLoading] = React.useState<boolean>(true);
+  const [dailyLimitError, setDailyLimitError] = React.useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = React.useState<number>(0);
 
   // Load defaults from localStorage
   React.useEffect(() => {
@@ -59,27 +63,29 @@ export default function WalletDashboardPage() {
     }
   }, []);
 
-  const fetchMonthlyStats = React.useCallback(async () => {
-    setMonthlyStatsLoading(true);
+  const fetchDailyLimit = React.useCallback(async () => {
+    setDailyLimitLoading(true);
+    setDailyLimitError(null);
     try {
-      const result = await getMonthlyStats(6);
-      setMonthlyStats(result);
-    } catch {
-      setMonthlyStats([]);
+      setDailyLimit(await getDailySpendingLimit());
+    } catch (error) {
+      setDailyLimitError(extractHistoryError(error));
+      setDailyLimit(null);
     } finally {
-      setMonthlyStatsLoading(false);
+      setDailyLimitLoading(false);
     }
   }, []);
 
   React.useEffect(() => {
     void fetchRecentHistory();
-    void fetchMonthlyStats();
+    void fetchDailyLimit();
     const unsubscribe = subscribeToHistoryRefresh(() => {
       void fetchRecentHistory();
-      void fetchMonthlyStats();
+      void fetchDailyLimit();
+      setRefreshTrigger((prev) => prev + 1);
     });
     return unsubscribe;
-  }, [fetchRecentHistory, fetchMonthlyStats]);
+  }, [fetchDailyLimit, fetchRecentHistory]);
 
   const isLoading = walletsLoading || partnersLoading;
   const error = walletsError || partnersError;
@@ -106,19 +112,7 @@ export default function WalletDashboardPage() {
                 <div className="h-4 w-24 bg-gray-200 rounded" />
               </CardHeader>
               <CardContent>
-                <div className="h-7 w-36 bg-gray-200 rounded" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((item) => (
-            <Card key={`stats-${item}`} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="h-4 w-24 bg-gray-200 rounded" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-7 w-36 bg-gray-200 rounded" />
+                <div className="h-8 w-32 bg-gray-200 rounded" />
               </CardContent>
             </Card>
           ))}
@@ -130,13 +124,8 @@ export default function WalletDashboardPage() {
   // Error state
   if (error) {
     return (
-      <div className="space-y-6" data-testid="wallet-dashboard-summary">
-        <PageHeader title="Dashboard" description="Financial overview of your wallets" />
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-4 pb-4">
-            <p className="text-red-600">Failed to load wallet data: {String(error)}</p>
-          </CardContent>
-        </Card>
+      <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-lg">
+        {typeof error === "string" ? error : "An error occurred while loading dashboard"}
       </div>
     );
   }
@@ -154,8 +143,10 @@ export default function WalletDashboardPage() {
 
       <StatsCards wallets={safeWallets} partners={partners} />
 
+      <DailyLimitCard dailyLimit={dailyLimit} isLoading={dailyLimitLoading} error={dailyLimitError} />
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <MonthlyChart monthlyStats={monthlyStats} isLoading={monthlyStatsLoading} />
+        <SpendingChart refreshTrigger={refreshTrigger} dailyLimit={dailyLimit} />
         <WalletsPanel
           parentWallets={parentWallets}
           childWallets={childWallets}

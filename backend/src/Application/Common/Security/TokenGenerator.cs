@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 
@@ -14,6 +15,8 @@ namespace Application.Common.Security;
 /// </summary>
 public class TokenGenerator : ITokenGenerator
 {
+    private const int RefreshTokenByteLength = 64;
+
     private readonly IConfiguration _configuration;
 
     public TokenGenerator(IConfiguration configuration)
@@ -21,7 +24,7 @@ public class TokenGenerator : ITokenGenerator
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public string GenerateToken(User user)
+    public string GenerateAccessToken(User user)
     {
         if (user == null)
         {
@@ -31,7 +34,9 @@ public class TokenGenerator : ITokenGenerator
         var secret = _configuration["Jwt:Secret"];
         var issuer = _configuration["Jwt:Issuer"];
         var audience = _configuration["Jwt:Audience"];
-        var expirationMinutes = int.TryParse(_configuration["Jwt:ExpirationMinutes"], out var minutes)
+        var expirationValue = _configuration["Jwt:AccessTokenExpirationMinutes"]
+            ?? _configuration["Jwt:ExpirationMinutes"];
+        var expirationMinutes = int.TryParse(expirationValue, out var minutes)
             ? minutes
             : 60;
 
@@ -74,5 +79,28 @@ public class TokenGenerator : ITokenGenerator
 
         var tokenHandler = new JwtSecurityTokenHandler();
         return tokenHandler.WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomBytes = RandomNumberGenerator.GetBytes(RefreshTokenByteLength);
+        return Base64UrlEncoder.Encode(randomBytes);
+    }
+
+    public string HashRefreshToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            throw new ArgumentException("Refresh token cannot be empty.", nameof(token));
+        }
+
+        var tokenBytes = Encoding.UTF8.GetBytes(token);
+        var hashBytes = SHA256.HashData(tokenBytes);
+        return Base64UrlEncoder.Encode(hashBytes);
+    }
+
+    public string GenerateToken(User user)
+    {
+        return GenerateAccessToken(user);
     }
 }

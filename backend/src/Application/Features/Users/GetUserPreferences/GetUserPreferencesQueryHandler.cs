@@ -27,7 +27,9 @@ namespace Application.Features.Users.GetUserPreferences
             return new UserPreferencesDto
             {
                 DefaultWalletId = user.DefaultWalletId,
-                DefaultPartnerId = user.DefaultPartnerId
+                DefaultPartnerId = user.DefaultPartnerId,
+                DailySpendingLimitEnabled = user.DailySpendingLimitEnabled,
+                DailySpendingLimitAmount = user.DailySpendingLimitAmount
             };
         }
     }

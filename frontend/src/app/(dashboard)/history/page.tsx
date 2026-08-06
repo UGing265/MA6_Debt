@@ -5,7 +5,10 @@ import { HistoryPageContainer } from "@/features/history/components/HistoryPageC
 
 import { PageHeader } from "@/components/ui/page-header";
 
+import { usePrivacy } from "@/context/PrivacyContext";
+
 export default function HistoryPage() {
+  const { tempShow } = usePrivacy();
   return (
     <div className="space-y-6" data-testid="history-page">
       <PageHeader 

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { useDeleteWallet } from "../hooks/useWallets";
 import type { Wallet } from "../types/wallet";
+import { formatVnd } from "@/lib/utils";
 
 interface WalletListProps {
   wallets: Wallet[];
@@ -123,10 +124,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   };
 
   const formatBalance = (balance: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(balance);
+    return formatVnd(balance);
   };
 
   if (!wallets || wallets.length === 0) {

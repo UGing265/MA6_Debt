@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { User, Mail, Lock, Save, KeyRound } from "lucide-react";
+import { User, Mail, Lock, Save, KeyRound, Eye, EyeOff, Shield, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,16 +14,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getProfile, updateProfile, changePassword, UserProfile } from "@/features/user/api/userApi";
+import {
+  getProfile,
+  updateProfile,
+  changePassword,
+  getUserPreferences,
+  updateDailySpendingLimit,
+  UserProfile,
+} from "@/features/user/api/userApi";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { PageHeader } from "@/components/ui/page-header";
+import { usePrivacy } from "@/context/PrivacyContext";
 
 export default function ProfilePage() {
+  const { hideAmount, toggleHideAmount } = usePrivacy();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [dailyLimitEnabled, setDailyLimitEnabled] = useState(false);
+  const [dailyLimitAmount, setDailyLimitAmount] = useState("");
+  const [isSavingDailyLimit, setIsSavingDailyLimit] = useState(false);
 
   // Password change state
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -35,10 +47,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const data = await getProfile();
+        const [data, preferences] = await Promise.all([getProfile(), getUserPreferences()]);
         setProfile(data);
         setUsername(data.username);
         setEmail(data.email || "");
+        setDailyLimitEnabled(preferences.dailySpendingLimitEnabled);
+        setDailyLimitAmount(preferences.dailySpendingLimitAmount ? String(preferences.dailySpendingLimitAmount) : "");
       } catch {
         toast.error("Failed to load profile");
       } finally {
@@ -108,6 +122,34 @@ export default function ProfilePage() {
       toast.error(parsed.general || "Failed to change password");
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleDailyLimitAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = event.target.value.replace(/,/g, "").replace(/[^\d]/g, "");
+    setDailyLimitAmount(raw);
+  };
+
+  const handleSaveDailyLimit = async () => {
+    const amount = dailyLimitAmount ? Number(dailyLimitAmount) : null;
+
+    if (dailyLimitEnabled && (!amount || amount <= 0)) {
+      toast.error("Daily limit amount must be greater than 0");
+      return;
+    }
+
+    setIsSavingDailyLimit(true);
+    try {
+      await updateDailySpendingLimit({
+        enabled: dailyLimitEnabled,
+        amount: dailyLimitEnabled ? amount : null,
+      });
+      toast.success("Daily spending limit updated");
+    } catch (error) {
+      const parsed = parseErrorResponse(error);
+      toast.error(parsed.general || "Failed to update daily spending limit");
+    } finally {
+      setIsSavingDailyLimit(false);
     }
   };
 
@@ -212,6 +254,116 @@ export default function ProfilePage() {
                 Change
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Privacy & Display Card */}
+        <Card className="border-note-yellow/25 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Shield className="h-5 w-5 text-note-yellow" />
+              Privacy & Display Settings (Riêng tư & Hiển thị)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-gray-50 gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-ink-black">Che số tiền (Hide Money Amounts)</p>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${hideAmount ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"}`}>
+                    {hideAmount ? "Đang che (Hidden)" : "Đang hiện (Visible)"}
+                  </span>
+                </div>
+                <p className="text-sm text-pencil-gray">
+                  Tự động che các số dư ví, nợ và giao dịch thành dạng <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">•••••• vnd</code> trên toàn hệ thống.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={toggleHideAmount}
+                  className="border-note-yellow text-ink-black hover:bg-note-yellow/20 flex items-center gap-2 cursor-pointer"
+                >
+                  {hideAmount ? (
+                    <>
+                      <Eye className="h-4 w-4 text-note-yellow" />
+                      Hiện số tiền
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff className="h-4 w-4 text-pencil-gray" />
+                      Che số tiền
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Daily Spending Limit Card */}
+        <Card className="border-note-yellow/25 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Target className="h-5 w-5 text-note-yellow" />
+              Daily Spending Limit
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-4 rounded-lg bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-ink-black">Limit daily spending</p>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${dailyLimitEnabled ? "bg-green-100 text-green-800" : "bg-gray-200 text-pencil-gray"}`}>
+                    {dailyLimitEnabled ? "On" : "Off"}
+                  </span>
+                </div>
+                <p className="text-sm text-pencil-gray">
+                  Dashboard will compare today&apos;s money-out transactions against this limit using Vietnam time.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setDailyLimitEnabled((current) => !current)}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-1 transition-colors duration-200 focus:outline-none ${
+                  dailyLimitEnabled ? "bg-note-yellow" : "bg-gray-200"
+                }`}
+                aria-pressed={dailyLimitEnabled}
+                aria-label="Toggle daily spending limit"
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    dailyLimitEnabled ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-ink-black">Daily limit amount</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={dailyLimitAmount ? Number(dailyLimitAmount).toLocaleString("en-US") : ""}
+                  onChange={handleDailyLimitAmountChange}
+                  disabled={!dailyLimitEnabled || isSavingDailyLimit}
+                  className="h-10 w-full rounded-lg border border-gray-200 bg-white px-4 py-2 pr-14 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  placeholder="100,000"
+                />
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-pencil-gray/80">vnd</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleSaveDailyLimit}
+              disabled={isSavingDailyLimit}
+              className="w-full bg-note-yellow text-ink-black hover:bg-note-yellow/90"
+            >
+              {isSavingDailyLimit ? "Saving..." : "Save Daily Limit"}
+            </Button>
           </CardContent>
         </Card>
       </div>

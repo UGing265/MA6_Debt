@@ -1,6 +1,7 @@
 import React from "react";
 import { Loader2, Wallet2, ChevronRight } from "lucide-react";
 import type { WalletDto } from "../types/transfer";
+import { formatVnd } from "@/lib/utils";
 
 type GroupedWallets = {
   parent: WalletDto | null;
@@ -8,7 +9,7 @@ type GroupedWallets = {
 };
 
 const formatBalance = (balance: number): string => {
-  return `${balance.toLocaleString("en-US")} VND`;
+  return formatVnd(balance);
 };
 
 interface WalletBalancePanelProps {

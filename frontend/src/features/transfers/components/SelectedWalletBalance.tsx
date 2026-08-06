@@ -1,8 +1,9 @@
 import React from "react";
 import type { WalletDto } from "../types/transfer";
+import { formatVnd } from "@/lib/utils";
 
 const formatBalance = (balance: number): string => {
-  return `${balance.toLocaleString("en-US")} VND`;
+  return formatVnd(balance);
 };
 
 interface SelectedWalletBalanceProps {

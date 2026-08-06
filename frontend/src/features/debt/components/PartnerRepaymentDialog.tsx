@@ -18,6 +18,7 @@ import { PayerMode } from "@/features/transaction/types/transaction";
 import { parseErrorResponse } from "@/features/auth/utils/errorParser";
 import { withRepayMarker } from "@/features/history/utils/historyKind";
 import type { DebtPartner } from "../types/debtPartner";
+import { WalletSelect } from "@/features/transaction/components/QuickDebt/WalletSelect";
 
 type PartnerRepaymentDialogProps = {
   open: boolean;
@@ -171,25 +172,15 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
               </p>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-pencil-gray">Child Wallet</label>
-              <select
-                disabled={isSubmitting || isWalletsLoading || childWallets.length === 0}
-                value={walletId}
-                onChange={(event) => setWalletId(event.target.value)}
-                className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-ink-black outline-none transition-colors focus:border-note-yellow focus:ring-2 focus:ring-note-yellow/30 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">
-                  {isWalletsLoading ? "Loading..." : childWallets.length === 0 ? "No child wallets" : "Select wallet"}
-                </option>
-                {childWallets.map((wallet) => (
-                  <option key={wallet.id} value={wallet.id}>
-                    {wallet.name} ({formatVnd(wallet.balance)})
-                  </option>
-                ))}
-              </select>
-              {walletError ? <p className="text-xs text-red-500">{walletError}</p> : null}
-            </div>
+            <WalletSelect
+              value={walletId}
+              onChange={(val) => setWalletId(val)}
+              groupedWallets={[{ parent: null, children: childWallets }]}
+              isLoading={isWalletsLoading}
+              hasWallets={childWallets.length > 0}
+              disabled={isSubmitting}
+              error={walletError ?? undefined}
+            />
 
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-pencil-gray">Amount Repaid</label>
@@ -220,11 +211,10 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setPayerMode(PayerMode.ToiTra)}
-                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    payerMode === PayerMode.ToiTra
+                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${payerMode === PayerMode.ToiTra
                       ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                       : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   I Paid
                 </button>
@@ -232,11 +222,10 @@ export function PartnerRepaymentDialog({ open, partner, onOpenChange }: PartnerR
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setPayerMode(PayerMode.PartnerTra)}
-                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    payerMode === PayerMode.PartnerTra
+                  className={`h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${payerMode === PayerMode.PartnerTra
                       ? "bg-note-yellow text-ink-black hover:bg-amber-400"
                       : "border border-gray-200 bg-white text-pencil-gray hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   Partner Paid
                 </button>

@@ -5,7 +5,10 @@ import { QuickDebtForm } from "@/features/transaction/components/QuickDebtForm";
 import { AdjustmentForm } from "@/features/transaction/components/AdjustmentForm";
 import { PageHeader } from "@/components/ui/page-header";
 
+import { usePrivacy } from "@/context/PrivacyContext";
+
 export default function QuickDeductPage() {
+  const { tempShow } = usePrivacy();
   const [activeTab, setActiveTab] = useState<"quick-debt" | "adjustment">("quick-debt");
 
   return (

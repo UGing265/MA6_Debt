@@ -5,11 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { LoginSchema, LoginInput } from "../types/auth";
 import { login } from "../api/auth";
 import { parseErrorResponse } from "../utils/errorParser";
-import { setAuthToken } from "@/lib/authToken";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,9 +23,10 @@ import { Input } from "@/components/ui/input";
 export const LoginForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginInput>({
-    resolver: zodResolver(LoginSchema as any),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -36,11 +36,10 @@ export const LoginForm = () => {
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
-      const response = await login(data);
-      setAuthToken(response.token);
+      await login(data);
       toast.success("Welcome!");
       router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       const parsedError = parseErrorResponse(error);
       
       if (parsedError.general) {
@@ -93,13 +92,28 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel className="text-gray-700">Password</FormLabel>
               <FormControl>
-                 <Input 
-                   type="password" 
-                   placeholder="Enter your password" 
-                   {...field} 
-                   disabled={isLoading}
-                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D]" 
-                 />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Enter your password" 
+                    {...field} 
+                    disabled={isLoading}
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] pr-10 text-[#1F2937] placeholder:text-[#4B5563]/70" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    disabled={isLoading}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FCD34D] rounded p-1 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

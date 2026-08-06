@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, Eye, EyeOff } from "lucide-react";
 import { RegisterSchema, RegisterInput } from "../types/auth";
 import { register } from "../api/auth";
 import { parseErrorResponse } from "../utils/errorParser";
@@ -50,6 +50,7 @@ const PasswordRequirements = ({ password }: { password: string }) => {
 export const RegisterForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
@@ -165,13 +166,28 @@ export const RegisterForm = () => {
              <FormItem>
                <FormLabel className="text-gray-700">Password</FormLabel>
                <FormControl>
-                 <Input 
-                   type="password" 
-                   placeholder="Create a password" 
-                   {...field} 
-                   disabled={isLoading}
-                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] text-[#1F2937] placeholder:text-[#4B5563]/70" 
-                 />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Create a password" 
+                    {...field} 
+                    disabled={isLoading}
+                    className="bg-[#FFFDF5] border-[#1F2937]/10 focus:border-[#FCD34D] focus:ring-[#FCD34D] pr-10 text-[#1F2937] placeholder:text-[#4B5563]/70" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    disabled={isLoading}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FCD34D] rounded p-1 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
               {field.value && <PasswordRequirements password={field.value} />}

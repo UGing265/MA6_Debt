@@ -17,7 +17,10 @@ import { PageHeader } from "@/components/ui/page-header";
 
 type SortOption = "name-asc" | "name-desc" | "balance-high" | "balance-low";
 
+import { usePrivacy } from "@/context/PrivacyContext";
+
 export default function WalletsPage() {
+  const { tempShow } = usePrivacy();
   const [isCreateParentOpen, setIsCreateParentOpen] = React.useState(false);
   const [editingWallet, setEditingWallet] = React.useState<Wallet | null>(null);
   const [deletingWallet, setDeletingWallet] = React.useState<Wallet | null>(null);

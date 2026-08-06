@@ -15,6 +15,7 @@ namespace Persistence.Data
         public DbSet<DebtPartner> DebtPartners { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -70,6 +71,22 @@ namespace Persistence.Data
                 .WithMany(w => w.ReceivedTransfers)
                 .HasForeignKey(t => t.ToWalletId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany()
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.TokenHash)
+                .IsUnique();
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.UserId);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.FamilyId);
                 
             modelBuilder.Entity<DebtPartner>().HasQueryFilter(dp => !dp.IsDeleted);
         }
