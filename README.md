@@ -237,8 +237,8 @@ Frontend runs at: `http://localhost:3000`
 
 ## Contributors
 
-<!-- readme: collaborators,contributors -start -->
-<!-- readme: collaborators,contributors -end -->
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
 
 ---
 
