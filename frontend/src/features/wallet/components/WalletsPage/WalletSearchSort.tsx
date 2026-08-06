@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 type SortOption = "name-asc" | "name-desc" | "balance-high" | "balance-low";
 
@@ -26,6 +29,7 @@ export const WalletSearchSort: React.FC<WalletSearchSortProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,7 +41,18 @@ export const WalletSearchSort: React.FC<WalletSearchSortProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectedOpt = SORT_OPTIONS.find((o) => o.value === sortBy);
+  const localizedSortOptions = SORT_OPTIONS.map((option) => ({
+    ...option,
+    label:
+      option.value === "name-asc"
+        ? t.wallets.page.search.options.nameAsc
+        : option.value === "name-desc"
+          ? t.wallets.page.search.options.nameDesc
+          : option.value === "balance-high"
+            ? t.wallets.page.search.options.balanceHigh
+            : t.wallets.page.search.options.balanceLow,
+  }));
+  const selectedLabel = localizedSortOptions.find((o) => o.value === sortBy)?.label ?? t.wallets.page.search.sortLabel;
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -45,10 +60,10 @@ export const WalletSearchSort: React.FC<WalletSearchSortProps> = ({
         <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-pencil-gray" />
         <input
           type="text"
-          placeholder="Search wallet by name..."
+          placeholder={t.wallets.page.search.placeholder}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          aria-label="Search wallets by name"
+          aria-label={t.wallets.page.search.aria}
           className="w-full pl-11 pr-4 py-3 border border-gray-200 hover:border-gray-300 rounded-xl bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-note-yellow/30 text-ink-black font-medium placeholder:text-pencil-gray/70 shadow-xs transition-all"
         />
       </div>
@@ -65,13 +80,13 @@ export const WalletSearchSort: React.FC<WalletSearchSortProps> = ({
               : "border border-gray-200 hover:border-gray-300 font-medium"
           )}
         >
-          <span>{selectedOpt?.label ?? "Sort wallets"}</span>
+          <span>{selectedLabel}</span>
           <ChevronDown className={cn("h-4 w-4 text-pencil-gray transition-transform duration-200 ml-2 shrink-0", isOpen && "rotate-180")} />
         </button>
 
         {isOpen && (
           <div className="absolute right-0 top-full mt-1.5 z-50 w-full rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl space-y-1 animate-in fade-in-50 zoom-in-95">
-            {SORT_OPTIONS.map((opt) => {
+            {localizedSortOptions.map((opt) => {
               const isSelected = opt.value === sortBy;
               return (
                 <div

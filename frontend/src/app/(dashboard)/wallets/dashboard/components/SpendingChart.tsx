@@ -4,6 +4,7 @@ import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Respons
 import { formatVnd, cn } from "@/lib/utils";
 import { getSpendingStats, SpendingStatsDto, DailySpendingLimitDto } from "@/features/history/api/history";
 import { ChevronDown, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SpendingChartProps {
   // Option to trigger a refetch from the parent if needed
@@ -12,6 +13,7 @@ interface SpendingChartProps {
 }
 
 export const SpendingChart: React.FC<SpendingChartProps> = ({ refreshTrigger = 0, dailyLimit }) => {
+  const { t } = useLanguage();
   const [period, setPeriod] = useState<"day" | "month" | "quarter">("day");
   const [limit, setLimit] = useState<number>(15);
   const [data, setData] = useState<SpendingStatsDto[]>([]);
@@ -45,7 +47,7 @@ export const SpendingChart: React.FC<SpendingChartProps> = ({ refreshTrigger = 0
         }
       } catch (err: any) {
         if (active) {
-          setError(err?.message || "Failed to load spending analysis");
+          setError(err?.message || t.wallets.page.stats.spendingFailedToLoad);
         }
       } finally {
         if (active) {
@@ -89,25 +91,28 @@ export const SpendingChart: React.FC<SpendingChartProps> = ({ refreshTrigger = 0
     return label;
   };
 
+  const formatText = (template: string, value: string | number) =>
+    template.replace("{label}", String(value)).replace("{amount}", String(value)).replace("{count}", String(value));
+
   const getLimitOptions = () => {
     if (period === "day") {
       return [
-        { label: "Last 7 Days", value: 7 },
-        { label: "Last 15 Days", value: 15 },
-        { label: "Last 30 Days", value: 30 },
+        { label: t.wallets.page.stats.spendingLast7Days, value: 7 },
+        { label: t.wallets.page.stats.spendingLast15Days, value: 15 },
+        { label: t.wallets.page.stats.spendingLast30Days, value: 30 },
       ];
     }
     if (period === "month") {
       return [
-        { label: "Last 3 Months", value: 3 },
-        { label: "Last 6 Months", value: 6 },
-        { label: "Last 12 Months", value: 12 },
+        { label: t.wallets.page.stats.spendingLast3Months, value: 3 },
+        { label: t.wallets.page.stats.spendingLast6Months, value: 6 },
+        { label: t.wallets.page.stats.spendingLast12Months, value: 12 },
       ];
     }
     // quarter
     return [
-      { label: "Last 4 Quarters", value: 4 },
-      { label: "Last 8 Quarters", value: 8 },
+      { label: t.wallets.page.stats.spendingLast4Quarters, value: 4 },
+      { label: t.wallets.page.stats.spendingLast8Quarters, value: 8 },
     ];
   };
 
@@ -178,15 +183,15 @@ const ChartRangeDropdown: React.FC<{
       <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <CardTitle className="text-2xl font-bold text-ink-black">Spending Analysis</CardTitle>
+            <CardTitle className="text-2xl font-bold text-ink-black">{t.wallets.page.stats.spendingAnalysisTitle}</CardTitle>
             {overLimitCount > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 border border-red-200">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                {overLimitCount} {overLimitCount === 1 ? "day" : "days"} over limit
+                {formatText(t.wallets.page.stats.spendingDaysOverLimit, overLimitCount)}
               </span>
             )}
           </div>
-          <p className="text-sm text-pencil-gray">Visualize your spending patterns and trends</p>
+          <p className="text-sm text-pencil-gray">{t.wallets.page.stats.spendingAnalysisDescription}</p>
         </div>
 
         {/* Filters and Controls */}
@@ -203,7 +208,11 @@ const ChartRangeDropdown: React.FC<{
                     : "text-pencil-gray hover:text-ink-black"
                 }`}
               >
-                {p}
+                {p === "day"
+                  ? t.wallets.page.stats.spendingDay
+                  : p === "month"
+                    ? t.wallets.page.stats.spendingMonth
+                    : t.wallets.page.stats.spendingQuarter}
               </button>
             ))}
           </div>
@@ -220,7 +229,7 @@ const ChartRangeDropdown: React.FC<{
       <CardContent>
         {isLoading ? (
           <div className="h-72 rounded-xl border border-dashed border-note-yellow/30 bg-gray-50/50 animate-pulse flex items-center justify-center">
-            <span className="text-xs text-pencil-gray">Loading spending stats...</span>
+            <span className="text-xs text-pencil-gray">{t.wallets.page.stats.spendingLoading}</span>
           </div>
         ) : error ? (
           <div className="h-72 rounded-xl border border-dashed border-red-200 bg-red-50/50 flex flex-col items-center justify-center gap-2">
@@ -232,13 +241,13 @@ const ChartRangeDropdown: React.FC<{
               }}
               className="text-xs underline text-red-500 hover:text-red-700"
             >
-              Retry
+              {t.wallets.page.stats.spendingRetry}
             </button>
           </div>
         ) : data.length === 0 ? (
           <div className="h-72 rounded-xl border border-dashed border-note-yellow/20 bg-gray-50/50 flex flex-col items-center justify-center gap-1">
-            <p className="text-sm text-pencil-gray font-semibold">No spending data</p>
-            <p className="text-xs text-pencil-gray/60">Any debit transactions will appear here</p>
+            <p className="text-sm text-pencil-gray font-semibold">{t.wallets.page.stats.spendingNoData}</p>
+            <p className="text-xs text-pencil-gray/60">{t.wallets.page.stats.spendingAnyDebitTransactions}</p>
           </div>
         ) : (
           <div className="h-72 w-full">
@@ -263,9 +272,9 @@ const ChartRangeDropdown: React.FC<{
                 <Tooltip
                   formatter={(value, name) => [
                     formatVnd(Number(value)),
-                    name === "Spent Amount" ? "Spent Amount" : "Trend",
+                    name === t.wallets.page.stats.spendingSpentAmount ? t.wallets.page.stats.spendingSpentAmount : t.wallets.page.stats.spendingTrend,
                   ]}
-                  labelFormatter={(label) => `Date: ${formatXAxisLabel(String(label))}`}
+                  labelFormatter={(label) => formatText(t.wallets.page.stats.spendingDatePrefix, formatXAxisLabel(String(label)))}
                   contentStyle={{
                     backgroundColor: "#fffbeb",
                     border: "1px solid #fcd34d",
@@ -282,7 +291,7 @@ const ChartRangeDropdown: React.FC<{
                     strokeDasharray="4 4"
                     strokeWidth={2}
                     label={{
-                      value: `Limit: ${formatVnd(dailyLimitAmount)}`,
+                      value: formatText(t.wallets.page.stats.spendingLimitLabel, formatVnd(dailyLimitAmount)),
                       fill: "#ef4444",
                       fontSize: 11,
                       position: "top",
@@ -292,7 +301,7 @@ const ChartRangeDropdown: React.FC<{
                 ) : null}
                 <Bar
                   dataKey="amount"
-                  name="Spent Amount"
+                  name={t.wallets.page.stats.spendingSpentAmount}
                   fill="#f59e0b"
                   opacity={0.85}
                   barSize={period === "day" ? 18 : period === "month" ? 36 : 54}
@@ -312,7 +321,7 @@ const ChartRangeDropdown: React.FC<{
                 <Line
                   type="monotone"
                   dataKey="amount"
-                  name="Trend"
+                  name={t.wallets.page.stats.spendingTrend}
                   stroke="#d97706"
                   strokeWidth={2}
                   dot={{ r: 3, fill: "#d97706", strokeWidth: 1 }}
