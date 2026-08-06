@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { ContactForm } from "./ContactForm";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const CTAFooterSection = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="flex flex-col w-full">
       <section className="bg-[#FFFDF5] py-20 px-4 sm:px-6 lg:px-8 font-quicksand">
@@ -29,17 +34,17 @@ export const CTAFooterSection = () => {
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold text-[#1F2937] mb-4 tracking-tight font-patrick">
-            Ready to <span className="text-[#D97706]">take control</span> of your cash?
+            {t.home.cta.title}
           </h2>
           <p className="text-xl text-[#4B5563] mb-8 max-w-2xl mx-auto">
-            Join people who track simple. Start free now.
+            {t.home.cta.description}
           </p>
           
           <Link
             href="/register"
             className="inline-block bg-[#FCD34D] text-[#1F2937] font-semibold px-10 py-4 rounded-full hover:bg-[#FBBF24] transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border border-[#1F2937]/30"
           >
-            Try Now
+            {t.home.cta.button}
           </Link>
         </div>
       </section>
@@ -49,10 +54,10 @@ export const CTAFooterSection = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-16">
             <div className="space-y-8">
               <div className="inline-block px-3 py-1 border border-[#4A2C2A]/10 rounded-full text-sm font-medium tracking-wider uppercase mb-4 text-[#8D6E63]">
-                / get in touch /
+                / {t.home.cta.contactTitle.toLowerCase()} /
               </div>
               <h3 className="text-4xl md:text-5xl font-bold leading-tight text-[#1F2937] font-patrick">
-                We're here to help
+                {t.home.cta.helpTitle}
               </h3>
               
               <div className="space-y-6 mt-8">
@@ -94,10 +99,10 @@ export const CTAFooterSection = () => {
             <p>© {new Date().getFullYear()} MA6 Debt. All rights reserved.</p>
             <div className="flex gap-8">
               <Link href="/privacy" className="hover:text-[#4A2C2A] transition-colors">
-                Privacy Policy
+                {t.home.footer.privacy}
               </Link>
               <Link href="/terms" className="hover:text-[#4A2C2A] transition-colors">
-                Terms of Service
+                {t.home.footer.terms}
               </Link>
             </div>
           </div>
