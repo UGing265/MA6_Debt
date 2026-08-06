@@ -7,6 +7,7 @@ import { ArrowLeftRight, Clock3, LayoutDashboard, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { useLanguage } from "@/context/LanguageContext";
 
 const tabMap: Record<string, { title: string; description: string; icon: React.ReactNode }> = {
   "quick-deduct": {
@@ -28,15 +29,22 @@ const tabMap: Record<string, { title: string; description: string; icon: React.R
 
 export default function WorkspacePage() {
   return (
-    <Suspense fallback={<div className="space-y-6 max-w-4xl"><PageHeader title="Workspace" description="Loading workspace..." className="mb-0 pb-3" /></div>}>
+    <Suspense fallback={<div className="space-y-6 max-w-4xl"><WorkspaceLoading /></div>}>
       <WorkspacePageContent />
     </Suspense>
   );
 }
 
+function WorkspaceLoading() {
+  const { t } = useLanguage();
+
+  return <PageHeader title={t.dashboard.workspace.title} description={t.dashboard.workspace.loading} className="mb-0 pb-3" />;
+}
+
 function WorkspacePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const tab = searchParams.get("tab") ?? "";
 
   // Hand off to dedicated route for quick deductions to avoid placeholder UI on workspace
@@ -61,7 +69,7 @@ function WorkspacePageContent() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <PageHeader title="Workspace" description="This route is kept for compatibility." className="mb-0 pb-3" />
+      <PageHeader title={t.dashboard.workspace.title} description={t.dashboard.workspace.compatibility} className="mb-0 pb-3" />
 
       {current ? (
         <Card className="border-note-yellow/30">
@@ -73,22 +81,20 @@ function WorkspacePageContent() {
             <CardDescription>{current.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-pencil-gray">No additional logic is implemented on this page.</p>
+            <p className="text-sm text-pencil-gray">{t.dashboard.workspace.noAdditionalLogic}</p>
           </CardContent>
         </Card>
       ) : (
         <Card className="border-note-yellow/30">
           <CardHeader>
-            <CardTitle className="text-ink-black">Workspace Moved</CardTitle>
-            <CardDescription>
-              Main wallet and partner management now live on dedicated pages.
-            </CardDescription>
+            <CardTitle className="text-ink-black">{t.dashboard.workspace.movedTitle}</CardTitle>
+            <CardDescription>{t.dashboard.workspace.movedDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/dashboard">
               <Button className="bg-note-yellow text-ink-black hover:bg-note-yellow/90">
                 <LayoutDashboard className="h-4 w-4 mr-2" />
-                Go to Dashboard
+                {t.dashboard.workspace.dashboardButton}
               </Button>
             </Link>
           </CardContent>
