@@ -463,13 +463,13 @@ export const vi = {
         card: {
           hasDefault: "Có mặc định",
           noDescription: "Không có mô tả",
-          subWalletSuffix: "ví con{suffix}",
+          subWalletSuffix: "ví con",
           editAria: "Sửa {name}",
           deleteAria: "Xóa {name}",
         },
         detail: {
           subWallet: "Ví con",
-          subWalletCount: "{count} ví con{suffix}",
+          subWalletCount: "{count} ví con",
           deleteTitle: "Xóa ví",
           deleteDescription: "Xóa {name}? Không thể hoàn tác.",
           deleteing: "Đang xóa...",
@@ -484,7 +484,7 @@ export const vi = {
           balanceAdjustment: "Điều chỉnh số dư",
           description: "Mô tả",
           subWallets: "Ví con",
-          walletCount: "{count} ví{suffix}",
+          walletCount: "{count} ví",
           setDefault: "Đặt làm mặc định",
           setDefaultFor: "Đặt {name} làm mặc định",
           unsetDefault: "Bỏ mặc định",
@@ -594,12 +594,12 @@ export const vi = {
       sections: {
         wallets: {
           title: "1. Kiến trúc ví",
-          subtitle: "Phân cấp ví cha và ví con",
-          netWorthRule: "Quy tắc tổng tài sản:",
-          body: "Hệ thống dùng cấu trúc ví lồng nhau để giúp bạn lập ngân sách mà không mất dấu các tài khoản tiền thật.",
-          parentWallets: "Ví cha đại diện cho nguồn tiền vật lý của bạn (ví dụ: \"Techcombank\", \"Tiền mặt\").",
-          childWallets: "Ví con là các phong bì ngân sách nằm trong ví cha (ví dụ: \"Tạp hóa\", \"Xăng\").",
-          netWorthRuleBody: "Số dư tổng của ví cha hiển thị cho bạn thực chất là Số dư ví cha + tổng số dư tất cả ví con.",
+          subtitle: "Phân cấp Ví gộp (Ví cha) và Ví thành viên (Ví con)",
+          netWorthRule: "Công thức:",
+          body: "Cấu trúc ví 2 cấp đơn giản:",
+          parentWallets: "• Ví cha = Nhóm gộp (ví dụ: Ví gia đình, Ví làm ăn). Dùng để gom các ví con lại cho gọn.",
+          childWallets: "• Ví con = Ví thực tế (ví dụ: Tiền mặt, Ngân hàng, Momo). Lưu số dư và tiêu tiền ở đây.",
+          netWorthRuleBody: "Số dư Ví cha = (Số dư Ví con 1 + Ví con 2 + ...)",
         },
         partners: {
           title: "2. Đối tác nợ",
@@ -712,7 +712,7 @@ export const vi = {
         card: {
           hasDefault: "Có mặc định",
           noDescription: "Không có mô tả",
-          subWalletSuffix: "ví con{suffix}",
+          subWalletSuffix: "ví con",
           editAria: "Sửa {name}",
           deleteAria: "Xóa {name}",
         },
@@ -721,7 +721,7 @@ export const vi = {
         sortLabel: "Sắp xếp ví",
         detail: {
           subWallet: "Ví con",
-          subWalletCount: "{count} ví con{suffix}",
+          subWalletCount: "{count} ví con",
           deleteTitle: "Xóa ví",
           deleteDescription: "Xóa {name}? Không thể hoàn tác.",
           deleteing: "Đang xóa...",
@@ -736,7 +736,7 @@ export const vi = {
           balanceAdjustment: "Điều chỉnh số dư",
           description: "Mô tả",
           subWallets: "Ví con",
-          walletCount: "{count} ví{suffix}",
+          walletCount: "{count} ví",
           setDefault: "Đặt làm mặc định",
           setDefaultFor: "Đặt {name} làm mặc định",
           unsetDefault: "Bỏ mặc định",
@@ -810,7 +810,7 @@ export const vi = {
       },
       dialog: {
         createParentTitle: "Tạo ví cha",
-        createParentDescription: "Tạo ví cha mới để sắp xếp tiền mặt.",
+        createParentDescription: "Tạo ví cha mới làm nhóm gộp các ví con.",
         editParentTitle: "Sửa ví cha",
         editChildTitle: "Sửa ví con",
         createChildTitle: "Tạo ví con",
@@ -831,7 +831,7 @@ export const vi = {
       form: {
         walletName: "Tên ví",
         descriptionOptional: "Mô tả (tùy chọn)",
-        walletNamePlaceholder: "ví dụ: Ví tiền mặt, tài khoản ngân hàng",
+        walletNamePlaceholder: "ví dụ: Ví gia đình, Ví làm ăn, Ví sinh hoạt",
         descriptionPlaceholder: "Mô tả ngắn về ví này",
       },
     },
@@ -1789,12 +1789,12 @@ export const en: I18nDictionary = {
       sections: {
         wallets: {
           title: "1. Wallet Architecture",
-          subtitle: "Parent & Child Wallet Hierarchy",
-          netWorthRule: "Net Worth Rule:",
-          body: "The system uses a nested wallet structure to help you budget money without losing track of your actual physical accounts.",
-          parentWallets: "Parent Wallets represent your physical money sources (e.g., \"Techcombank\", \"Cash in Pocket\").",
-          childWallets: "Child Wallets are budget envelopes inside a Parent Wallet (e.g., \"Grocery\", \"Gas\").",
-          netWorthRuleBody: "The overall balance of a Parent Wallet shown to you is actually Parent Balance + Sum of all Child Balances.",
+          subtitle: "Parent Group & Child Wallet Hierarchy",
+          netWorthRule: "Formula:",
+          body: "Simple 2-level wallet structure:",
+          parentWallets: "• Parent Wallet = Group folder (e.g., Family Group, Business Group). Used only to organize sub-wallets.",
+          childWallets: "• Child Wallet = Actual wallet (e.g., Cash, Bank, E-wallet). Balance and transactions live here.",
+          netWorthRuleBody: "Parent Balance = (Sub-wallet 1 + Sub-wallet 2 + ...)",
         },
         partners: {
           title: "2. Debt Partners",
