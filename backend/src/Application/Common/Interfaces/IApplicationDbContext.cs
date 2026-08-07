@@ -44,6 +44,11 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<PasswordResetToken> PasswordResetTokens { get; }
 
+    /// <summary>
+    /// Gets the DbSet for browser push subscriptions.
+    /// </summary>
+    DbSet<PushSubscription> PushSubscriptions { get; }
+
     DatabaseFacade Database { get; }
 
     /// <summary>

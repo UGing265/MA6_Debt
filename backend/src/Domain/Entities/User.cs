@@ -29,5 +29,6 @@ namespace Domain.Entities
         // Navigation Properties
         public ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
         public ICollection<DebtPartner> DebtPartners { get; set; } = new List<DebtPartner>();
+        public ICollection<PushSubscription> PushSubscriptions { get; set; } = new List<PushSubscription>();
     }
 }
