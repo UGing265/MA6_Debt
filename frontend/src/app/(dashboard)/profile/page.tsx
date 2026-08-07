@@ -27,6 +27,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { usePrivacy } from "@/context/PrivacyContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { supportedLocales } from "@/lib/i18n";
+import { PushSettingsCard } from "@/features/push/components/PushSettingsCard";
 
 export default function ProfilePage() {
   const { hideAmount, toggleHideAmount } = usePrivacy();
@@ -404,6 +405,8 @@ export default function ProfilePage() {
 	            </Button>
           </CardContent>
         </Card>
+
+        <PushSettingsCard />
       </div>
 
       {/* Change Password Dialog */}
