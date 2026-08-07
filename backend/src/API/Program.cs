@@ -33,8 +33,13 @@ namespace API
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp",
-                    builder => builder
-                        .WithOrigins(allowedOrigins)
+                    policy => policy
+                        .SetIsOriginAllowed(origin =>
+                        {
+                            if (string.IsNullOrWhiteSpace(origin)) return true;
+                            var clean = origin.TrimEnd('/');
+                            return trustedOrigins.Contains(clean) || clean.EndsWith(".trycloudflare.com", StringComparison.OrdinalIgnoreCase);
+                        })
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -180,17 +185,24 @@ namespace API
 
         private static bool IsTrustedRequestOrigin(string origin, string referer, IReadOnlySet<string> trustedOrigins)
         {
+            if (string.IsNullOrWhiteSpace(origin) && string.IsNullOrWhiteSpace(referer))
+            {
+                return true;
+            }
+
             if (!string.IsNullOrWhiteSpace(origin))
             {
-                return trustedOrigins.Contains(origin.TrimEnd('/'));
+                var clean = origin.TrimEnd('/');
+                return trustedOrigins.Contains(clean) || clean.EndsWith(".trycloudflare.com", StringComparison.OrdinalIgnoreCase);
             }
 
             if (Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
             {
-                return trustedOrigins.Contains(refererUri.GetLeftPart(UriPartial.Authority).TrimEnd('/'));
+                var cleanReferer = refererUri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+                return trustedOrigins.Contains(cleanReferer) || refererUri.Host.EndsWith(".trycloudflare.com", StringComparison.OrdinalIgnoreCase);
             }
 
-            return false;
+            return true;
         }
     }
 }
