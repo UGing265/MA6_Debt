@@ -12,6 +12,28 @@ export interface ApiFetchOptions extends RequestInit {
 }
 
 let refreshPromise: Promise<void> | null = null;
+//phương án dự phòng lưu storage
+export const getStoredAccessToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("access_token");
+};
+
+export const getStoredRefreshToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("refresh_token");
+};
+
+export const setStoredTokens = (accessToken?: string, refreshToken?: string) => {
+  if (typeof window === "undefined") return;
+  if (accessToken) localStorage.setItem("access_token", accessToken);
+  if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+};
+
+export const clearStoredTokens = () => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+};
 
 const buildFullUrl = (url: string) =>
   url.startsWith("http") ? url : `${API_URL}${url}`;
@@ -28,13 +50,24 @@ const isAuthEndpoint = (url: string) => {
 
 const refreshSessionOnce = async () => {
   if (!refreshPromise) {
+    const storedRefreshToken = getStoredRefreshToken();
+
     refreshPromise = fetch(AUTH_REFRESH_URL, {
       method: "POST",
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: storedRefreshToken ? JSON.stringify({ refreshToken: storedRefreshToken }) : undefined,
     })
       .then(async (response) => {
         if (!response.ok) {
+          clearStoredTokens();
           await handleApiError(response);
+        }
+        const data = await response.json();
+        if (data?.token) {
+          setStoredTokens(data.token, data.refreshToken);
         }
       })
       .finally(() => {
@@ -46,7 +79,7 @@ const refreshSessionOnce = async () => {
 };
 
 const redirectToLogin = () => {
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && window.location.pathname !== "/login") {
     window.location.href = "/login";
   }
 };
@@ -62,10 +95,11 @@ export async function apiFetch(
   const { skipAuthRefresh = false, ...fetchOptions } = options;
   const fullUrl = buildFullUrl(url);
 
-  // Merge headers, prioritizing custom headers
-  const headers = {
+  const token = getStoredAccessToken();
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...fetchOptions.headers,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(fetchOptions.headers as Record<string, string>),
   };
 
   const requestOptions: RequestInit = {
@@ -87,7 +121,16 @@ export async function apiFetch(
     throw new Error("Session expired. Please log in again.");
   }
 
-  return fetch(fullUrl, requestOptions);
+  const newToken = getStoredAccessToken();
+  const retryHeaders: Record<string, string> = {
+    ...headers,
+    ...(newToken ? { Authorization: `Bearer ${newToken}` } : {}),
+  };
+
+  return fetch(fullUrl, {
+    ...requestOptions,
+    headers: retryHeaders,
+  });
 }
 
 /**
@@ -95,8 +138,10 @@ export async function apiFetch(
  * @deprecated Use apiFetch instead
  */
 export const getAuthHeaders = () => {
+  const token = getStoredAccessToken();
   return {
     "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 

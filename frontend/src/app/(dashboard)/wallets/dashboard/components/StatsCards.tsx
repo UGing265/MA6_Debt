@@ -23,36 +23,40 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ wallets, partners }) => 
   const childWallets = wallets.filter((wallet) => !!wallet.parentWalletId);
   const totalWallets = parentWallets.length + childWallets.length;
 
-  const parentWalletsCount = parentWallets.length;
-  const avgSubWalletsDisplay =
-    parentWalletsCount > 0 ? (childWallets.length / parentWalletsCount).toFixed(1) : "0";
-
   const receivableCount = partners.filter((p) => p.balance > 0).length;
   const payableCount = partners.filter((p) => p.balance < 0).length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Card data-testid="stats-total-wallets" className="border-blue-100">
-        <div className="p-5 text-center space-y-1">
-          <p className="text-sm font-medium text-pencil-gray">{t.wallets.page.stats.totalWallets}</p>
+        <div className="p-5 text-center space-y-2">
+          <p className="text-sm font-semibold text-pencil-gray">{t.wallets.page.stats.totalWallets}</p>
           <div className="text-4xl font-bold text-blue-600">{totalWallets}</div>
-          <p className="text-xs text-pencil-gray">{t.wallets.page.stats.parentAndSubBreakdown.replace("{parents}", String(parentWallets.length)).replace("{children}", String(childWallets.length))}</p>
-        </div>
-      </Card>
-
-      <Card data-testid="stats-parent-wallets" className="border-purple-100">
-        <div className="p-5 text-center space-y-1">
-          <p className="text-sm font-medium text-pencil-gray">{t.wallets.page.stats.parentWallets}</p>
-          <div className="text-4xl font-bold text-purple-600">{parentWallets.length}</div>
-          <p className="text-xs text-pencil-gray">{t.wallets.page.stats.avgSubWallets.replace("{count}", avgSubWalletsDisplay)}</p>
+          <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 text-xs font-bold">
+              {parentWallets.length} ví cha
+            </span>
+            <span className="text-slate-400 font-bold">·</span>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 text-xs font-bold">
+              {childWallets.length} ví con
+            </span>
+          </div>
         </div>
       </Card>
 
       <Card data-testid="stats-debt-partners" className="border-emerald-100">
-        <div className="p-5 text-center space-y-1">
-          <p className="text-sm font-medium text-pencil-gray">{t.partners.page.title}</p>
+        <div className="p-5 text-center space-y-2">
+          <p className="text-sm font-semibold text-pencil-gray">{t.partners.page.title}</p>
           <div className="text-4xl font-bold text-emerald-600">{partners.length}</div>
-          <p className="text-xs text-pencil-gray">{t.partners.page.receivable} {receivableCount} · {t.partners.page.payable} {payableCount}</p>
+          <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 text-xs font-bold">
+              {t.partners.page.receivable} {receivableCount}
+            </span>
+            <span className="text-slate-400 font-bold">·</span>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 text-xs font-bold">
+              {t.partners.page.payable} {payableCount}
+            </span>
+          </div>
         </div>
       </Card>
     </div>

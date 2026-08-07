@@ -113,8 +113,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
   const deleteMutation = useDeleteWallet();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [walletToDelete, setWalletToDelete] = useState<Wallet | null>(null);
-  const { t } = useLanguage();
-
+  const { t, locale } = useLanguage();
   const handleDelete = async (wallet: Wallet) => {
     setDeletingId(wallet.id);
     try {
@@ -167,7 +166,7 @@ export const WalletList = ({ wallets, onEdit }: WalletListProps) => {
               </p>
               {node.children.length > 0 && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {t.wallets.page.detail.subWalletCount.replace("{count}", String(node.children.length)).replace("{suffix}", node.children.length > 1 ? "s" : "")}
+                    {t.wallets.page.detail.subWalletCount.replace("{count}", String(node.children.length)).replace("{suffix}", locale === "en" ? (node.children.length > 1 ? "s" : "") : "")}
                   </p>
               )}
             </div>

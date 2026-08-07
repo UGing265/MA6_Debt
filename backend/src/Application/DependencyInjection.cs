@@ -1,5 +1,6 @@
 using Application.Common.Behaviors;
 using Application.Common.Interfaces;
+using Application.Common.Push;
 using Application.Common.Security;
 using Application.Features.Auth.Login;
 using FluentValidation;
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddScoped<IEmailService, Application.Common.Email.GmailEmailService>();
+        services.AddScoped<IPushNotificationService, PushNotificationService>();
 
         services.AddMediatR(cfg => {
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);

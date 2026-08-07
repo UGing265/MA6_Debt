@@ -25,7 +25,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
   onSetDefault,
   onClearDefault,
 }) => {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const isParent = !wallet.parentWalletId;
   const isDefault = defaultWalletId === wallet.id;
   const hasDefaultChild = isParent && defaultWalletId && childWallets.some((child) => defaultWalletId === child.id);
@@ -105,7 +105,7 @@ export const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
               <p className="text-sm text-pencil-gray">{t.wallets.page.detail.subWallets}</p>
               <p className="text-3xl font-bold text-blue-600">{childWallets.length}</p>
               <p className="text-xs text-pencil-gray mt-1">
-                {t.wallets.page.detail.subWalletCount.replace("{count}", String(childWallets.length)).replace("{suffix}", childWallets.length !== 1 ? "s" : "")}
+                {t.wallets.page.detail.subWalletCount.replace("{count}", String(childWallets.length)).replace("{suffix}", locale === "en" ? (childWallets.length !== 1 ? "s" : "") : "")}
               </p>
             </div>
           )}

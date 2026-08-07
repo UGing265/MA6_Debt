@@ -30,6 +30,7 @@ type NavItem = {
   href: string;
   icon: React.ReactNode;
   testId?: string;
+  isImportant?: boolean;
 };
 
 const navTextMap = {
@@ -111,30 +112,34 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     icon: <LayoutDashboard className="h-4 w-4" />,
     testId: "nav-wallet-dashboard",
-  },
-  {
-    key: "wallets",
-    href: "/wallets",
-    icon: <Wallet2 className="h-4 w-4" />,
-    testId: "nav-wallets",
+    isImportant: true,
   },
   {
     key: "quickDeduct",
     href: "/quick-deduct",
     icon: <Zap className="h-4 w-4" />,
     testId: "nav-quick-deduct",
+    isImportant: true,
   },
   {
-    key: "partners",
-    href: "/partners",
-    icon: <Users className="h-4 w-4" />,
-    testId: "nav-partners",
+    key: "wallets",
+    href: "/wallets",
+    icon: <Wallet2 className="h-4 w-4" />,
+    testId: "nav-wallets",
+    isImportant: true,
   },
   {
     key: "history",
     href: "/history",
     icon: <Clock3 className="h-4 w-4" />,
     testId: "nav-history",
+    isImportant: true,
+  },
+  {
+    key: "partners",
+    href: "/partners",
+    icon: <Users className="h-4 w-4" />,
+    testId: "nav-partners",
   },
   {
     key: "transfer",
@@ -259,11 +264,29 @@ const DashboardLayoutContent = ({
           {navItems.map((item) => {
             const active = isActive(pathname, null, item.href);
             const placeholder = isPlaceholderNav(item.href);
-            let itemStateClass = "text-ink-black hover:bg-note-yellow/10";
-            if (active) {
-              itemStateClass = "bg-note-yellow/20 text-[#D97706]";
-            } else if (placeholder) {
-              itemStateClass = "text-pencil-gray/50 cursor-default";
+
+            let itemClass = "";
+            let iconClass = "";
+
+            if (item.isImportant) {
+              if (active) {
+                itemClass = "bg-amber-100/90 text-[#B45309] font-bold shadow-xs border-l-4 border-[#D97706]";
+                iconClass = "text-[#D97706]";
+              } else {
+                itemClass = "text-amber-950 font-semibold bg-amber-50/60 hover:bg-amber-100/80 hover:text-[#B45309]";
+                iconClass = "text-[#D97706]";
+              }
+            } else {
+              if (active) {
+                itemClass = "bg-slate-100 text-slate-900 font-semibold border-l-4 border-slate-400";
+                iconClass = "text-slate-700";
+              } else if (placeholder) {
+                itemClass = "text-pencil-gray/40 cursor-default";
+                iconClass = "text-pencil-gray/30";
+              } else {
+                itemClass = "text-pencil-gray font-normal hover:bg-slate-100/60 hover:text-ink-black";
+                iconClass = "text-pencil-gray/70";
+              }
             }
 
             return (
@@ -272,10 +295,10 @@ const DashboardLayoutContent = ({
                 href={item.href}
                 scroll={false}
                 data-testid={item.testId}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${itemStateClass}`}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${itemClass}`}
               >
-                {item.icon}
-                {t.nav[item.key]}
+                <span className={iconClass}>{item.icon}</span>
+                <span className="flex-1">{t.nav[item.key]}</span>
                 {placeholder ? (
                   <span className="ml-auto text-[10px] rounded-full bg-pencil-gray/10 px-1.5 py-0.5 text-pencil-gray/60">{t.common.soon}</span>
                 ) : null}

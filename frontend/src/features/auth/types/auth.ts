@@ -35,4 +35,5 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export interface LoginResponse {
   token?: string;
   expiration?: string;
+  refreshToken?: string;
 }

@@ -1,4 +1,5 @@
 import type { LoginInput, RegisterInput, LoginResponse } from "../types/auth";
+import { setStoredTokens, clearStoredTokens, getStoredRefreshToken } from "@/lib/apiClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
 
@@ -31,7 +32,11 @@ export const login = async (data: LoginInput): Promise<LoginResponse> => {
     throw await readAuthError(response);
   }
 
-  return response.json();
+  const result: LoginResponse = await response.json();
+  if (result.token) {
+    setStoredTokens(result.token, result.refreshToken);
+  }
+  return result;
 };
 
 export const register = async (data: RegisterInput): Promise<void> => {
@@ -50,19 +55,31 @@ export const register = async (data: RegisterInput): Promise<void> => {
 };
 
 export const refreshSession = async (): Promise<LoginResponse> => {
+  const storedRefreshToken = getStoredRefreshToken();
+
   const response = await fetch(AUTH_ENDPOINTS.refreshSession, {
     method: "POST",
     credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: storedRefreshToken ? JSON.stringify({ refreshToken: storedRefreshToken }) : undefined,
   });
 
   if (!response.ok) {
+    clearStoredTokens();
     throw await readAuthError(response);
   }
 
-  return response.json();
+  const result: LoginResponse = await response.json();
+  if (result.token) {
+    setStoredTokens(result.token, result.refreshToken);
+  }
+  return result;
 };
 
 export const logout = async (): Promise<void> => {
+  clearStoredTokens();
   const response = await fetch(AUTH_ENDPOINTS.logout, {
     method: "POST",
     credentials: "include",

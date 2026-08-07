@@ -28,7 +28,7 @@ export const ParentWalletCard: React.FC<ParentWalletCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   return (
     <Link href={`/wallets/${wallet.id}`} data-testid={`parent-wallet-card-${wallet.id}`}>
@@ -56,7 +56,7 @@ export const ParentWalletCard: React.FC<ParentWalletCardProps> = ({
                   )}
                 </div>
                 <p className="text-sm text-pencil-gray">
-                  {wallet.description || t.wallets.page.card.noDescription} · {t.wallets.page.detail.subWalletCount.replace("{count}", String(childCount)).replace("{suffix}", childCount !== 1 ? "s" : "")}
+                  {wallet.description || t.wallets.page.card.noDescription} · {t.wallets.page.detail.subWalletCount.replace("{count}", String(childCount)).replace("{suffix}", locale === "en" ? (childCount !== 1 ? "s" : "") : "")}
                 </p>
               </div>
             </div>

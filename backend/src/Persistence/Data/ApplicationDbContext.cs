@@ -17,6 +17,7 @@ namespace Persistence.Data
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<PushSubscription> PushSubscriptions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -41,6 +42,12 @@ namespace Persistence.Data
                 .HasMany(u => u.DebtPartners)
                 .WithOne(dp => dp.User)
                 .HasForeignKey(dp => dp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.PushSubscriptions)
+                .WithOne(ps => ps.User)
+                .HasForeignKey(ps => ps.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Wallet>()
@@ -101,6 +108,13 @@ namespace Persistence.Data
 
             modelBuilder.Entity<PasswordResetToken>()
                 .HasIndex(prt => prt.UserId);
+
+            modelBuilder.Entity<PushSubscription>()
+                .HasIndex(ps => ps.Endpoint)
+                .IsUnique();
+
+            modelBuilder.Entity<PushSubscription>()
+                .HasIndex(ps => ps.UserId);
 
             modelBuilder.Entity<DebtPartner>().HasQueryFilter(dp => !dp.IsDeleted);
         }
