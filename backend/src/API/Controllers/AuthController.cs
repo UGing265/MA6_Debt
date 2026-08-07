@@ -53,11 +53,17 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(RefreshResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<RefreshResponse>> Refresh()
+    public async Task<ActionResult<RefreshResponse>> Refresh([FromBody] RefreshCommand? request)
     {
         var refreshTokenName = AuthCookieOptions.GetRefreshTokenName(_configuration);
+        string? refreshToken = request?.RefreshToken;
 
-        if (!Request.Cookies.TryGetValue(refreshTokenName, out var refreshToken) || string.IsNullOrWhiteSpace(refreshToken))
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            Request.Cookies.TryGetValue(refreshTokenName, out refreshToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
         {
             ClearAuthCookies();
             return Unauthorized();
